@@ -11,13 +11,13 @@
 
     <groupId>com.pardom</groupId>
     <artifactId>ollie-parent</artifactId>
-    <version>5.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>Ollie (Parent)</name>
-    <description>View "injection" for Android.</description>
+    <description>Compile time active record ORM for Android.</description>
     <url>http://github.com/pardom/ollie/</url>
-    <inceptionYear>2013</inceptionYear>
+    <inceptionYear>2014</inceptionYear>
 
     <modules>
         <module>ollie</module>

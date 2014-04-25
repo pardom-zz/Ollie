@@ -14,7 +14,7 @@ public class Note$$ModelAdapter extends ModelAdapter<Note> {
 	}
 
 	@Override
-	public String getTableDefinition() {
+	public String getSchema() {
 		return "CREATE TABLE  IF NOT EXISTS " + getTableName() + " (" +
 				BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 				"Title TEXT, " +

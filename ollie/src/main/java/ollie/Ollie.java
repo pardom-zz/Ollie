@@ -112,7 +112,7 @@ public class Ollie {
 	static synchronized List<String> getTableDefinitions() {
 		List<String> tableDefinitions = new ArrayList<String>();
 		for (ModelAdapter modelAdapter : sAdapterHolder.getModelAdapters()) {
-			tableDefinitions.add(modelAdapter.getTableDefinition());
+			tableDefinitions.add(modelAdapter.getSchema());
 		}
 
 		return tableDefinitions;

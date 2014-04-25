@@ -14,7 +14,7 @@ public class Tag$$ModelAdapter extends ModelAdapter<Tag> {
 	}
 
 	@Override
-	public String getTableDefinition() {
+	public String getSchema() {
 		return "CREATE TABLE  IF NOT EXISTS " + getTableName() + " (" +
 				BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 				"Name TEXT" +

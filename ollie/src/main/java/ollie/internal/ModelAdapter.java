@@ -9,7 +9,7 @@ import ollie.Model;
 public abstract class ModelAdapter<T extends Model> {
 	public abstract String getTableName();
 
-	public abstract String getTableDefinition();
+	public abstract String getSchema();
 
 	public abstract void load(T entity, Cursor cursor);
 

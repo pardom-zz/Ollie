@@ -8,6 +8,5 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 @Target(TYPE)
 @Retention(CLASS)
-public @interface Table {
-	public String value();
+public @interface TypeAdapter {
 }
