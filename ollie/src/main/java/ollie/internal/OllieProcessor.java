@@ -123,28 +123,34 @@ public class OllieProcessor extends AbstractProcessor {
 			}
 
 			String name = column.value();
-			String targetType = enclosedElement.asType().toString();
+			String targetName = enclosedElement.toString();
+			String deserializedType = enclosedElement.asType().toString();
+			String serializedType = deserializedType;
 			String sqlType;
+			boolean isModel = false;
 
 			if (isSubtypeOfType(enclosedElement.asType(), MODEL_CLASS)) {
-				sqlType = SQL_TYPE_MAP.get(Long.class.getName());
+				isModel = true;
+				serializedType = Long.class.getName();
 			}
-			else if (TYPE_ADAPTERS.containsKey(targetType)) {
-				sqlType = SQL_TYPE_MAP.get(TYPE_ADAPTERS.get(targetType).getSerializedType());
-			}
-			else {
-				sqlType = SQL_TYPE_MAP.get(targetType);
+			else if (TYPE_ADAPTERS.containsKey(deserializedType)) {
+				serializedType = TYPE_ADAPTERS.get(deserializedType).getSerializedType();
 			}
 
+			sqlType = SQL_TYPE_MAP.get(serializedType);
+
 			if (sqlType == null) {
-				error(enclosedElement, "@Column type contains no SQL type mapping. (%s)", targetType);
+				error(enclosedElement, "@Column type contains no SQL type mapping. (%s)", deserializedType);
 				continue;
 			}
 
 			ColumnDefinition columnDefinition = new ColumnDefinition();
 			columnDefinition.setName(name);
-			columnDefinition.setTargetType(targetType);
+			columnDefinition.setTargetName(targetName);
+			columnDefinition.setDeserializedType(deserializedType);
+			columnDefinition.setSerializedType(serializedType);
 			columnDefinition.setSqlType(sqlType);
+			columnDefinition.setIsModel(isModel);
 
 			for (AnnotationMirror annotationMirror : enclosedElement.getAnnotationMirrors()) {
 				try {

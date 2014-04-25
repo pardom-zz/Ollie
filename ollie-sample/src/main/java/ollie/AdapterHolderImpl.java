@@ -11,9 +11,9 @@ import java.util.Set;
 public class AdapterHolderImpl implements AdapterHolder {
 	private static final Map<Class<? extends Model>, ModelAdapter> MODEL_ADAPTERS = new HashMap<Class<? extends Model>, ModelAdapter>() {
 		{
-			put(com.example.ollie.model.Note.class, new Note$$ModelAdapter());
-			put(com.example.ollie.model.Tag.class, new Tag$$ModelAdapter());
-			put(com.example.ollie.model.NoteTag.class, new NoteTag$$ModelAdapter());
+			put(com.example.ollie.model.Note.class, new ollie.Note$$ModelAdapter());
+			put(com.example.ollie.model.Tag.class, new ollie.Tag$$ModelAdapter());
+			put(com.example.ollie.model.NoteTag.class, new ollie.NoteTag$$ModelAdapter());
 		}
 	};
 
