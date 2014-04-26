@@ -8,7 +8,6 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 @Target(FIELD)
 @Retention(CLASS)
-@Constraint("DEFAULT")
 public @interface Default {
 	public String value();
 }

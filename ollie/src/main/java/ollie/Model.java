@@ -15,7 +15,7 @@ public abstract class Model {
 	public Long id;
 
 	public static final <T extends Model> T find(Class<T> cls, Long id) {
-		List<T> result = Ollie.query(cls, false, null, BaseColumns._ID + "=?", new String[]{id.toString()}, null, null, null, null);
+		List<T> result = Ollie.query(cls, false, null, BaseColumns._ID + "=?", new String[]{id.toString()}, null, null, null, "1");
 		if (result.size() > 0) {
 			return result.get(0);
 		}

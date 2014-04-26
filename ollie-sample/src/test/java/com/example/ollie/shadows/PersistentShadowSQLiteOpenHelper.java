@@ -17,14 +17,11 @@ import org.robolectric.annotation.RealObject;
 public class PersistentShadowSQLiteOpenHelper {
 	@RealObject
 	private SQLiteOpenHelper mRealHelper;
+
 	private static SQLiteDatabase mDatabase;
 	private CursorFactory mFactory;
 
 	public void __constructor__(Context context, String name, CursorFactory factory, int version) {
-		if (mDatabase != null) {
-			mDatabase.close();
-		}
-		mDatabase = null;
 		mFactory = factory;
 	}
 

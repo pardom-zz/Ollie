@@ -8,6 +8,5 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 @Target(FIELD)
 @Retention(CLASS)
-@Constraint("PRIMARY KEY")
 public @interface PrimaryKey {
 }

@@ -1,7 +1,13 @@
 package ollie.internal;
 
+import ollie.annotation.AutoIncrementing;
+import ollie.annotation.PrimaryKey;
+
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ModelAdapterDefinition {
 	private static final Map<String, String> CURSOR_METHOD_MAP = new HashMap<String, String>() {
@@ -31,6 +37,10 @@ public class ModelAdapterDefinition {
 
 	public void setClassPackage(String classPackage) {
 		this.classPackage = classPackage;
+	}
+
+	public String getClassName() {
+		return className;
 	}
 
 	public void setClassName(String className) {
@@ -169,7 +179,7 @@ public class ModelAdapterDefinition {
 		private String sqlType;
 		private boolean isModel;
 
-		private List<Annotation> annotations = new ArrayList<Annotation>();
+		private Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<Class<? extends Annotation>, Annotation>();
 
 		public void setName(String name) {
 			this.name = name;
@@ -195,8 +205,8 @@ public class ModelAdapterDefinition {
 			this.isModel = isModelSubclass;
 		}
 
-		public void addAnnotation(Annotation annotation) {
-			this.annotations.add(annotation);
+		public void putAnnotation(Class<? extends Annotation> cls, Annotation annotation) {
+			this.annotations.put(cls, annotation);
 		}
 
 		public boolean requiresTypeAdapter() {
@@ -204,7 +214,19 @@ public class ModelAdapterDefinition {
 		}
 
 		public String getSchema() {
-			return name + " " + sqlType;
+			StringBuilder builder = new StringBuilder();
+			builder.append(name);
+			builder.append(" ");
+			builder.append(sqlType);
+
+			if (annotations.containsKey(PrimaryKey.class)) {
+				builder.append(" PRIMARY KEY");
+			}
+			if (annotations.containsKey(AutoIncrementing.class)) {
+				builder.append(" AUTO INCREMENTING");
+			}
+
+			return builder.toString();
 		}
 	}
 }

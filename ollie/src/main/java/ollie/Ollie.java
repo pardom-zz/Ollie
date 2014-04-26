@@ -44,7 +44,7 @@ public class Ollie {
 		}
 
 		try {
-			Class adapterClass = Class.forName("ollie.AdapterHolderImpl");
+			Class adapterClass = Class.forName(AdapterHolder.IMPLEMENTATION_CLASS_FQCN);
 			sAdapterHolder = (AdapterHolder) adapterClass.newInstance();
 		} catch (Exception e) {
 			Log.e(TAG, "Failed to initialize.", e);

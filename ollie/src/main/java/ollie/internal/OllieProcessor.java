@@ -14,7 +14,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
@@ -24,12 +23,13 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 
 @SupportedAnnotationTypes({"*"})
 public class OllieProcessor extends AbstractProcessor {
-	public static final String SUFFIX = "$$ModelAdapter";
-	static final String MODEL_CLASS = "ollie.Model";
-	static final String TYPE_ADAPTER_CLASS = "ollie.TypeAdapter<?,?>";
+	private static final String MODEL_ADAPTER_SUFFIX = "$$ModelAdapter";
+	private static final String MODEL_CLASS = "ollie.Model";
+	private static final String TYPE_ADAPTER_CLASS = "ollie.TypeAdapter<?,?>";
 
 	private static final Map<String, ModelAdapterDefinition> MODEL_ADAPTERS = new HashMap<String, ModelAdapterDefinition>();
 	private static final Map<String, TypeAdapterDefinition> TYPE_ADAPTERS = new HashMap<String, TypeAdapterDefinition>();
+
 	private static final Class[] DEFAULT_TYPE_ADAPTERS = new Class[]{
 			SqlDateAdapter.class,
 			UtilDateAdapter.class
@@ -54,28 +54,32 @@ public class OllieProcessor extends AbstractProcessor {
 	};
 
 	private Elements elementUtils;
-	private Types typeUtils;
 	private Filer filer;
 
 	@Override
 	public synchronized void init(ProcessingEnvironment env) {
 		super.init(env);
 		elementUtils = env.getElementUtils();
-		typeUtils = env.getTypeUtils();
 		filer = env.getFiler();
 	}
 
 	@Override
 	public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment env) {
 		findAndParseTypeAdapters(env);
+		findAndParseModels(env);
+		writeModelAdapters();
+		writeAdapterHolder();
+		return true;
+	}
 
-		Map<Element, ModelAdapterDefinition> definitions = findAndParseModels(env);
-		for (Map.Entry<Element, ModelAdapterDefinition> entry : definitions.entrySet()) {
-			Element element = entry.getKey();
+	private void writeModelAdapters() {
+		for (Map.Entry<String, ModelAdapterDefinition> entry : MODEL_ADAPTERS.entrySet()) {
+			String model = entry.getKey();
 			ModelAdapterDefinition definition = entry.getValue();
+			Element element = elementUtils.getTypeElement(model);
 
 			try {
-				JavaFileObject jfo = filer.createSourceFile(definition.getFqcn(), element);
+				JavaFileObject jfo = filer.createSourceFile(definition.getFqcn(), null);
 				Writer writer = jfo.openWriter();
 				writer.write(definition.brewJava());
 				writer.flush();
@@ -84,8 +88,64 @@ public class OllieProcessor extends AbstractProcessor {
 				error(element, "Unable to write adapter for type %s: %s", element, e.getMessage());
 			}
 		}
+	}
 
-		return true;
+	private void writeAdapterHolder() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("// Generated code from Ollie. Do not modify!\n");
+		builder.append("package ollie;\n\n");
+		builder.append("import ollie.internal.AdapterHolder;\n");
+		builder.append("import ollie.internal.ModelAdapter;\n\n");
+		builder.append("import java.util.HashMap;\n");
+		builder.append("import java.util.HashSet;\n");
+		builder.append("import java.util.Map;\n");
+		builder.append("import java.util.Set;\n\n");
+		builder.append("public class ").append(AdapterHolder.IMPLEMENTATION_CLASS_NAME).append(" implements AdapterHolder {\n");
+		builder.append("	private static final Map<Class<? extends Model>, ModelAdapter> MODEL_ADAPTERS = new HashMap<Class<? extends Model>, ModelAdapter>() {\n");
+		builder.append("		{\n");
+
+		for (Map.Entry<String, ModelAdapterDefinition> entry : MODEL_ADAPTERS.entrySet()) {
+			String model = entry.getKey();
+			ModelAdapterDefinition definition = entry.getValue();
+			builder.append("			put(").append(model).append(".class, new ollie.").append(definition.getClassName()).append("());\n");
+		}
+
+		builder.append("		}\n");
+		builder.append("	};\n\n");
+		builder.append("	private static final Map<Class, TypeAdapter> TYPE_ADAPTERS = new HashMap<Class, TypeAdapter>() {\n");
+		builder.append("		{\n");
+
+		for (Map.Entry<String, TypeAdapterDefinition> entry : TYPE_ADAPTERS.entrySet()) {
+			String model = entry.getKey();
+			TypeAdapterDefinition definition = entry.getValue();
+			builder.append("			put(").append(model).append(".class, new ").append(definition.getFqcn()).append("());\n");
+		}
+
+		builder.append("		}\n");
+		builder.append("	};\n\n");
+		builder.append("	@Override\n");
+		builder.append("	public Set<? extends ModelAdapter> getModelAdapters() {\n");
+		builder.append("		return new HashSet(MODEL_ADAPTERS.values());\n");
+		builder.append("	}\n\n");
+		builder.append("	@Override\n");
+		builder.append("	public <T extends Model> ModelAdapter<T> getModelAdapter(Class<? extends Model> cls) {\n");
+		builder.append("		return MODEL_ADAPTERS.get(cls);\n");
+		builder.append("	}\n\n");
+		builder.append("	@Override\n");
+		builder.append("	public <D, S extends ollie.TypeAdapter<D, S>> ollie.TypeAdapter<D, S> getTypeAdapter(Class<D> cls) {\n");
+		builder.append("		return TYPE_ADAPTERS.get(cls);\n");
+		builder.append("	}\n");
+		builder.append("}");
+
+		try {
+			JavaFileObject jfo = filer.createSourceFile(AdapterHolder.IMPLEMENTATION_CLASS_FQCN, null);
+			Writer writer = jfo.openWriter();
+			writer.write(builder.toString());
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			error(null, "Unable to write adapter holder for.");
+		}
 	}
 
 	private void findAndParseTypeAdapters(RoundEnvironment env) {
@@ -99,12 +159,10 @@ public class OllieProcessor extends AbstractProcessor {
 		}
 	}
 
-	private Map<Element, ModelAdapterDefinition> findAndParseModels(RoundEnvironment env) {
-		Map<Element, ModelAdapterDefinition> definitions = new LinkedHashMap<Element, ModelAdapterDefinition>();
+	private void findAndParseModels(RoundEnvironment env) {
 		for (Element element : env.getElementsAnnotatedWith(Table.class)) {
-			parseTableAnnotation(element, definitions);
+			parseTableAnnotation(element);
 		}
-		return definitions;
 	}
 
 	private void findAndParseColumns(TypeMirror typeMirror, Set<ColumnDefinition> definitions) {
@@ -155,7 +213,7 @@ public class OllieProcessor extends AbstractProcessor {
 			for (AnnotationMirror annotationMirror : enclosedElement.getAnnotationMirrors()) {
 				try {
 					Class annotationClass = Class.forName(annotationMirror.getAnnotationType().toString());
-					columnDefinition.addAnnotation(enclosedElement.getAnnotation(annotationClass));
+					columnDefinition.putAnnotation(annotationClass, enclosedElement.getAnnotation(annotationClass));
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
@@ -186,10 +244,16 @@ public class OllieProcessor extends AbstractProcessor {
 		String deserializedType = typeArguments.get(0).toString();
 		String serializedType = typeArguments.get(1).toString();
 
-		TYPE_ADAPTERS.put(deserializedType, new TypeAdapterDefinition(classPackage, className, deserializedType, serializedType));
+		TypeAdapterDefinition typeAdapter = new TypeAdapterDefinition();
+		typeAdapter.setClassPackage(classPackage);
+		typeAdapter.setClassName(className);
+		typeAdapter.setDeserializedType(deserializedType);
+		typeAdapter.setSerializedType(serializedType);
+
+		TYPE_ADAPTERS.put(deserializedType, typeAdapter);
 	}
 
-	private void parseTableAnnotation(Element element, Map<Element, ModelAdapterDefinition> definitions) {
+	private void parseTableAnnotation(Element element) {
 		boolean hasError = false;
 
 		Element enclosingElement = element.getEnclosingElement();
@@ -208,13 +272,13 @@ public class OllieProcessor extends AbstractProcessor {
 		findAndParseColumns(element.asType(), columnDefinitions);
 
 		ModelAdapterDefinition definition = new ModelAdapterDefinition();
-		definition.setClassPackage(classPackage);
-		definition.setClassName(className + SUFFIX);
+		definition.setClassPackage("ollie");
+		definition.setClassName(className + MODEL_ADAPTER_SUFFIX);
 		definition.setTargetType(targetType);
 		definition.setColumnDefinitions(columnDefinitions);
 		definition.setTableName(tableName);
 
-		definitions.put(element, definition);
+		MODEL_ADAPTERS.put(targetType, definition);
 	}
 
 	private boolean isSubtypeOfType(TypeMirror typeMirror, String otherType) {
@@ -255,15 +319,6 @@ public class OllieProcessor extends AbstractProcessor {
 			}
 		}
 		return false;
-	}
-
-	private static String getClassName(TypeElement type, String packageName) {
-		int packageLen = packageName.length() + 1;
-		return type.getQualifiedName().toString().substring(packageLen).replace('.', '$');
-	}
-
-	private String getPackageName(TypeElement type) {
-		return elementUtils.getPackageOf(type).getQualifiedName().toString();
 	}
 
 	private void error(Element element, String message, Object... args) {
