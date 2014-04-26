@@ -8,6 +8,6 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 @Target(FIELD)
 @Retention(CLASS)
-public @interface NotNull {
-	public ConflictClause value() default ConflictClause.NONE;
+public @interface Check {
+	public String value();
 }

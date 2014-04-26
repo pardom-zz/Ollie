@@ -9,4 +9,5 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Target(FIELD)
 @Retention(CLASS)
 public @interface Unique {
+	public ConflictClause value() default ConflictClause.NONE;
 }

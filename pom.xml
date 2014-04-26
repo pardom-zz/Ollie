@@ -9,9 +9,9 @@
         <version>7</version>
     </parent>
 
-    <groupId>com.pardom</groupId>
+    <groupId>com.michaelpardo</groupId>
     <artifactId>ollie-parent</artifactId>
-    <version>1.0.0</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Ollie (Parent)</name>

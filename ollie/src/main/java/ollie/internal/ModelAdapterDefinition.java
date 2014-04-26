@@ -1,13 +1,12 @@
 package ollie.internal;
 
-import ollie.annotation.AutoIncrement;
-import ollie.annotation.PrimaryKey;
+import ollie.annotation.*;
+import ollie.annotation.ForeignKey.Deferrable;
+import ollie.annotation.ForeignKey.DeferrableTiming;
+import ollie.annotation.ForeignKey.ReferentialAction;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ModelAdapterDefinition {
 	private static final Map<String, String> CURSOR_METHOD_MAP = new HashMap<String, String>() {
@@ -49,6 +48,10 @@ public class ModelAdapterDefinition {
 
 	public void setTargetType(String targetType) {
 		this.targetType = targetType;
+	}
+
+	public String getTableName() {
+		return tableName;
 	}
 
 	public void setTableName(String tableName) {
@@ -94,19 +97,22 @@ public class ModelAdapterDefinition {
 	private void emitGetSchema(StringBuilder builder) {
 		builder.append("	@Override\n");
 		builder.append("	public String getSchema() {\n");
-		builder.append("		return \"CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (\" +\n");
+		builder.append("		return \"CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (");
 
-		int current = 0;
-		int count = columnDefinitions.size();
+		List<String> definitions = new ArrayList<String>();
 		for (ColumnDefinition columnDefinition : columnDefinitions) {
-			builder.append("			\"").append(columnDefinition.getSchema());
-			if (++current < count) {
-				builder.append(", ");
+			definitions.add(columnDefinition.getSchema());
+		}
+		for (ColumnDefinition columnDefinition : columnDefinitions) {
+			String foreignKeyClause = columnDefinition.getForeignKeyClause();
+			if (!TextUtils.isEmpty(foreignKeyClause)) {
+				definitions.add(columnDefinition.getForeignKeyClause());
 			}
-			builder.append("\" +\n");
 		}
 
-		builder.append("			\")\";\n");
+		builder.append(TextUtils.join(", ", definitions));
+
+		builder.append(")\";\n");
 		builder.append("	}\n");
 	}
 
@@ -177,7 +183,9 @@ public class ModelAdapterDefinition {
 		private String deserializedType;
 		private String serializedType;
 		private String sqlType;
+
 		private boolean isModel;
+		private String modelTableName;
 
 		private Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<Class<? extends Annotation>, Annotation>();
 
@@ -205,6 +213,10 @@ public class ModelAdapterDefinition {
 			this.isModel = isModelSubclass;
 		}
 
+		public void setModelTableName(String modelTableName) {
+			this.modelTableName = modelTableName;
+		}
+
 		public void putAnnotation(Class<? extends Annotation> cls, Annotation annotation) {
 			this.annotations.put(cls, annotation);
 		}
@@ -225,8 +237,66 @@ public class ModelAdapterDefinition {
 			if (annotations.containsKey(AutoIncrement.class)) {
 				builder.append(" AUTOINCREMENT");
 			}
+			if (annotations.containsKey(NotNull.class)) {
+				builder.append(" NOT NULL");
+				appendConflictClause(builder, ((NotNull) annotations.get(NotNull.class)).value());
+			}
+			if (annotations.containsKey(Unique.class)) {
+				builder.append(" UNIQUE");
+				appendConflictClause(builder, ((Unique) annotations.get(Unique.class)).value());
+			}
+			if (annotations.containsKey(Check.class)) {
+				builder.append(" CHECK (").append(((Check) annotations.get(Check.class)).value()).append(")");
+			}
+			if (annotations.containsKey(Default.class)) {
+				builder.append(" DEFAULT ").append(((Default) annotations.get(Default.class)).value());
+			}
+			if (annotations.containsKey(Collate.class)) {
+				builder.append(" COLLATE ").append(((Collate) annotations.get(Collate.class)).value().keyword());
+			}
 
 			return builder.toString();
+		}
+
+		public String getForeignKeyClause() {
+			StringBuilder builder = new StringBuilder();
+
+			if (isModel && annotations.containsKey(ForeignKey.class)) {
+				ForeignKey foreignKey = (ForeignKey) annotations.get(ForeignKey.class);
+
+				builder.append("FOREIGN KEY(").append(name).append(") REFERENCES ");
+				builder.append(modelTableName);
+
+				if (foreignKey.foreignColumns().length > 0) {
+					builder.append("(");
+					builder.append(TextUtils.join(",", foreignKey.foreignColumns()));
+					builder.append(")");
+				}
+				if (!foreignKey.onDelete().equals(ReferentialAction.NONE)) {
+					builder.append(" ON DELETE ").append(foreignKey.onDelete().keyword());
+				}
+				if (!foreignKey.onUpdate().equals(ReferentialAction.NONE)) {
+					builder.append(" ON UPDATE ").append(foreignKey.onUpdate().keyword());
+				}
+				if (!TextUtils.isEmpty(foreignKey.match())) {
+					builder.append(" MATCH ").append(foreignKey.match());
+				}
+				if (!foreignKey.deferrable().equals(Deferrable.NONE)) {
+					builder.append(" ").append(foreignKey.deferrable().keyword());
+
+					if (!foreignKey.deferrableTiming().equals(DeferrableTiming.NONE)) {
+						builder.append(" ").append(foreignKey.deferrableTiming().keyword());
+					}
+				}
+			}
+
+			return builder.toString();
+		}
+
+		private void appendConflictClause(StringBuilder builder, ConflictClause conflictClause) {
+			if (!conflictClause.equals(ConflictClause.NONE)) {
+				builder.append(" ON CONFLICT ").append(conflictClause.keyword());
+			}
 		}
 	}
 }

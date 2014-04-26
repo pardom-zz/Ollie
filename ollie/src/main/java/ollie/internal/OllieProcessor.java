@@ -8,6 +8,7 @@ import ollie.annotation.TypeAdapter;
 import ollie.internal.ModelAdapterDefinition.ColumnDefinition;
 
 import javax.annotation.processing.*;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -65,11 +66,19 @@ public class OllieProcessor extends AbstractProcessor {
 	}
 
 	@Override
+	public SourceVersion getSupportedSourceVersion() {
+		return SourceVersion.latestSupported();
+	}
+
+	@Override
 	public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment env) {
 		findAndParseTypeAdapters(env);
 		findAndParseModels(env);
+		findAndParseColumns();
+
 		writeModelAdapters();
 		writeAdapterHolder();
+
 		return true;
 	}
 
@@ -80,7 +89,7 @@ public class OllieProcessor extends AbstractProcessor {
 			Element element = elementUtils.getTypeElement(model);
 
 			try {
-				JavaFileObject jfo = filer.createSourceFile(definition.getFqcn(), null);
+				JavaFileObject jfo = filer.createSourceFile(definition.getFqcn(), element);
 				Writer writer = jfo.openWriter();
 				writer.write(definition.brewJava());
 				writer.flush();
@@ -139,7 +148,8 @@ public class OllieProcessor extends AbstractProcessor {
 		builder.append("}");
 
 		try {
-			JavaFileObject jfo = filer.createSourceFile(AdapterHolder.IMPLEMENTATION_CLASS_FQCN, null);
+			JavaFileObject jfo = filer.createSourceFile(AdapterHolder.IMPLEMENTATION_CLASS_FQCN,
+					elementUtils.getTypeElement(AdapterHolder.IMPLEMENTATION_CLASS_FQCN));
 			Writer writer = jfo.openWriter();
 			writer.write(builder.toString());
 			writer.flush();
@@ -166,61 +176,15 @@ public class OllieProcessor extends AbstractProcessor {
 		}
 	}
 
-	private void findAndParseColumns(TypeMirror typeMirror, Set<ColumnDefinition> definitions) {
-		DeclaredType declaredType = (DeclaredType) typeMirror;
-		Element element = declaredType.asElement();
-		TypeElement typeElement = (TypeElement) element;
+	private void findAndParseColumns() {
+		for (Map.Entry<String, ModelAdapterDefinition> entry : MODEL_ADAPTERS.entrySet()) {
+			Element element = elementUtils.getTypeElement(entry.getKey());
+			ModelAdapterDefinition definition = entry.getValue();
 
-		if (isSubtypeOfType(typeElement.getSuperclass(), MODEL_CLASS)) {
-			findAndParseColumns(typeElement.getSuperclass(), definitions);
-		}
+			Set<ColumnDefinition> columnDefinitions = new LinkedHashSet<ColumnDefinition>();
+			parseColumnAnnotations(element.asType(), columnDefinitions);
 
-		for (Element enclosedElement : element.getEnclosedElements()) {
-			Column column = enclosedElement.getAnnotation(Column.class);
-			if (column == null) {
-				continue;
-			}
-
-			String name = column.value();
-			String targetName = enclosedElement.toString();
-			String deserializedType = enclosedElement.asType().toString();
-			String serializedType = deserializedType;
-			String sqlType;
-			boolean isModel = false;
-
-			if (isSubtypeOfType(enclosedElement.asType(), MODEL_CLASS)) {
-				isModel = true;
-				serializedType = Long.class.getName();
-			}
-			else if (TYPE_ADAPTERS.containsKey(deserializedType)) {
-				serializedType = TYPE_ADAPTERS.get(deserializedType).getSerializedType();
-			}
-
-			sqlType = SQL_TYPE_MAP.get(serializedType);
-
-			if (sqlType == null) {
-				error(enclosedElement, "@Column type contains no SQL type mapping. (%s)", deserializedType);
-				continue;
-			}
-
-			ColumnDefinition columnDefinition = new ColumnDefinition();
-			columnDefinition.setName(name);
-			columnDefinition.setTargetName(targetName);
-			columnDefinition.setDeserializedType(deserializedType);
-			columnDefinition.setSerializedType(serializedType);
-			columnDefinition.setSqlType(sqlType);
-			columnDefinition.setIsModel(isModel);
-
-			for (AnnotationMirror annotationMirror : enclosedElement.getAnnotationMirrors()) {
-				try {
-					Class annotationClass = Class.forName(annotationMirror.getAnnotationType().toString());
-					columnDefinition.putAnnotation(annotationClass, enclosedElement.getAnnotation(annotationClass));
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			}
-
-			definitions.add(columnDefinition);
+			definition.setColumnDefinitions(columnDefinitions);
 		}
 	}
 
@@ -269,17 +233,75 @@ public class OllieProcessor extends AbstractProcessor {
 			hasError = true;
 		}
 
-		Set<ColumnDefinition> columnDefinitions = new LinkedHashSet<ColumnDefinition>();
-		findAndParseColumns(element.asType(), columnDefinitions);
-
 		ModelAdapterDefinition definition = new ModelAdapterDefinition();
 		definition.setClassPackage("ollie");
 		definition.setClassName(className + MODEL_ADAPTER_SUFFIX);
 		definition.setTargetType(targetType);
-		definition.setColumnDefinitions(columnDefinitions);
 		definition.setTableName(tableName);
 
 		MODEL_ADAPTERS.put(targetType, definition);
+	}
+
+	private void parseColumnAnnotations(TypeMirror typeMirror, Set<ColumnDefinition> definitions) {
+		DeclaredType declaredType = (DeclaredType) typeMirror;
+		Element element = declaredType.asElement();
+		TypeElement typeElement = (TypeElement) element;
+
+		if (isSubtypeOfType(typeElement.getSuperclass(), MODEL_CLASS)) {
+			parseColumnAnnotations(typeElement.getSuperclass(), definitions);
+		}
+
+		for (Element enclosedElement : element.getEnclosedElements()) {
+			Column column = enclosedElement.getAnnotation(Column.class);
+			if (column == null) {
+				continue;
+			}
+
+			String name = column.value();
+			String targetName = enclosedElement.toString();
+			String deserializedType = enclosedElement.asType().toString();
+			String serializedType = deserializedType;
+			String sqlType;
+			boolean isModel = false;
+
+			if (isSubtypeOfType(enclosedElement.asType(), MODEL_CLASS)) {
+				isModel = true;
+				serializedType = Long.class.getName();
+			}
+			else if (TYPE_ADAPTERS.containsKey(deserializedType)) {
+				serializedType = TYPE_ADAPTERS.get(deserializedType).getSerializedType();
+			}
+
+			sqlType = SQL_TYPE_MAP.get(serializedType);
+
+			if (sqlType == null) {
+				error(enclosedElement, "@Column type contains no SQL type mapping. (%s)", deserializedType);
+				continue;
+			}
+
+			ColumnDefinition columnDefinition = new ColumnDefinition();
+			columnDefinition.setName(name);
+			columnDefinition.setTargetName(targetName);
+			columnDefinition.setDeserializedType(deserializedType);
+			columnDefinition.setSerializedType(serializedType);
+			columnDefinition.setSqlType(sqlType);
+			columnDefinition.setIsModel(isModel);
+
+			if (MODEL_ADAPTERS.containsKey(deserializedType)) {
+				columnDefinition.setModelTableName(MODEL_ADAPTERS.get(deserializedType).getTableName());
+			}
+
+			for (AnnotationMirror annotationMirror : enclosedElement.getAnnotationMirrors()) {
+				try {
+					Class annotationClass = Class.forName(annotationMirror.getAnnotationType().toString());
+					columnDefinition.putAnnotation(annotationClass, enclosedElement.getAnnotation(annotationClass));
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+
+			definitions.add(columnDefinition);
+		}
 	}
 
 	private boolean isSubtypeOfType(TypeMirror typeMirror, String otherType) {
