@@ -2,7 +2,7 @@ package ollie;
 
 import android.database.Cursor;
 import android.provider.BaseColumns;
-import ollie.annotation.AutoIncrementing;
+import ollie.annotation.AutoIncrement;
 import ollie.annotation.Column;
 import ollie.annotation.PrimaryKey;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public abstract class Model {
 	@Column(BaseColumns._ID)
 	@PrimaryKey
-	@AutoIncrementing
+	@AutoIncrement
 	public Long id;
 
 	public static final <T extends Model> T find(Class<T> cls, Long id) {

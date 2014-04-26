@@ -1,6 +1,6 @@
 package ollie.internal;
 
-import ollie.annotation.AutoIncrementing;
+import ollie.annotation.AutoIncrement;
 import ollie.annotation.PrimaryKey;
 
 import java.lang.annotation.Annotation;
@@ -222,8 +222,8 @@ public class ModelAdapterDefinition {
 			if (annotations.containsKey(PrimaryKey.class)) {
 				builder.append(" PRIMARY KEY");
 			}
-			if (annotations.containsKey(AutoIncrementing.class)) {
-				builder.append(" AUTO INCREMENTING");
+			if (annotations.containsKey(AutoIncrement.class)) {
+				builder.append(" AUTOINCREMENT");
 			}
 
 			return builder.toString();

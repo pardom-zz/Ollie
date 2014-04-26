@@ -8,5 +8,5 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 @Target(FIELD)
 @Retention(CLASS)
-public @interface AutoIncrementing {
+public @interface AutoIncrement {
 }

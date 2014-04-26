@@ -20,6 +20,7 @@ import java.io.Writer;
 import java.util.*;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
+import static javax.tools.Diagnostic.Kind.WARNING;
 
 @SupportedAnnotationTypes({"*"})
 public class OllieProcessor extends AbstractProcessor {
@@ -85,7 +86,7 @@ public class OllieProcessor extends AbstractProcessor {
 				writer.flush();
 				writer.close();
 			} catch (IOException e) {
-				error(element, "Unable to write adapter for type %s: %s", element, e.getMessage());
+				warning(element, "Unable to write adapter for type %s: %s", element, e.getMessage());
 			}
 		}
 	}
@@ -144,7 +145,7 @@ public class OllieProcessor extends AbstractProcessor {
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {
-			error(null, "Unable to write adapter holder for.");
+			warning(null, "Unable to write adapter holder for.");
 		}
 	}
 
@@ -319,6 +320,13 @@ public class OllieProcessor extends AbstractProcessor {
 			}
 		}
 		return false;
+	}
+
+	private void warning(Element element, String message, Object... args) {
+		if (args.length > 0) {
+			message = String.format(message, args);
+		}
+		processingEnv.getMessager().printMessage(WARNING, message, element);
 	}
 
 	private void error(Element element, String message, Object... args) {
