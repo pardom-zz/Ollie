@@ -5,9 +5,11 @@ import ollie.annotation.Column;
 import ollie.annotation.NotNull;
 import ollie.annotation.Table;
 
-@Table("Tags")
+@Table("tags")
 public class Tag extends Model {
-	@Column("Name")
+	public static final String Name = "name";
+
+	@Column(Name)
 	@NotNull
 	public String name;
 }

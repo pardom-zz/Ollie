@@ -9,13 +9,15 @@ import ollie.annotation.PrimaryKey;
 import java.util.List;
 
 public abstract class Model {
-	@Column(BaseColumns._ID)
+	public static final String _ID = BaseColumns._ID;
+
+	@Column(_ID)
 	@PrimaryKey
 	@AutoIncrement
 	public Long id;
 
 	public static final <T extends Model> T find(Class<T> cls, Long id) {
-		List<T> result = Ollie.query(cls, false, null, BaseColumns._ID + "=?", new String[]{id.toString()}, null, null, null, "1");
+		List<T> result = Ollie.query(cls, false, null, _ID + "=?", new String[]{id.toString()}, null, null, null, "1");
 		if (result.size() > 0) {
 			return result.get(0);
 		}

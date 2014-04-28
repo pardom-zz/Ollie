@@ -1,6 +1,6 @@
 package ollie.internal;
 
-import android.provider.BaseColumns;
+import ollie.Model;
 import ollie.annotation.*;
 import ollie.annotation.ForeignKey.Deferrable;
 import ollie.annotation.ForeignKey.DeferrableTiming;
@@ -190,7 +190,7 @@ public class ModelAdapterDefinition {
 	private void emitDelete(StringBuilder builder) {
 		builder.append("	@Override\n");
 		builder.append("	public void delete(").append(targetType).append(" entity, SQLiteDatabase db) {\n");
-		builder.append("		db.delete(\"").append(tableName).append("\", \"").append(BaseColumns._ID).append("=?\", new String[]{entity.id.toString()});\n");
+		builder.append("		db.delete(\"").append(tableName).append("\", \"").append(Model._ID).append("=?\", new String[]{entity.id.toString()});\n");
 		builder.append("	}\n");
 	}
 

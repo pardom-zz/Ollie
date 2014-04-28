@@ -5,12 +5,15 @@ import ollie.annotation.Column;
 import ollie.annotation.ForeignKey;
 import ollie.annotation.Table;
 
-@Table("NoteTags")
+@Table("noteTags")
 public class NoteTag extends Model {
-	@Column("NoteId")
+	public static final String Note = "note";
+	public static final String Tag = "tag";
+
+	@Column(Note)
 	@ForeignKey
 	public Note note;
-	@Column("TagId")
+	@Column(Tag)
 	@ForeignKey
 	public Tag tag;
 }

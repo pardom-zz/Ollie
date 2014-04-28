@@ -7,13 +7,17 @@ import ollie.annotation.Table;
 
 import java.util.Date;
 
-@Table("Notes")
+@Table("notes")
 public class Note extends Model {
-	@Column("Title")
+	public static final String Title = "title";
+	public static final String Body = "body";
+	public static final String Date = "date";
+
+	@Column(Title)
 	public String title;
-	@Column("Body")
+	@Column(Body)
 	@NotNull
 	public String body;
-	@Column("Date")
+	@Column(Date)
 	public Date date;
 }
