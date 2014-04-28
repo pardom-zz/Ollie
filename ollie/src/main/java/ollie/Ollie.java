@@ -21,7 +21,7 @@ import java.util.Set;
 public class Ollie {
 	public static final int DEFAULT_CACHE_SIZE = 1024;
 
-	static final String TAG = "Ollie";
+	private static final String TAG = "Ollie";
 
 	private static Context sContext;
 	private static AdapterHolder sAdapterHolder;
@@ -36,11 +36,11 @@ public class Ollie {
 
 	// Public methods
 
-	public static synchronized void init(Context context, String name, int version) {
+	public static void init(Context context, String name, int version) {
 		init(context, name, version, DEFAULT_CACHE_SIZE);
 	}
 
-	public static synchronized void init(Context context, String name, int version, int cacheSize) {
+	public static void init(Context context, String name, int version, int cacheSize) {
 		if (sInitialized) {
 			return;
 		}
@@ -68,59 +68,59 @@ public class Ollie {
 		return sSQLiteDatabase;
 	}
 
+	public static <T extends Model> String getTableName(Class<T> cls) {
+		return sAdapterHolder.getModelAdapter(cls).getTableName();
+	}
+
 	// Query wrappers
 
-	public static synchronized <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
+	public static <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.query(distinct, getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit));
 	}
 
 	@TargetApi(VERSION_CODES.JELLY_BEAN)
-	public static synchronized <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
+	public static <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.query(distinct, getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal));
 	}
 
-	public static synchronized <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
+	public static <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.queryWithFactory(cursorFactory, distinct, getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit));
 	}
 
 	@TargetApi(VERSION_CODES.JELLY_BEAN)
-	public static synchronized <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
+	public static <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.queryWithFactory(cursorFactory, distinct, getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal));
 	}
 
-	public static synchronized <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
+	public static <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.query(getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy));
 	}
 
-	public static synchronized <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
+	public static <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.query(getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit));
 	}
 
-	public static synchronized <T extends Model> List<T> rawQuery(Class<T> cls, String sql, String[] selectionArgs) {
+	public static <T extends Model> List<T> rawQuery(Class<T> cls, String sql, String[] selectionArgs) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.rawQuery(sql, selectionArgs));
 	}
 
 	@TargetApi(VERSION_CODES.JELLY_BEAN)
-	public static synchronized <T extends Model> List<T> rawQuery(Class<T> cls, String sql, String[] selectionArgs, CancellationSignal cancellationSignal) {
+	public static <T extends Model> List<T> rawQuery(Class<T> cls, String sql, String[] selectionArgs, CancellationSignal cancellationSignal) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.rawQuery(sql, selectionArgs, cancellationSignal));
 	}
 
-	public static synchronized <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql, String[] selectionArgs, String editTable) {
+	public static <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql, String[] selectionArgs, String editTable) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.rawQueryWithFactory(cursorFactory, sql, selectionArgs, editTable));
 	}
 
 	@TargetApi(VERSION_CODES.JELLY_BEAN)
-	public static synchronized <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql, String[] selectionArgs, String editTable, CancellationSignal cancellationSignal) {
+	public static <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql, String[] selectionArgs, String editTable, CancellationSignal cancellationSignal) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.rawQueryWithFactory(cursorFactory, sql, selectionArgs, editTable, cancellationSignal));
 	}
 
-	// Package methods
+	// Finder methods
 
-	public static synchronized <T extends Model> String getTableName(Class<T> cls) {
-		return sAdapterHolder.getModelAdapter(cls).getTableName();
-	}
-
-	static synchronized List<String> getTableDefinitions() {
+	static List<String> getTableDefinitions() {
 		List<String> tableDefinitions = new ArrayList<String>();
 		for (ModelAdapter modelAdapter : sAdapterHolder.getModelAdapters()) {
 			tableDefinitions.add(modelAdapter.getSchema());
@@ -129,25 +129,15 @@ public class Ollie {
 		return tableDefinitions;
 	}
 
-	static synchronized <D, S> TypeAdapter<D, S> getTypeAdapter(Class<D> cls) {
+	static <D, S> TypeAdapter<D, S> getTypeAdapter(Class<D> cls) {
 		return (TypeAdapter<D, S>) sAdapterHolder.getTypeAdapter(cls);
 	}
 
-	static synchronized Set<? extends ModelAdapter> getModelAdapters() {
+	static Set<? extends ModelAdapter> getModelAdapters() {
 		return sAdapterHolder.getModelAdapters();
 	}
 
-	static synchronized <T extends Model> void load(T entity, Cursor cursor) {
-		sAdapterHolder.getModelAdapter(entity.getClass()).load(entity, cursor);
-	}
-
-	static synchronized <T extends Model> Long save(T entity) {
-		return sAdapterHolder.getModelAdapter(entity.getClass()).save(entity, sSQLiteDatabase);
-	}
-
-	static synchronized <T extends Model> void delete(T entity) {
-		sAdapterHolder.getModelAdapter(entity.getClass()).delete(entity, sSQLiteDatabase);
-	}
+	// Cache methods
 
 	static synchronized <T extends Model> void putEntity(T entity) {
 		if (entity.id != null) {
@@ -169,6 +159,20 @@ public class Ollie {
 			entity = Model.find(cls, id);
 		}
 		return entity;
+	}
+
+	// Model adapter methods
+
+	static synchronized <T extends Model> void load(T entity, Cursor cursor) {
+		sAdapterHolder.getModelAdapter(entity.getClass()).load(entity, cursor);
+	}
+
+	static synchronized <T extends Model> Long save(T entity) {
+		return sAdapterHolder.getModelAdapter(entity.getClass()).save(entity, sSQLiteDatabase);
+	}
+
+	static synchronized <T extends Model> void delete(T entity) {
+		sAdapterHolder.getModelAdapter(entity.getClass()).delete(entity, sSQLiteDatabase);
 	}
 
 	// Private methods
