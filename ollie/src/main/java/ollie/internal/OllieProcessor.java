@@ -1,5 +1,6 @@
 package ollie.internal;
 
+import ollie.adapter.CalendarAdapter;
 import ollie.adapter.SqlDateAdapter;
 import ollie.adapter.UtilDateAdapter;
 import ollie.annotation.Column;
@@ -33,6 +34,7 @@ public class OllieProcessor extends AbstractProcessor {
 	private static final Map<String, TypeAdapterDefinition> TYPE_ADAPTERS = new HashMap<String, TypeAdapterDefinition>();
 
 	private static final Class[] DEFAULT_TYPE_ADAPTERS = new Class[]{
+			CalendarAdapter.class,
 			SqlDateAdapter.class,
 			UtilDateAdapter.class
 	};
@@ -142,7 +144,7 @@ public class OllieProcessor extends AbstractProcessor {
 		builder.append("		return MODEL_ADAPTERS.get(cls);\n");
 		builder.append("	}\n\n");
 		builder.append("	@Override\n");
-		builder.append("	public <D, S extends ollie.TypeAdapter<D, S>> ollie.TypeAdapter<D, S> getTypeAdapter(Class<D> cls) {\n");
+		builder.append("	public <D, S extends TypeAdapter<D, S>> TypeAdapter<D, S> getTypeAdapter(Class<D> cls) {\n");
 		builder.append("		return TYPE_ADAPTERS.get(cls);\n");
 		builder.append("	}\n");
 		builder.append("}");
@@ -267,8 +269,7 @@ public class OllieProcessor extends AbstractProcessor {
 			if (isSubtypeOfType(enclosedElement.asType(), MODEL_CLASS)) {
 				isModel = true;
 				serializedType = Long.class.getName();
-			}
-			else if (TYPE_ADAPTERS.containsKey(deserializedType)) {
+			} else if (TYPE_ADAPTERS.containsKey(deserializedType)) {
 				serializedType = TYPE_ADAPTERS.get(deserializedType).getSerializedType();
 			}
 
