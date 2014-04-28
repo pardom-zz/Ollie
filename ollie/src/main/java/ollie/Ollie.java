@@ -16,12 +16,14 @@ import ollie.internal.ModelAdapter;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Ollie {
 	public static final int DEFAULT_CACHE_SIZE = 1024;
 
 	static final String TAG = "Ollie";
 
+	private static Context sContext;
 	private static AdapterHolder sAdapterHolder;
 	private static DatabaseHelper sDatabaseHelper;
 	private static SQLiteDatabase sSQLiteDatabase;
@@ -50,11 +52,20 @@ public class Ollie {
 			Log.e(TAG, "Failed to initialize.", e);
 		}
 
-		sDatabaseHelper = new DatabaseHelper(context, name, version);
+		sContext = context.getApplicationContext();
+		sDatabaseHelper = new DatabaseHelper(sContext, name, version);
 		sSQLiteDatabase = sDatabaseHelper.getWritableDatabase();
 		sCache = new LruCache<String, Model>(cacheSize);
 
 		sInitialized = true;
+	}
+
+	public static Context getContext() {
+		return sContext;
+	}
+
+	public static SQLiteDatabase getDatabase() {
+		return sSQLiteDatabase;
 	}
 
 	// Query wrappers
@@ -105,7 +116,7 @@ public class Ollie {
 
 	// Package methods
 
-	static synchronized <T extends Model> String getTableName(Class<T> cls) {
+	public static synchronized <T extends Model> String getTableName(Class<T> cls) {
 		return sAdapterHolder.getModelAdapter(cls).getTableName();
 	}
 
@@ -122,12 +133,20 @@ public class Ollie {
 		return (TypeAdapter<D, S>) sAdapterHolder.getTypeAdapter(cls);
 	}
 
+	static synchronized Set<? extends ModelAdapter> getModelAdapters() {
+		return sAdapterHolder.getModelAdapters();
+	}
+
 	static synchronized <T extends Model> void load(T entity, Cursor cursor) {
 		sAdapterHolder.getModelAdapter(entity.getClass()).load(entity, cursor);
 	}
 
 	static synchronized <T extends Model> Long save(T entity) {
 		return sAdapterHolder.getModelAdapter(entity.getClass()).save(entity, sSQLiteDatabase);
+	}
+
+	static synchronized <T extends Model> void delete(T entity) {
+		sAdapterHolder.getModelAdapter(entity.getClass()).delete(entity, sSQLiteDatabase);
 	}
 
 	static synchronized <T extends Model> void putEntity(T entity) {
@@ -138,6 +157,10 @@ public class Ollie {
 
 	static synchronized <T extends Model> T getEntity(Class<T> cls, long id) {
 		return (T) sCache.get(getEntityIdentifier(cls, id));
+	}
+
+	static synchronized <T extends Model> void removeEntity(T entity) {
+		sCache.remove(getEntityIdentifier(entity.getClass(), entity.id));
 	}
 
 	static synchronized <T extends Model> T getOrFindEntity(Class<T> cls, long id) {

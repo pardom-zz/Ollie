@@ -1,5 +1,6 @@
 package ollie.internal;
 
+import android.provider.BaseColumns;
 import ollie.annotation.*;
 import ollie.annotation.ForeignKey.Deferrable;
 import ollie.annotation.ForeignKey.DeferrableTiming;
@@ -75,6 +76,8 @@ public class ModelAdapterDefinition {
 		builder.append("import android.database.sqlite.SQLiteDatabase;\n");
 		builder.append("import ollie.internal.ModelAdapter;\n\n");
 		builder.append("public class ").append(className).append(" extends ModelAdapter<").append(targetType).append("> {\n");
+		emitGetModelType(builder);
+		builder.append('\n');
 		emitGetTableName(builder);
 		builder.append('\n');
 		emitGetSchema(builder);
@@ -83,8 +86,16 @@ public class ModelAdapterDefinition {
 		builder.append('\n');
 		emitSave(builder);
 		builder.append('\n');
+		emitDelete(builder);
 		builder.append("}");
 		return builder.toString();
+	}
+
+	private void emitGetModelType(StringBuilder builder) {
+		builder.append("	@Override\n");
+		builder.append("	public Class<? extends Model> getModelType() {\n");
+		builder.append("		return ").append(targetType).append(".class;\n");
+		builder.append("	}\n");
 	}
 
 	private void emitGetTableName(StringBuilder builder) {
@@ -127,8 +138,7 @@ public class ModelAdapterDefinition {
 			if (columnDefinition.isModel) {
 				closeParens++;
 				builder.append("Ollie.getOrFindEntity(entity.").append(columnDefinition.targetName).append(".getClass(), ");
-			}
-			else if (columnDefinition.requiresTypeAdapter()) {
+			} else if (columnDefinition.requiresTypeAdapter()) {
 				closeParens++;
 				builder.append("Ollie.getTypeAdapter(").append(columnDefinition.deserializedType).append(".class).deserialize(");
 			}
@@ -174,7 +184,14 @@ public class ModelAdapterDefinition {
 		}
 
 		builder.append("		return insertOrUpdate(entity, db, values);\n");
-		builder.append("	}");
+		builder.append("	}\n");
+	}
+
+	private void emitDelete(StringBuilder builder) {
+		builder.append("	@Override\n");
+		builder.append("	public void delete(").append(targetType).append(" entity, SQLiteDatabase db) {\n");
+		builder.append("		db.delete(\"").append(tableName).append("\", \"").append(BaseColumns._ID).append("=?\", new String[]{entity.id.toString()});\n");
+		builder.append("	}\n");
 	}
 
 	public static class ColumnDefinition {

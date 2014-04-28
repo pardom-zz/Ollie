@@ -7,6 +7,8 @@ import android.provider.BaseColumns;
 import ollie.Model;
 
 public abstract class ModelAdapter<T extends Model> {
+	public abstract Class<? extends Model> getModelType();
+
 	public abstract String getTableName();
 
 	public abstract String getSchema();
@@ -15,11 +17,12 @@ public abstract class ModelAdapter<T extends Model> {
 
 	public abstract Long save(T entity, SQLiteDatabase db);
 
+	public abstract void delete(T entity, SQLiteDatabase db);
+
 	protected final Long insertOrUpdate(T entity, SQLiteDatabase db, ContentValues values) {
 		if (entity.id == null) {
 			entity.id = db.insert(getTableName(), null, values);
-		}
-		else {
+		} else {
 			db.update(getTableName(), values, "WHERE " + BaseColumns._ID + "=?", new String[]{entity.id.toString()});
 		}
 

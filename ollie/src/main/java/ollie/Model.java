@@ -33,8 +33,18 @@ public abstract class Model {
 		beforeSave();
 		id = Ollie.save(this);
 		Ollie.putEntity(this);
+		notifyChange();
 		afterSave();
 		return id;
+	}
+
+	public final void delete() {
+		beforeDelete();
+		Ollie.delete(this);
+		Ollie.removeEntity(this);
+		notifyChange();
+		id = null;
+		afterDelete();
 	}
 
 	protected void beforeLoad() {
@@ -47,6 +57,27 @@ public abstract class Model {
 	}
 
 	protected void afterSave() {
+	}
+
+	protected void beforeDelete() {
+	}
+
+	protected void afterDelete() {
+	}
+
+	private void notifyChange() {
+		if (OllieProvider.isImplemented()) {
+			Ollie.getContext().getContentResolver().notifyChange(OllieProvider.createUri(getClass(), id), null);
+		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Model && id != null) {
+			final Model other = (Model) obj;
+			return Ollie.getTableName(getClass()).equals(Ollie.getTableName(other.getClass())) && id.equals(other.id);
+		}
+		return this == obj;
 	}
 
 	@Override

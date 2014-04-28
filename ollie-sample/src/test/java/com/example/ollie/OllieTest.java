@@ -1,5 +1,7 @@
 package com.example.ollie;
 
+import android.content.ContentProvider;
+import com.example.ollie.content.OllieSampleProvider;
 import com.example.ollie.model.Note;
 import com.example.ollie.shadows.PersistentShadowSQLiteOpenHelper;
 import ollie.Ollie;
@@ -10,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowContentResolver;
 
 import java.io.File;
 
@@ -25,6 +28,11 @@ public class OllieTest {
 
 	@Before
 	public void initialize() {
+		ContentProvider contentProvider = new OllieSampleProvider();
+		contentProvider.onCreate();
+
+		ShadowContentResolver.registerProvider("com.example.ollie", contentProvider);
+
 		Ollie.init(Robolectric.application, "OllieSample.db", 1);
 	}
 
