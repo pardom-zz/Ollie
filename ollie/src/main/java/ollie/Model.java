@@ -23,46 +23,22 @@ public abstract class Model {
 	}
 
 	public final void load(Cursor cursor) {
-		beforeLoad();
 		Ollie.load(this, cursor);
 		Ollie.putEntity(this);
-		afterLoad();
 	}
 
 	public final Long save() {
-		beforeSave();
 		id = Ollie.save(this);
 		Ollie.putEntity(this);
 		notifyChange();
-		afterSave();
 		return id;
 	}
 
 	public final void delete() {
-		beforeDelete();
 		Ollie.delete(this);
 		Ollie.removeEntity(this);
 		notifyChange();
 		id = null;
-		afterDelete();
-	}
-
-	protected void beforeLoad() {
-	}
-
-	protected void afterLoad() {
-	}
-
-	protected void beforeSave() {
-	}
-
-	protected void afterSave() {
-	}
-
-	protected void beforeDelete() {
-	}
-
-	protected void afterDelete() {
 	}
 
 	private void notifyChange() {
