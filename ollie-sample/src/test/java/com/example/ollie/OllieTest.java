@@ -87,7 +87,7 @@ public class OllieTest {
 	}
 
 	@Test
-	public void testSelect() {
+	public void testSelectSql() {
 		String sql;
 		Query query;
 
@@ -130,7 +130,7 @@ public class OllieTest {
 	}
 
 	@Test
-	public void testInsert() {
+	public void testInsertSql() {
 		String sql;
 		Query query;
 
@@ -165,7 +165,7 @@ public class OllieTest {
 	}
 
 	@Test
-	public void testUpdate() {
+	public void testUpdateSql() {
 		String sql;
 		Query query;
 
@@ -191,7 +191,7 @@ public class OllieTest {
 	}
 
 	@Test
-	public void testDelete() {
+	public void testDeleteSql() {
 		String sql;
 		Query query;
 
