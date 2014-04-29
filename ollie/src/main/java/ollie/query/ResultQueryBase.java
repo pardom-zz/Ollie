@@ -17,6 +17,10 @@ public class ResultQueryBase extends ExecutableQueryBase implements ResultQuery 
 
 	@Override
 	public <T extends Model> T fetchSingle() {
-		return (T) Ollie.rawQuery(mTable, getSql(), getArgs());
+		List<T> results = (List<T>) Ollie.rawQuery(mTable, getSql(), getArgs());
+		if (!results.isEmpty()) {
+			return results.get(0);
+		}
+		return null;
 	}
 }
