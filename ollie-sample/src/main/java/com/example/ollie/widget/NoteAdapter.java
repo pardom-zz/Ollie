@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.example.ollie.R;
 import com.example.ollie.model.Note;
+import ollie.query.Select;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class NoteAdapter extends BaseAdapter {
 	}
 
 	public void updateDataSet() {
-
+		mNotes = new Select().from(Note.class).orderBy("date").fetch();
 	}
 
 	@Override
