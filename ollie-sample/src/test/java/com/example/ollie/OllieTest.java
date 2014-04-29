@@ -3,6 +3,8 @@ package com.example.ollie;
 import android.content.ContentProvider;
 import com.example.ollie.content.OllieSampleProvider;
 import com.example.ollie.model.Note;
+import com.example.ollie.model.NoteTag;
+import com.example.ollie.model.Tag;
 import com.example.ollie.shadows.PersistentShadowSQLiteOpenHelper;
 import ollie.Model;
 import ollie.Ollie;
@@ -83,6 +85,45 @@ public class OllieTest {
 
 	@Test
 	public void testSelect() {
+		String sql;
+		Query query;
+
+		sql = "SELECT * FROM notes";
+		query = new Select().from(Note.class);
+		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(null);
+
+		sql = "SELECT * FROM notes WHERE _id=?";
+		query = new Select().from(Note.class).where(Model._ID + "=?", "1");
+		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(new String[]{"1"});
+
+		sql = "SELECT * FROM notes ORDER BY title ASC";
+		query = new Select().from(Note.class).orderBy("title ASC");
+		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(null);
+
+		sql = "SELECT * FROM notes LIMIT 1";
+		query = new Select().from(Note.class).limit("1");
+		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(null);
+
+		sql = "SELECT * FROM notes LIMIT 1 OFFSET 10";
+		query = new Select().from(Note.class).limit("1").offset("10");
+		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(null);
+
+		sql = "SELECT * FROM notes INNER JOIN noteTags ON notes.id=noteTags.note INNER JOIN tags ON tag.id=noteTags.tag WHERE tag.name=? ORDER BY notes.title ASC LIMIT 10 OFFSET 10";
+		query = new Select()
+				.from(Note.class)
+				.innerJoin(NoteTag.class).on("notes.id=noteTags.note")
+				.innerJoin(Tag.class).on("tag.id=noteTags.tag")
+				.where("tag.name=?", "test")
+				.orderBy("notes.title ASC")
+				.limit("10")
+				.offset("10");
+		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(new String[]{"test"});
 	}
 
 	@Test
@@ -128,6 +169,7 @@ public class OllieTest {
 		sql = "UPDATE notes SET title='Testing UPDATE'";
 		query = new Update(Note.class).set("title='Testing UPDATE'");
 		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "UPDATE notes SET title=?";
 		query = new Update(Note.class).set("title=?", "Testing UPDATE");
@@ -137,6 +179,7 @@ public class OllieTest {
 		sql = "UPDATE notes SET title='Testing UPDATE' WHERE _id=1";
 		query = new Update(Note.class).set("title='Testing UPDATE'").where(Model._ID + "=1");
 		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "UPDATE notes SET title=? WHERE _id=?";
 		query = new Update(Note.class).set("title=?", "Testing UPDATE").where(Model._ID + "=?", "1");
@@ -152,10 +195,12 @@ public class OllieTest {
 		sql = "DELETE FROM notes";
 		query = new Delete().from(Note.class);
 		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "DELETE FROM notes WHERE _id=1";
 		query = new Delete().from(Note.class).where(Model._ID + "=1");
 		assertThat(query.getSql()).isEqualTo(sql);
+		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "DELETE FROM notes WHERE _id=?";
 		query = new Delete().from(Note.class).where(Model._ID + "=?", "1");

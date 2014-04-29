@@ -42,6 +42,7 @@ public final class Delete implements Query {
 
 		@Override
 		public void execute() {
+			Ollie.rawQuery(mTable, getSql(), getArgs());
 		}
 
 		@Override
