@@ -265,16 +265,12 @@ public class OllieTest {
 		assertThat(notes.size()).isGreaterThan(0);
 
 		// Join
-		ResultQuery query = new Select("notes.*")
+		notes = new Select("notes.*")
 				.from(Note.class)
 				.innerJoin(NoteTag.class).on("notes._id=noteTags.note")
 				.innerJoin(Tag.class).on("tags._id=noteTags.tag")
-				.where("tags._id=?", tag.id.toString());
-
-		System.out.println(query.getSql());
-
-		notes = query.fetch();
-
+				.where("tags._id=?", tag.id.toString())
+				.fetch();
 		assertThat(notes).isNotNull();
 		assertThat(notes.size()).isGreaterThan(0);
 	}
