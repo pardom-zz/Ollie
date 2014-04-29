@@ -2,14 +2,10 @@ package ollie.query;
 
 import ollie.Model;
 import ollie.Ollie;
-import ollie.internal.TextUtils;
-import ollie.query.util.ArrayUtils;
 
-public class Update implements Query {
-	private Class<? extends Model> mTable;
-
+public class Update extends QueryAdapter {
 	public Update(Class<? extends Model> table) {
-		mTable = table;
+		super(null, table);
 	}
 
 	public Set set(String set) {
@@ -21,85 +17,57 @@ public class Update implements Query {
 	}
 
 	@Override
-	public String getSql() {
-		return "UPDATE " + Ollie.getTableName(mTable) + " ";
+	public String getPartSql() {
+		return "UPDATE " + Ollie.getTableName(mTable);
 	}
 
-	@Override
-	public String[] getArgs() {
-		return null;
-	}
-
-	public static final class Set implements ExecutableQuery {
-		private Query mParent;
-		private Class<? extends Model> mTable;
+	public static final class Set extends ExecutableQueryAdapter {
 		private String mSet;
 		private String[] mSetArgs;
-		private String mWhere;
-		private String[] mWhereArgs;
 
 		private Set(Query parent, Class<? extends Model> table, String set, String... args) {
-			mParent = parent;
-			mTable = table;
+			super(parent, table);
 			mSet = set;
 			mSetArgs = args;
 		}
 
-		public Tail where(String where) {
+		public Where where(String where) {
 			return where(where, null);
 		}
 
-		public Tail where(String where, String... args) {
-			mWhere = where;
-			mWhereArgs = args;
-			return new Tail(this);
+		public Where where(String where, String... args) {
+			return new Where(this, mTable, where, args);
 		}
 
 		@Override
-		public void execute() {
-			Ollie.rawQuery(mTable, getSql(), getArgs());
+		public String getPartSql() {
+			return "SET " + mSet;
 		}
 
 		@Override
-		public String getSql() {
-			StringBuilder builder = new StringBuilder();
-			builder.append(mParent.getSql());
-			builder.append("SET ");
-			builder.append(mSet);
-
-			if (!TextUtils.isEmpty(mWhere)) {
-				builder.append(" WHERE ").append(mWhere);
-			}
-
-			return builder.toString();
-		}
-
-		@Override
-		public String[] getArgs() {
-			return ArrayUtils.addAll(mSetArgs, mWhereArgs);
+		public String[] getPartArgs() {
+			return mSetArgs;
 		}
 	}
 
-	public static final class Tail implements ExecutableQuery {
-		private Set mParent;
+	public static final class Where extends ExecutableQueryAdapter {
+		private String mWhere;
+		private String[] mWhereArgs;
 
-		private Tail(Set parent) {
-			mParent = parent;
+		public Where(Query parent, Class<? extends Model> table, String where, String[] args) {
+			super(parent, table);
+			mWhere = where;
+			mWhereArgs = args;
 		}
 
 		@Override
-		public void execute() {
-			mParent.execute();
+		public String getPartSql() {
+			return "WHERE " + mWhere;
 		}
 
 		@Override
-		public String getSql() {
-			return mParent.getSql();
-		}
-
-		@Override
-		public String[] getArgs() {
-			return mParent.getArgs();
+		public String[] getPartArgs() {
+			return mWhereArgs;
 		}
 	}
 }

@@ -97,8 +97,8 @@ public class Select implements Query {
 			return new Where(this, where, args);
 		}
 
-		public GroupBy groupBy() {
-			return null;
+		public GroupBy groupBy(String groupBy) {
+			return new GroupBy(this, groupBy);
 		}
 
 		public OrderBy orderBy(String orderBy) {
@@ -239,6 +239,17 @@ public class Select implements Query {
 	}
 
 	public static final class GroupBy implements ExecutableQuery {
+		private Query mParent;
+		private String mGroupBy;
+
+		public GroupBy(Query parent, String groupBy) {
+			mParent = parent;
+			mGroupBy = groupBy;
+		}
+
+		public Having having(String having) {
+			return new Having(this, having);
+		}
 
 		public OrderBy orderBy(String orderBy) {
 			return new OrderBy(this, orderBy);
@@ -255,12 +266,45 @@ public class Select implements Query {
 
 		@Override
 		public String getSql() {
-			return null;
+			return mParent.getSql() + " GROUP BY " + mGroupBy.trim();
 		}
 
 		@Override
 		public String[] getArgs() {
-			return new String[0];
+			return mParent.getArgs();
+		}
+	}
+
+	public static final class Having implements ExecutableQuery {
+		private Query mParent;
+		private String mHaving;
+
+		public Having(Query parent, String having) {
+			mParent = parent;
+			mHaving = having;
+		}
+
+		public OrderBy orderBy(String orderBy) {
+			return new OrderBy(this, orderBy);
+		}
+
+		public Limit limit(String limits) {
+			return new Limit(this, limits);
+		}
+
+		@Override
+		public void execute() {
+
+		}
+
+		@Override
+		public String getSql() {
+			return mParent.getSql() + " HAVING " + mHaving.trim();
+		}
+
+		@Override
+		public String[] getArgs() {
+			return mParent.getArgs();
 		}
 	}
 

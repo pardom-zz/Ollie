@@ -15,7 +15,7 @@ public class Insert implements Query {
 
 	@Override
 	public String getSql() {
-		return "INSERT ";
+		return "INSERT";
 	}
 
 	@Override
@@ -23,34 +23,51 @@ public class Insert implements Query {
 		return null;
 	}
 
-	public static final class Into implements Query {
-		private Query mParent;
-		private Class<? extends Model> mTable;
+	public static final class Into extends QueryAdapter {
 		private String[] mColumns;
-		private String[] mValuesArgs;
 
 		private Into(Query parent, Class<? extends Model> table, String... columns) {
-			mParent = parent;
-			mTable = table;
+			super(parent, table);
 			mColumns = columns;
 		}
 
-		public Tail values(String... args) {
-			mValuesArgs = args;
-			return new Tail(this);
+		public Values values(String... args) {
+			return new Values(this, mTable, args);
 		}
 
 		@Override
-		public String getSql() {
+		protected String getPartSql() {
 			StringBuilder builder = new StringBuilder();
-			builder.append(mParent.getSql());
 			builder.append("INTO ");
 			builder.append(Ollie.getTableName(mTable));
 			if (mColumns != null && mColumns.length > 0) {
 				builder.append("(").append(TextUtils.join(", ", mColumns)).append(")");
 			}
 
-			builder.append(" VALUES(");
+			return builder.toString();
+		}
+	}
+
+	public static final class Values extends ExecutableQueryBase {
+		private String[] mValuesArgs;
+
+		private Values(Query parent, Class<? extends Model> table, String[] args) {
+			super(parent, table);
+			mValuesArgs = args;
+		}
+
+		@Override
+		public void execute() {
+			if (((Into) mParent).mColumns != null && ((Into) mParent).mColumns.length != mValuesArgs.length) {
+				throw new MalformedQueryException("Number of columns does not match number of values.");
+			}
+			super.execute();
+		}
+
+		@Override
+		protected String getPartSql() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("VALUES(");
 			for (int i = 0; i < mValuesArgs.length; i++) {
 				if (i > 0) {
 					builder.append(", ");
@@ -58,40 +75,12 @@ public class Insert implements Query {
 				builder.append("?");
 			}
 			builder.append(")");
-
 			return builder.toString();
 		}
 
 		@Override
-		public String[] getArgs() {
+		protected String[] getPartArgs() {
 			return mValuesArgs;
-		}
-	}
-
-	public static final class Tail implements ExecutableQuery {
-		private Into mParent;
-
-		private Tail(Into parent) {
-			mParent = parent;
-		}
-
-		@Override
-		public void execute() {
-			if (mParent.mColumns != null && mParent.mColumns.length != mParent.mValuesArgs.length) {
-				throw new MalformedQueryException("Number of columns does not match number of values.");
-			}
-
-			Ollie.rawQuery(mParent.mTable, getSql(), getArgs());
-		}
-
-		@Override
-		public String getSql() {
-			return mParent.getSql();
-		}
-
-		@Override
-		public String[] getArgs() {
-			return mParent.getArgs();
 		}
 	}
 }

@@ -2,89 +2,58 @@ package ollie.query;
 
 import ollie.Model;
 import ollie.Ollie;
-import ollie.internal.TextUtils;
 
-public final class Delete implements Query {
+public final class Delete extends QueryAdapter {
+	public Delete() {
+		super(null, null);
+	}
+
 	public From from(Class<? extends Model> table) {
 		return new From(this, table);
 	}
 
 	@Override
-	public String getSql() {
-		return "DELETE ";
+	public String getPartSql() {
+		return "DELETE";
 	}
 
-	@Override
-	public String[] getArgs() {
-		return null;
-	}
-
-	public static final class From implements ExecutableQuery {
-		private Query mParent;
-		private Class<? extends Model> mTable;
-		private String mWhere;
-		private String[] mWhereArgs;
-
+	public static final class From extends ExecutableQueryAdapter {
 		private From(Query parent, Class<? extends Model> table) {
-			mParent = parent;
-			mTable = table;
+			super(parent, table);
 		}
 
-		public Tail where(String where) {
+		public Where where(String where) {
 			return where(where, null);
 		}
 
-		public Tail where(String where, String... args) {
-			mWhere = where;
-			mWhereArgs = args;
-			return new Tail(this);
+		public Where where(String where, String... args) {
+			return new Where(this, mTable, where, args);
 		}
 
 		@Override
-		public void execute() {
-			Ollie.rawQuery(mTable, getSql(), getArgs());
-		}
-
-		@Override
-		public String getSql() {
-			StringBuilder builder = new StringBuilder();
-			builder.append(mParent.getSql());
-			builder.append("FROM ");
-			builder.append(Ollie.getTableName(mTable));
-
-			if (!TextUtils.isEmpty(mWhere)) {
-				builder.append(" WHERE ").append(mWhere);
-			}
-
-			return builder.toString();
-		}
-
-		@Override
-		public String[] getArgs() {
-			return mWhereArgs;
+		public String getPartSql() {
+			return "FROM " + Ollie.getTableName(mTable);
 		}
 	}
 
-	public static final class Tail implements ExecutableQuery {
-		private From mParent;
+	public static final class Where extends ExecutableQueryAdapter {
+		private String mWhere;
+		private String[] mWhereArgs;
 
-		private Tail(From from) {
-			mParent = from;
+		public Where(Query parent, Class<? extends Model> table, String where, String[] args) {
+			super(parent, table);
+			mWhere = where;
+			mWhereArgs = args;
 		}
 
 		@Override
-		public void execute() {
-			mParent.execute();
+		public String getPartSql() {
+			return "WHERE " + mWhere;
 		}
 
 		@Override
-		public String getSql() {
-			return mParent.getSql();
-		}
-
-		@Override
-		public String[] getArgs() {
-			return mParent.getArgs();
+		public String[] getPartArgs() {
+			return mWhereArgs;
 		}
 	}
 }
