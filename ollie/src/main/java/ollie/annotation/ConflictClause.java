@@ -8,13 +8,13 @@ public enum ConflictClause {
 	IGNORE("IGNORE"),
 	REPLACE("REPLACE");
 
-	private String keyword;
+	private String mKeyword;
 
 	ConflictClause(String keyword) {
-		this.keyword = keyword;
+		mKeyword = keyword;
 	}
 
 	public String keyword() {
-		return keyword;
+		return mKeyword;
 	}
 }

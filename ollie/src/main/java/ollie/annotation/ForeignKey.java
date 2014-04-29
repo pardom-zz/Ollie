@@ -17,14 +17,14 @@ public @interface ForeignKey {
 		RESTRICT("RESTRICT"),
 		NO_ACTION("NO ACTION");
 
-		private String keyword;
+		private String mKeyword;
 
 		ReferentialAction(String keyword) {
-			this.keyword = keyword;
+			mKeyword = keyword;
 		}
 
 		public String keyword() {
-			return keyword;
+			return mKeyword;
 		}
 	}
 
@@ -33,14 +33,14 @@ public @interface ForeignKey {
 		DEFERRABLE("DEFERRABLE"),
 		NOT_DEFERRABLE("NOT DEFERRABLE");
 
-		private String keyword;
+		private String mKeyword;
 
 		Deferrable(String keyword) {
-			this.keyword = keyword;
+			mKeyword = keyword;
 		}
 
 		public String keyword() {
-			return keyword;
+			return mKeyword;
 		}
 	}
 
@@ -49,14 +49,14 @@ public @interface ForeignKey {
 		DEFERRED("INITIALLY DEFERRED"),
 		IMMEDIATE("INITIALLY IMMEDIATE");
 
-		private String keyword;
+		private String mKeyword;
 
 		DeferrableTiming(String keyword) {
-			this.keyword = keyword;
+			mKeyword = keyword;
 		}
 
 		public String keyword() {
-			return keyword;
+			return mKeyword;
 		}
 
 	}

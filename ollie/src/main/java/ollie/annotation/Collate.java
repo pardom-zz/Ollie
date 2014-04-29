@@ -14,14 +14,14 @@ public @interface Collate {
 		NOCASE("NOCASE"),
 		RTRIM("RTRIM");
 
-		private String keyword;
+		private String mKeyword;
 
 		Collation(String keyword) {
-			this.keyword = keyword;
+			mKeyword = keyword;
 		}
 
 		public String keyword() {
-			return keyword;
+			return mKeyword;
 		}
 	}
 
