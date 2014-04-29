@@ -154,7 +154,7 @@ public class OllieTest {
 		try {
 			new Insert().into(Note.class, "title", "body", "date").values("Testing INSERT", "Testing INSERT body.").execute();
 			assert false;
-		} catch (MalformedQueryException e) {
+		} catch (Query.MalformedQueryException e) {
 			// Successfully threw exception
 			assert true;
 		}

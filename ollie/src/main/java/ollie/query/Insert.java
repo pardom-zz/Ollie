@@ -4,7 +4,11 @@ import ollie.Model;
 import ollie.Ollie;
 import ollie.internal.TextUtils;
 
-public class Insert implements Query {
+public class Insert extends QueryBase {
+	public Insert() {
+		super(null, null);
+	}
+
 	public Into into(Class<? extends Model> table) {
 		return new Into(this, table);
 	}
@@ -14,16 +18,11 @@ public class Insert implements Query {
 	}
 
 	@Override
-	public String getSql() {
+	public String getPartSql() {
 		return "INSERT";
 	}
 
-	@Override
-	public String[] getArgs() {
-		return null;
-	}
-
-	public static final class Into extends QueryAdapter {
+	public static final class Into extends QueryBase {
 		private String[] mColumns;
 
 		private Into(Query parent, Class<? extends Model> table, String... columns) {

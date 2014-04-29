@@ -3,7 +3,7 @@ package ollie.query;
 import ollie.Model;
 import ollie.Ollie;
 
-public final class Delete extends QueryAdapter {
+public final class Delete extends QueryBase {
 	public Delete() {
 		super(null, null);
 	}
@@ -17,7 +17,7 @@ public final class Delete extends QueryAdapter {
 		return "DELETE";
 	}
 
-	public static final class From extends ExecutableQueryAdapter {
+	public static final class From extends ExecutableQueryBase {
 		private From(Query parent, Class<? extends Model> table) {
 			super(parent, table);
 		}
@@ -36,7 +36,7 @@ public final class Delete extends QueryAdapter {
 		}
 	}
 
-	public static final class Where extends ExecutableQueryAdapter {
+	public static final class Where extends ExecutableQueryBase {
 		private String mWhere;
 		private String[] mWhereArgs;
 
