@@ -20,12 +20,16 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowContentResolver;
 
 import java.io.File;
+import java.util.*;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, shadows = PersistentShadowSQLiteOpenHelper.class)
 public class OllieTest {
+	private static final int NOTE_COUNT = 100;
+	private static final int TAG_COUNT = 10;
+
 	@BeforeClass
 	public static void setup() {
 		new File("path").delete();
@@ -40,7 +44,6 @@ public class OllieTest {
 	public void initialize() {
 		ContentProvider contentProvider = new OllieSampleProvider();
 		contentProvider.onCreate();
-
 		ShadowContentResolver.registerProvider("com.example.ollie", contentProvider);
 
 		Ollie.init(Robolectric.application, "OllieSample.db", 1);
@@ -49,13 +52,11 @@ public class OllieTest {
 	@Test
 	public void testSaveEntity() {
 		Note note = new Note();
-
 		assertThat(note.id).isNull();
 
 		note.title = "Test note";
 		note.body = "Testing saving a note.";
 		note.save();
-
 		assertThat(note.id).isNotNull();
 		assertThat(note.id).isGreaterThan(0l);
 	}
@@ -63,7 +64,6 @@ public class OllieTest {
 	@Test
 	public void testLoadEntity() {
 		Note note = Note.find(Note.class, 1l);
-
 		assertThat(note).isNotNull();
 		assertThat(note.id).isNotNull();
 		assertThat(note.id).isGreaterThan(0l);
@@ -72,15 +72,18 @@ public class OllieTest {
 	@Test
 	public void testDeleteEntity() {
 		Note note = Note.find(Note.class, 1l);
-
 		assertThat(note).isNotNull();
 		assertThat(note.id).isNotNull();
 		assertThat(note.id).isGreaterThan(0l);
 
 		note.delete();
-
 		assertThat(note).isNotNull();
 		assertThat(note.id).isNull();
+	}
+
+	@Test
+	public void testPopulateDatabase() {
+		populateDatabase();
 	}
 
 	@Test
@@ -206,5 +209,49 @@ public class OllieTest {
 		query = new Delete().from(Note.class).where(Model._ID + "=?", "1");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"1"});
+	}
+
+	@Test
+	public void testSelectEntity() {
+		Note note = new Select().from(Note.class).fetchSingle();
+		assertThat(note).isNotNull();
+		assertThat(note.id).isNotNull();
+		assertThat(note.id).isGreaterThan(0l);
+
+		List<Note> notes = new Select().from(Note.class).fetch();
+		assertThat(notes).isNotNull();
+		assertThat(notes.size()).isGreaterThan(0);
+	}
+
+	private void populateDatabase() {
+		final Tag[] tags = new Tag[TAG_COUNT];
+		final Random rand = new Random();
+
+		for (int i = 0; i < TAG_COUNT; i++) {
+			Tag tag = new Tag();
+			tag.name = "Tag " + i;
+			tag.save();
+
+			tags[i] = tag;
+		}
+
+		for (int i = 0; i < NOTE_COUNT; i++) {
+			Note note = new Note();
+			note.title = "Note " + i;
+			note.body = "This is the body for note #" + i;
+			note.date = new Date();
+			note.save();
+
+			final int tagCount = rand.nextInt(TAG_COUNT);
+			final List<Tag> tagList = new ArrayList<Tag>(Arrays.asList(tags));
+			Collections.shuffle(tagList);
+
+			for (int j = 0; j < tagCount; j++) {
+				NoteTag noteTag = new NoteTag();
+				noteTag.note = note;
+				noteTag.tag = tagList.remove(0);
+				noteTag.save();
+			}
+		}
 	}
 }
