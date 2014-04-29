@@ -110,10 +110,6 @@ public class Select extends QueryBase {
 		}
 
 		@Override
-		public void execute() {
-		}
-
-		@Override
 		public String getPartSql() {
 			StringBuilder builder = new StringBuilder();
 			builder.append("FROM ");
@@ -123,7 +119,7 @@ public class Select extends QueryBase {
 				builder.append(join.getPartSql()).append(" ");
 			}
 
-			return builder.toString().trim();
+			return builder.toString();
 		}
 	}
 
