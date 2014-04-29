@@ -37,7 +37,7 @@ public class OllieTest {
 
 	@AfterClass
 	public static void cleanUp() {
-		new File("path").delete();
+		//new File("path").delete();
 	}
 
 	@Before
@@ -47,6 +47,39 @@ public class OllieTest {
 		ShadowContentResolver.registerProvider("com.example.ollie", contentProvider);
 
 		Ollie.init(Robolectric.application, "OllieSample.db", 1);
+	}
+
+	@Test
+	public void testPopulateDatabase() {
+		final Tag[] tags = new Tag[TAG_COUNT];
+		final Random rand = new Random();
+
+		for (int i = 0; i < TAG_COUNT; i++) {
+			Tag tag = new Tag();
+			tag.name = "Tag " + i;
+			tag.save();
+
+			tags[i] = tag;
+		}
+
+		for (int i = 0; i < NOTE_COUNT; i++) {
+			Note note = new Note();
+			note.title = "Note " + i;
+			note.body = "This is the body for note #" + i;
+			note.date = new Date();
+			note.save();
+
+			final int tagCount = rand.nextInt(TAG_COUNT);
+			final List<Tag> tagList = new ArrayList<Tag>(Arrays.asList(tags));
+			Collections.shuffle(tagList);
+
+			for (int j = 0; j < tagCount; j++) {
+				NoteTag noteTag = new NoteTag();
+				noteTag.note = note;
+				noteTag.tag = tagList.remove(0);
+				noteTag.save();
+			}
+		}
 	}
 
 	@Test
@@ -79,11 +112,6 @@ public class OllieTest {
 		note.delete();
 		assertThat(note).isNotNull();
 		assertThat(note.id).isNull();
-	}
-
-	@Test
-	public void testPopulateDatabase() {
-		populateDatabase();
 	}
 
 	@Test
@@ -213,45 +241,41 @@ public class OllieTest {
 
 	@Test
 	public void testSelectEntity() {
+		// Single note
 		Note note = new Select().from(Note.class).fetchSingle();
 		assertThat(note).isNotNull();
 		assertThat(note.id).isNotNull();
 		assertThat(note.id).isGreaterThan(0l);
 
+		// Single tag
+		Tag tag = new Select().from(Tag.class).fetchSingle();
+		assertThat(tag).isNotNull();
+		assertThat(tag.id).isNotNull();
+		assertThat(tag.id).isGreaterThan(0l);
+
+		// Save note tag to get guaranteed join result
+		NoteTag noteTag = new NoteTag();
+		noteTag.note = note;
+		noteTag.tag = tag;
+		noteTag.save();
+
+		// Many
 		List<Note> notes = new Select().from(Note.class).fetch();
 		assertThat(notes).isNotNull();
 		assertThat(notes.size()).isGreaterThan(0);
-	}
 
-	private void populateDatabase() {
-		final Tag[] tags = new Tag[TAG_COUNT];
-		final Random rand = new Random();
+		// Join
+		ResultQuery query = new Select("notes.*")
+				.from(Note.class)
+				.innerJoin(NoteTag.class).on("notes._id=noteTags.note")
+				.innerJoin(Tag.class).on("tags._id=noteTags.tag")
+				.where("tags._id=?", tag.id.toString());
 
-		for (int i = 0; i < TAG_COUNT; i++) {
-			Tag tag = new Tag();
-			tag.name = "Tag " + i;
-			tag.save();
+		System.out.println(query.getSql());
 
-			tags[i] = tag;
-		}
+		notes = query.fetch();
 
-		for (int i = 0; i < NOTE_COUNT; i++) {
-			Note note = new Note();
-			note.title = "Note " + i;
-			note.body = "This is the body for note #" + i;
-			note.date = new Date();
-			note.save();
-
-			final int tagCount = rand.nextInt(TAG_COUNT);
-			final List<Tag> tagList = new ArrayList<Tag>(Arrays.asList(tags));
-			Collections.shuffle(tagList);
-
-			for (int j = 0; j < tagCount; j++) {
-				NoteTag noteTag = new NoteTag();
-				noteTag.note = note;
-				noteTag.tag = tagList.remove(0);
-				noteTag.save();
-			}
-		}
+		assertThat(notes).isNotNull();
+		assertThat(notes.size()).isGreaterThan(0);
 	}
 }
