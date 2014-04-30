@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class Ollie {
+public final class Ollie {
 	public static final int DEFAULT_CACHE_SIZE = 1024;
 
 	private static final String TAG = "Ollie";
@@ -31,7 +31,6 @@ public class Ollie {
 	private static boolean sInitialized = false;
 
 	private Ollie() {
-		throw new AssertionError("No instances.");
 	}
 
 	// Public methods

@@ -5,7 +5,7 @@ import ollie.Ollie;
 
 import java.util.List;
 
-public class ResultQueryBase extends ExecutableQueryBase implements ResultQuery {
+public abstract class ResultQueryBase extends ExecutableQueryBase implements ResultQuery {
 	public ResultQueryBase(Query parent, Class<? extends Model> table) {
 		super(parent, table);
 	}

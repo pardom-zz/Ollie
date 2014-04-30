@@ -3,7 +3,7 @@ package ollie.query;
 import ollie.Model;
 import ollie.Ollie;
 
-public class Update extends QueryBase {
+public final class Update extends QueryBase {
 	public Update(Class<? extends Model> table) {
 		super(null, table);
 	}

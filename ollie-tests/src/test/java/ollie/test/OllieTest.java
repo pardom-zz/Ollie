@@ -37,7 +37,7 @@ public class OllieTest {
 
 	@AfterClass
 	public static void cleanUp() {
-		//new File("path").delete();
+		new File("path").delete();
 	}
 
 	@Before

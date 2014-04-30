@@ -4,7 +4,7 @@ import ollie.Model;
 import ollie.Ollie;
 import ollie.internal.TextUtils;
 
-public class Insert extends QueryBase {
+public final class Insert extends QueryBase {
 	public Insert() {
 		super(null, null);
 	}

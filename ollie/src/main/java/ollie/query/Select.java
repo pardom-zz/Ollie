@@ -7,7 +7,7 @@ import ollie.internal.TextUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Select extends QueryBase {
+public final class Select extends QueryBase {
 	private String[] mColumns;
 
 	public Select() {
