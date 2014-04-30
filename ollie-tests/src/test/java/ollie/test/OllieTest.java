@@ -1,15 +1,14 @@
 package ollie.test;
 
 import android.content.ContentProvider;
+import ollie.Model;
+import ollie.Ollie;
+import ollie.query.*;
 import ollie.test.content.OllieSampleProvider;
 import ollie.test.model.Note;
 import ollie.test.model.NoteTag;
 import ollie.test.model.Tag;
 import ollie.test.shadows.PersistentShadowSQLiteOpenHelper;
-import ollie.Model;
-import ollie.Ollie;
-import ollie.query.*;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,11 +31,6 @@ public class OllieTest {
 
 	@BeforeClass
 	public static void setup() {
-		new File("path").delete();
-	}
-
-	@AfterClass
-	public static void cleanUp() {
 		new File("path").delete();
 	}
 
@@ -278,5 +272,16 @@ public class OllieTest {
 				.fetch();
 		assertThat(notes).isNotNull();
 		assertThat(notes.size()).isGreaterThan(0);
+	}
+
+	@Test
+	public void testFetchValue() {
+		ResultQuery query = new Select("COUNT(*)").from(Note.class);
+		System.out.println(query.getSql());
+
+		int count = query.fetchValue();
+		System.out.println(count);
+
+		assertThat(count).isGreaterThan(0);
 	}
 }
