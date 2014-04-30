@@ -276,12 +276,7 @@ public class OllieTest {
 
 	@Test
 	public void testFetchValue() {
-		ResultQuery query = new Select("COUNT(*)").from(Note.class);
-		System.out.println(query.getSql());
-
-		int count = query.fetchValue();
-		System.out.println(count);
-
+		int count = new Select("COUNT(*)").from(Note.class).fetchValue();
 		assertThat(count).isGreaterThan(0);
 	}
 }
