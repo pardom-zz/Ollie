@@ -1,4 +1,4 @@
-package com.example.ollie.shadows;
+package ollie.test.shadows;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

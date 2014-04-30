@@ -1,4 +1,4 @@
-package com.example.ollie.model;
+package ollie.test.model;
 
 import ollie.Model;
 import ollie.annotation.Column;

@@ -1,11 +1,11 @@
-package com.example.ollie;
+package ollie.test;
 
 import android.content.ContentProvider;
-import com.example.ollie.content.OllieSampleProvider;
-import com.example.ollie.model.Note;
-import com.example.ollie.model.NoteTag;
-import com.example.ollie.model.Tag;
-import com.example.ollie.shadows.PersistentShadowSQLiteOpenHelper;
+import ollie.test.content.OllieSampleProvider;
+import ollie.test.model.Note;
+import ollie.test.model.NoteTag;
+import ollie.test.model.Tag;
+import ollie.test.shadows.PersistentShadowSQLiteOpenHelper;
 import ollie.Model;
 import ollie.Ollie;
 import ollie.query.*;
@@ -47,6 +47,11 @@ public class OllieTest {
 		ShadowContentResolver.registerProvider("com.example.ollie", contentProvider);
 
 		Ollie.init(Robolectric.application, "OllieSample.db", 1);
+	}
+
+	@Test
+	public void testTrue() {
+		assert true;
 	}
 
 	@Test

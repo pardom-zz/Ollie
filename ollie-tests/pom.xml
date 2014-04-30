@@ -9,10 +9,15 @@
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>ollie</artifactId>
-	<name>Ollie</name>
+	<artifactId>ollie-tests</artifactId>
+	<name>Ollie Tests</name>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.michaelpardo</groupId>
+			<artifactId>ollie</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -34,11 +39,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.google.testing.compile</groupId>
-			<artifactId>compile-testing</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
 			<scope>provided</scope>
@@ -51,20 +51,6 @@
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
 				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<compilerArgument>-proc:none</compilerArgument>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<excludePackageNames>ollie.internal:ollie.internal.*</excludePackageNames>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

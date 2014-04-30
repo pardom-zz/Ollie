@@ -1,4 +1,4 @@
-package com.example.ollie.content;
+package ollie.test.content;
 
 import ollie.OllieProvider;
 
