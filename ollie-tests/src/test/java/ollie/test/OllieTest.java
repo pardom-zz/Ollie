@@ -276,7 +276,7 @@ public class OllieTest {
 
 	@Test
 	public void testFetchValue() {
-		int count = new Select("COUNT(*)").from(Note.class).fetchValue();
+		long count = new Select("SUM(date)").from(Note.class).fetchValueAs(long.class);
 		assertThat(count).isGreaterThan(0);
 	}
 }

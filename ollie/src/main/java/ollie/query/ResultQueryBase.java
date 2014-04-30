@@ -26,29 +26,26 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public <T> T fetchValue() {
+	public <T> T fetchValueAs(Class<T> type) {
 		final Cursor cursor = Ollie.getDatabase().rawQuery(getSql(), getArgs());
 		if (!cursor.moveToFirst()) {
 			return null;
 		}
 
-		int type = cursor.getType(0);
-		switch (type) {
-			case Cursor.FIELD_TYPE_BLOB: {
-				return (T) cursor.getBlob(0);
-			}
-			case Cursor.FIELD_TYPE_FLOAT: {
-				return (T) Float.valueOf(cursor.getFloat(0));
-			}
-			case Cursor.FIELD_TYPE_INTEGER: {
-				return (T) Integer.valueOf(cursor.getInt(0));
-			}
-			case Cursor.FIELD_TYPE_NULL: {
-				return null;
-			}
-			case Cursor.FIELD_TYPE_STRING: {
-				return (T) cursor.getString(0);
-			}
+		if (type.equals(Byte[].class) || type.equals(byte[].class)) {
+			return (T) cursor.getBlob(0);
+		} else if (type.equals(double.class) || type.equals(Double.class)) {
+			return (T) Double.valueOf(cursor.getDouble(0));
+		} else if (type.equals(float.class) || type.equals(Float.class)) {
+			return (T) Float.valueOf(cursor.getFloat(0));
+		} else if (type.equals(int.class) || type.equals(Integer.class)) {
+			return (T) Integer.valueOf(cursor.getInt(0));
+		} else if (type.equals(long.class) || type.equals(Long.class)) {
+			return (T) Long.valueOf(cursor.getLong(0));
+		} else if (type.equals(short.class) || type.equals(Short.class)) {
+			return (T) Short.valueOf(cursor.getShort(0));
+		} else if (type.equals(String.class)) {
+			return (T) cursor.getString(0);
 		}
 
 		return null;

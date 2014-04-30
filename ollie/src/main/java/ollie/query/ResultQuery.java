@@ -9,5 +9,5 @@ public interface ResultQuery extends ExecutableQuery {
 
 	<T extends Model> T fetchSingle();
 
-	<T> T fetchValue();
+	<T> T fetchValueAs(Class<T> type);
 }
