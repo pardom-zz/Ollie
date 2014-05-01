@@ -44,11 +44,6 @@ public class OllieTest {
 	}
 
 	@Test
-	public void testTrue() {
-		assert true;
-	}
-
-	@Test
 	public void testPopulateDatabase() {
 		final Tag[] tags = new Tag[TAG_COUNT];
 		final Random rand = new Random();
