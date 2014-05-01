@@ -68,4 +68,12 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Nexus Snapshot Repository</name>
+			<url>https://oss.sonatype.org/service/local/snapshots/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 </project>
