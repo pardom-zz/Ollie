@@ -11,7 +11,7 @@ Ollie is in active development and is changing quite rapidly. I would recommend 
 Download
 --------
 
-Download [the latest JAR][1] or grab via Maven:
+Grab via Maven:
 ```xml
 <dependency>
   <groupId>com.michaelpardo</groupId>
@@ -21,8 +21,10 @@ Download [the latest JAR][1] or grab via Maven:
 ```
 or Gradle:
 ```groovy
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    mavenCentral()
+}
+
 compile 'com.michaelpardo:ollie:0.1.0-SNAPSHOT'
 ```
-
-
- [1]: http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.michaelpardo&a=ollie&v=LATEST
