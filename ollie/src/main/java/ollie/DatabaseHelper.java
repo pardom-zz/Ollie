@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 
+import java.util.List;
+
 public final class DatabaseHelper extends SQLiteOpenHelper {
 	public DatabaseHelper(Context context, String name, int version) {
 		super(context, name, null, version);
@@ -19,15 +21,14 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		executePragmas(db);
 		executeCreate(db);
-		//executeMigrations(db, -1, db.getVersion());
-		//executeCreateIndex(db);
+		executeMigrations(db, -1, db.getVersion());
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		executePragmas(db);
 		executeCreate(db);
-		//executeMigrations(db, oldVersion, newVersion);
+		executeMigrations(db, oldVersion, newVersion);
 	}
 
 	private void executePragmas(SQLiteDatabase db) {
@@ -46,5 +47,27 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		} finally {
 			db.endTransaction();
 		}
+	}
+
+	private boolean executeMigrations(SQLiteDatabase db, int oldVersion, int newVersion) {
+		boolean migrationExecuted = false;
+		final List<? extends Migration> migrations = Ollie.getMigrations();
+
+		db.beginTransaction();
+		try {
+			for (Migration migration : migrations) {
+				if (migration.getVersion() > oldVersion && migration.getVersion() <= newVersion) {
+					for (String statement : migration.getStatements()) {
+						db.execSQL(statement);
+					}
+					migrationExecuted = true;
+				}
+			}
+		} finally {
+			db.setTransactionSuccessful();
+		}
+		db.endTransaction();
+
+		return migrationExecuted;
 	}
 }

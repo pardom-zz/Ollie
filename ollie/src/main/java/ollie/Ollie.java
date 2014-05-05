@@ -16,7 +16,6 @@ import ollie.util.LruCache;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public final class Ollie {
 	public static final int DEFAULT_CACHE_SIZE = 1024;
@@ -132,8 +131,12 @@ public final class Ollie {
 		return (TypeAdapter<D, S>) sAdapterHolder.getTypeAdapter(cls);
 	}
 
-	static Set<? extends ModelAdapter> getModelAdapters() {
+	static List<? extends ModelAdapter> getModelAdapters() {
 		return sAdapterHolder.getModelAdapters();
+	}
+
+	static List<? extends Migration> getMigrations() {
+		return sAdapterHolder.getMigrations();
 	}
 
 	// Cache methods

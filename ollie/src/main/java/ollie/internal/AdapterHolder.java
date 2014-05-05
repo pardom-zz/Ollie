@@ -1,16 +1,20 @@
 package ollie.internal;
 
+import ollie.Migration;
 import ollie.Model;
 import ollie.TypeAdapter;
 
-import java.util.Set;
+import java.util.List;
+
 
 public interface AdapterHolder {
 	public static final String IMPLEMENTATION_CLASS_PACKAGE = "ollie";
 	public static final String IMPLEMENTATION_CLASS_NAME = "AdapterHolderImpl";
 	public static final String IMPLEMENTATION_CLASS_FQCN = IMPLEMENTATION_CLASS_PACKAGE + "." + IMPLEMENTATION_CLASS_NAME;
 
-	public Set<? extends ModelAdapter> getModelAdapters();
+	public List<? extends ModelAdapter> getModelAdapters();
+
+	public List<? extends Migration> getMigrations();
 
 	public <T extends Model> ModelAdapter<T> getModelAdapter(Class<? extends Model> cls);
 

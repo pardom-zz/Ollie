@@ -4,6 +4,7 @@ import ollie.adapter.CalendarAdapter;
 import ollie.adapter.SqlDateAdapter;
 import ollie.adapter.UtilDateAdapter;
 import ollie.annotation.Column;
+import ollie.annotation.Migration;
 import ollie.annotation.Table;
 import ollie.annotation.TypeAdapter;
 import ollie.internal.ModelAdapterDefinition.ColumnDefinition;
@@ -27,11 +28,14 @@ import static javax.tools.Diagnostic.Kind.WARNING;
 @SupportedAnnotationTypes({"*"})
 public class OllieProcessor extends AbstractProcessor {
 	private static final String MODEL_ADAPTER_SUFFIX = "$$ModelAdapter";
+
 	private static final String MODEL_CLASS = "ollie.Model";
 	private static final String TYPE_ADAPTER_CLASS = "ollie.TypeAdapter<?,?>";
+	private static final String MIGRATION_CLASS = "ollie.Migration";
 
 	private static final Map<String, ModelAdapterDefinition> MODEL_ADAPTERS = new HashMap<String, ModelAdapterDefinition>();
 	private static final Map<String, TypeAdapterDefinition> TYPE_ADAPTERS = new HashMap<String, TypeAdapterDefinition>();
+	private static final List<String> MIGRATIONS = new ArrayList<String>();
 
 	private static final Class[] DEFAULT_TYPE_ADAPTERS = new Class[]{
 			CalendarAdapter.class,
@@ -77,6 +81,7 @@ public class OllieProcessor extends AbstractProcessor {
 		findAndParseTypeAdapters(env);
 		findAndParseModels(env);
 		findAndParseColumns();
+		findAndParseMigrations(env);
 
 		writeModelAdapters();
 		writeAdapterHolder();
@@ -108,10 +113,11 @@ public class OllieProcessor extends AbstractProcessor {
 		builder.append("package ollie;\n\n");
 		builder.append("import ollie.internal.AdapterHolder;\n");
 		builder.append("import ollie.internal.ModelAdapter;\n\n");
+		builder.append("import java.util.ArrayList;\n");
+		builder.append("import java.util.Collections;\n");
 		builder.append("import java.util.HashMap;\n");
-		builder.append("import java.util.HashSet;\n");
+		builder.append("import java.util.List;\n");
 		builder.append("import java.util.Map;\n");
-		builder.append("import java.util.Set;\n\n");
 		builder.append("public class ").append(AdapterHolder.IMPLEMENTATION_CLASS_NAME).append(" implements AdapterHolder {\n");
 		builder.append("	private static final Map<Class<? extends Model>, ModelAdapter> MODEL_ADAPTERS = new HashMap<Class<? extends Model>, ModelAdapter>() {\n");
 		builder.append("		{\n");
@@ -135,14 +141,34 @@ public class OllieProcessor extends AbstractProcessor {
 
 		builder.append("		}\n");
 		builder.append("	};\n\n");
+
+
+		builder.append("	private static final List<Migration> MIGRATIONS = new ArrayList<Migration>() {\n");
+		builder.append("		{\n");
+
+		for (String entry : MIGRATIONS) {
+			builder.append("			add(new ").append(entry).append("());\n");
+		}
+
+		builder.append("		}\n");
+		builder.append("	};\n\n");
+
 		builder.append("	@Override\n");
-		builder.append("	public Set<? extends ModelAdapter> getModelAdapters() {\n");
-		builder.append("		return new HashSet(MODEL_ADAPTERS.values());\n");
+		builder.append("	public List<? extends ModelAdapter> getModelAdapters() {\n");
+		builder.append("		return new ArrayList(MODEL_ADAPTERS.values());\n");
 		builder.append("	}\n\n");
+
+		builder.append("	@Override\n");
+		builder.append("	public List<? extends Migration> getMigrations() {\n");
+		builder.append("		Collections.sort(MIGRATIONS);\n");
+		builder.append("		return MIGRATIONS;\n");
+		builder.append("	}\n\n");
+
 		builder.append("	@Override\n");
 		builder.append("	public <T extends Model> ModelAdapter<T> getModelAdapter(Class<? extends Model> cls) {\n");
 		builder.append("		return MODEL_ADAPTERS.get(cls);\n");
 		builder.append("	}\n\n");
+
 		builder.append("	@Override\n");
 		builder.append("	public <D, S extends TypeAdapter<D, S>> TypeAdapter<D, S> getTypeAdapter(Class<D> cls) {\n");
 		builder.append("		return TYPE_ADAPTERS.get(cls);\n");
@@ -162,7 +188,7 @@ public class OllieProcessor extends AbstractProcessor {
 	}
 
 	private void findAndParseTypeAdapters(RoundEnvironment env) {
-		Set<Element> elements = new HashSet<Element>(env.getElementsAnnotatedWith(TypeAdapter.class));
+		final List<Element> elements = new ArrayList<Element>(env.getElementsAnnotatedWith(TypeAdapter.class));
 		for (Class cls : DEFAULT_TYPE_ADAPTERS) {
 			elements.add(elementUtils.getTypeElement(cls.getName()));
 		}
@@ -175,6 +201,12 @@ public class OllieProcessor extends AbstractProcessor {
 	private void findAndParseModels(RoundEnvironment env) {
 		for (Element element : env.getElementsAnnotatedWith(Table.class)) {
 			parseTableAnnotation(element);
+		}
+	}
+
+	private void findAndParseMigrations(RoundEnvironment env) {
+		for (Element element : env.getElementsAnnotatedWith(Migration.class)) {
+			parseMigrationAnnotation(element);
 		}
 	}
 
@@ -303,6 +335,23 @@ public class OllieProcessor extends AbstractProcessor {
 
 			definitions.add(columnDefinition);
 		}
+	}
+
+	private void parseMigrationAnnotation(Element element) {
+		boolean hasError = false;
+
+		Element enclosingElement = element.getEnclosingElement();
+		String classPackage = enclosingElement.toString();
+		String className = element.getSimpleName().toString();
+		String targetType = element.toString();
+
+		// Verify that the target class extends from Model.
+		if (!isSubtypeOfType(element.asType(), MIGRATION_CLASS)) {
+			error(element, "@Migration classes must extend from Migration. (%s.%s)", classPackage, className);
+			hasError = true;
+		}
+
+		MIGRATIONS.add(targetType);
 	}
 
 	private boolean isSubtypeOfType(TypeMirror typeMirror, String otherType) {
