@@ -1,5 +1,6 @@
 package ollie.internal;
 
+import ollie.adapter.BooleanAdapter;
 import ollie.adapter.CalendarAdapter;
 import ollie.adapter.SqlDateAdapter;
 import ollie.adapter.UtilDateAdapter;
@@ -38,6 +39,7 @@ public class OllieProcessor extends AbstractProcessor {
 	private static final List<String> MIGRATIONS = new ArrayList<String>();
 
 	private static final Class[] DEFAULT_TYPE_ADAPTERS = new Class[]{
+			BooleanAdapter.class,
 			CalendarAdapter.class,
 			SqlDateAdapter.class,
 			UtilDateAdapter.class
