@@ -20,6 +20,10 @@ public abstract class OllieProvider extends ContentProvider {
 		return sIsImplemented;
 	}
 
+	public static Uri createUri(Class<? extends Model> type) {
+		return createUri(type, null);
+	}
+
 	public static Uri createUri(Class<? extends Model> type, Long id) {
 		final StringBuilder uri = new StringBuilder();
 		uri.append("content://");
