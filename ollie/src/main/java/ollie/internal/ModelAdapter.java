@@ -23,7 +23,7 @@ public abstract class ModelAdapter<T extends Model> {
 		if (entity.id == null) {
 			entity.id = db.insert(getTableName(), null, values);
 		} else {
-			db.update(getTableName(), values, "WHERE " + BaseColumns._ID + "=?", new String[]{entity.id.toString()});
+			db.update(getTableName(), values, BaseColumns._ID + "=?", new String[]{entity.id.toString()});
 		}
 
 		return entity.id;
