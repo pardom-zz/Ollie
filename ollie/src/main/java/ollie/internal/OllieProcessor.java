@@ -1,11 +1,14 @@
 package ollie.internal;
 
+import ollie.Model;
 import ollie.adapter.BooleanAdapter;
 import ollie.adapter.CalendarAdapter;
 import ollie.adapter.SqlDateAdapter;
 import ollie.adapter.UtilDateAdapter;
 import ollie.annotation.Column;
 import ollie.annotation.Migration;
+import ollie.annotation.Polymorphic;
+import ollie.annotation.PolymorphicType;
 import ollie.annotation.Table;
 import ollie.annotation.TypeAdapter;
 import ollie.internal.ModelAdapterDefinition.ColumnDefinition;
@@ -37,6 +40,8 @@ public class OllieProcessor extends AbstractProcessor {
 	private static final Map<String, ModelAdapterDefinition> MODEL_ADAPTERS = new HashMap<String, ModelAdapterDefinition>();
 	private static final Map<String, TypeAdapterDefinition> TYPE_ADAPTERS = new HashMap<String, TypeAdapterDefinition>();
 	private static final List<String> MIGRATIONS = new ArrayList<String>();
+    private static final List<String> POLYMORPHIC_TABLES = new ArrayList<String>();
+    private static final Map<Class<? extends Model>, String> SUBTYPES = new HashMap<Class<? extends Model>, String>();
 
 	private static final Class[] DEFAULT_TYPE_ADAPTERS = new Class[]{
 			BooleanAdapter.class,
@@ -82,6 +87,7 @@ public class OllieProcessor extends AbstractProcessor {
 	public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment env) {
 		findAndParseTypeAdapters(env);
 		findAndParseModels(env);
+        findAndParsePolymorphic(env);
 		findAndParseColumns();
 		findAndParseMigrations(env);
 
@@ -155,6 +161,27 @@ public class OllieProcessor extends AbstractProcessor {
 		builder.append("		}\n");
 		builder.append("	};\n\n");
 
+        builder.append("	private static final List<Class<? extends Model>> POLYMORPHIC_TABLES = new ArrayList<Class<? extends Model>>() {\n");
+        builder.append("		{\n");
+
+        for (String entry : POLYMORPHIC_TABLES) {
+            builder.append("			add(").append(entry).append(");\n");
+        }
+
+        builder.append("		}\n");
+        builder.append("	};\n\n");
+
+        builder.append("	private static final Map<Class<? extends Model>, String> SUBTYPES = new HashMap<Class<? extends Model>, String>() {\n");
+        builder.append("		{\n");
+
+        for (Map.Entry<Class<? extends Model>, String> entry : SUBTYPES.entrySet()) {
+            builder.append("			add(new ").append(entry).append("());\n");
+        }
+
+        builder.append("		}\n");
+        builder.append("	};\n\n");
+
+
 		builder.append("	@Override\n");
 		builder.append("	public List<? extends ModelAdapter> getModelAdapters() {\n");
 		builder.append("		return new ArrayList(MODEL_ADAPTERS.values());\n");
@@ -205,6 +232,16 @@ public class OllieProcessor extends AbstractProcessor {
 			parseTableAnnotation(element);
 		}
 	}
+
+    private void findAndParsePolymorphic(RoundEnvironment env) {
+        for (Element element : env.getElementsAnnotatedWith(Polymorphic.class)) {
+            parsePolymorphicModels(element);
+        }
+
+        for (Element element : env.getElementsAnnotatedWith(PolymorphicType.class)) {
+            parsePolymorphicTypes(element);
+        }
+    }
 
 	private void findAndParseMigrations(RoundEnvironment env) {
 		for (Element element : env.getElementsAnnotatedWith(Migration.class)) {
@@ -275,8 +312,39 @@ public class OllieProcessor extends AbstractProcessor {
 		definition.setTargetType(targetType);
 		definition.setTableName(tableName);
 
+
 		MODEL_ADAPTERS.put(targetType, definition);
 	}
+
+    private void parsePolymorphicModels(Element element){
+        String targetType = element.toString();
+        String typeColumn = element.getAnnotation(Polymorphic.class).value();
+
+        ModelAdapterDefinition definition = MODEL_ADAPTERS.get(targetType);
+        if (definition == null) {
+            error(element, "@Polymorphic model must be annotated as @Table. (%s)", targetType);
+        }
+        assert definition != null;
+        definition.setTypeColumnName(typeColumn);
+    }
+
+    private void parsePolymorphicTypes(Element element){
+        String targetType = element.toString();
+        ModelAdapterDefinition targetDefinition = MODEL_ADAPTERS.get(element.toString());
+
+        if (!isSubtypeOfType(element.asType(), MODEL_CLASS)) {
+            error(element, "@PolymorphicType classes must extend from Model.(%s)", targetType);
+        }
+
+        for (Map.Entry<String, ModelAdapterDefinition> entry: MODEL_ADAPTERS.entrySet()){
+            ModelAdapterDefinition baseDefinition = entry.getValue();
+            if (isSubtypeOfType(element.asType(), entry.getKey())){
+                baseDefinition.polymorphicNameToTypeMap.put(element.getAnnotation(PolymorphicType.class).value(),
+                        element.toString());
+                targetDefinition.setTypeColumnName(baseDefinition.getTypeColumnName());
+            }
+        }
+    }
 
 	private void parseColumnAnnotations(TypeMirror typeMirror, Set<ColumnDefinition> definitions) {
 		DeclaredType declaredType = (DeclaredType) typeMirror;

@@ -33,7 +33,17 @@ public class ModelAdapterDefinition {
 	private String targetType;
 
 	private String tableName;
+    private String typeColumnName = "";
 	private Set<ColumnDefinition> columnDefinitions = new LinkedHashSet<ColumnDefinition>();
+
+    public void setTypeColumnName(String columnName){
+        this.typeColumnName = columnName;
+    }
+    public String getTypeColumnName(){
+        return this.typeColumnName;
+    }
+
+    public Map<String, String> polymorphicNameToTypeMap = new HashMap<String, String>();
 
 	public void setClassPackage(String classPackage) {
 		this.classPackage = classPackage;
@@ -86,10 +96,22 @@ public class ModelAdapterDefinition {
 		builder.append('\n');
 		emitSave(builder);
 		builder.append('\n');
+        emitGetTypeColumn(builder);
+        builder.append('\n');
+        if (isPolymorph()){
+            emitNewEntityPolymorph(builder);
+        } else {
+            emitNewEntityStrict(builder);
+        }
+        builder.append('\n');
 		emitDelete(builder);
 		builder.append("}");
 		return builder.toString();
 	}
+
+    private boolean isPolymorph(){
+        return typeColumnName != null && !typeColumnName.isEmpty();
+    }
 
 	private void emitGetModelType(StringBuilder builder) {
 		builder.append("	@Override\n");
@@ -104,6 +126,32 @@ public class ModelAdapterDefinition {
 		builder.append("		return \"").append(tableName).append("\";\n");
 		builder.append("	}\n");
 	}
+
+    private void emitGetTypeColumn(StringBuilder builder) {
+        builder.append("	@Override\n");
+        builder.append("	public String getTypeColumn() {\n");
+        builder.append("		return \"").append(typeColumnName).append("\";\n");
+        builder.append("	}\n");
+    }
+
+    private void emitNewEntityStrict(StringBuilder builder) {
+        builder.append("	@Override\n");
+        builder.append("	public ").append(targetType).append(" newEntity(String type) {\n");
+        builder.append("		return new ").append(targetType).append("();\n");
+        builder.append("	}\n");
+    }
+
+    private void emitNewEntityPolymorph(StringBuilder builder) {
+        builder.append("	@Override\n");
+        builder.append("	public ").append(targetType).append(" newEntity(String type) {\n");
+        for (Map.Entry<String, String> entry : polymorphicNameToTypeMap.entrySet()) {
+        builder.append("        if (type.equals(\"").append(entry.getKey()).append("\")){\n");
+        builder.append("         return new ").append(entry.getValue()).append("();\n");
+        builder.append("        }\n");
+        }
+        builder.append("        return null;\n");
+        builder.append("	}\n");
+    }
 
 	private void emitGetSchema(StringBuilder builder) {
 		builder.append("	@Override\n");
