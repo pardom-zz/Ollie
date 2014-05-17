@@ -145,32 +145,6 @@ public final class Ollie {
         return sAdapterHolder.getMigrations();
     }
 
-//    static boolean isPolymorph(Class cls) {
-//        return sAdapterHolder.getPolymorphicTables().contains(cls);
-//    }
-//
-//    static boolean isSubtype(Class cls) {
-//        return sAdapterHolder.getSubtypeMap().containsKey(cls);
-//    }
-//
-//    static String getSubtypeName(Class cls) {
-//        return sAdapterHolder.getSubtypeMap().get(cls);
-//    }
-
-//    static <T extends Model> Class<T> getSubtypeClass(Class polymorphClass, String name) {
-//        for (Map.Entry<Class<? extends Model>, String> e : sAdapterHolder.getSubtypeMap().entrySet()) {
-//            Class subtypeClass = e.getKey();
-//            String subtypeName = e.getValue();
-//
-//            if (name.equals(subtypeName)) {
-//                if (subtypeClass.getSuperclass() == polymorphClass) {
-//                    return subtypeClass;
-//                }
-//            }
-//        }
-//        return null;
-//    }
-
     // Cache methods
 
     static synchronized <T extends Model> void putEntity(T entity) {
