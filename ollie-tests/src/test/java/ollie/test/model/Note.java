@@ -22,6 +22,4 @@ public class Note extends Model {
 
 	@Column(Date)
 	public Date date;
-
-
 }

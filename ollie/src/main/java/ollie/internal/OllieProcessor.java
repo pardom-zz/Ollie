@@ -325,23 +325,25 @@ public class OllieProcessor extends AbstractProcessor {
             error(element, "@Polymorphic model must be annotated as @Table. (%s)", targetType);
         }
         assert definition != null;
-        definition.setTypeColumnName(typeColumn);
+        definition.setTypeColumn(typeColumn);
     }
 
     private void parsePolymorphicTypes(Element element){
         String targetType = element.toString();
+        String targetTypeName = element.getAnnotation(PolymorphicType.class).value();
         ModelAdapterDefinition targetDefinition = MODEL_ADAPTERS.get(element.toString());
 
         if (!isSubtypeOfType(element.asType(), MODEL_CLASS)) {
             error(element, "@PolymorphicType classes must extend from Model.(%s)", targetType);
         }
 
+        targetDefinition.setTypeName(targetTypeName);
+
         for (Map.Entry<String, ModelAdapterDefinition> entry: MODEL_ADAPTERS.entrySet()){
             ModelAdapterDefinition baseDefinition = entry.getValue();
             if (isSubtypeOfType(element.asType(), entry.getKey())){
-                baseDefinition.polymorphicNameToTypeMap.put(element.getAnnotation(PolymorphicType.class).value(),
-                        element.toString());
-                targetDefinition.setTypeColumnName(baseDefinition.getTypeColumnName());
+                baseDefinition.polymorphicNameToTypeMap.put(targetTypeName, element.toString());
+                targetDefinition.setTypeColumn(baseDefinition.getTypeColumn());
             }
         }
     }

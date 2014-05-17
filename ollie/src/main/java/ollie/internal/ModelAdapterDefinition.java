@@ -33,14 +33,24 @@ public class ModelAdapterDefinition {
 	private String targetType;
 
 	private String tableName;
-    private String typeColumnName = "";
+    private String typeColumn = "";
+    private String typeName = "";
 	private Set<ColumnDefinition> columnDefinitions = new LinkedHashSet<ColumnDefinition>();
 
-    public void setTypeColumnName(String columnName){
-        this.typeColumnName = columnName;
+    public void setTypeColumn(String columnName){
+        this.typeColumn = columnName;
     }
-    public String getTypeColumnName(){
-        return this.typeColumnName;
+
+    public String getTypeColumn(){
+        return this.typeColumn;
+    }
+
+    public void setTypeName(String typeName){
+        this.typeName = typeName;
+    }
+
+    public String getTypeName(){
+        return this.typeName;
     }
 
     public Map<String, String> polymorphicNameToTypeMap = new HashMap<String, String>();
@@ -98,6 +108,8 @@ public class ModelAdapterDefinition {
 		builder.append('\n');
         emitGetTypeColumn(builder);
         builder.append('\n');
+        emitGetTypeName(builder);
+        builder.append('\n');
         if (isPolymorph()){
             emitNewEntityPolymorph(builder);
         } else {
@@ -110,7 +122,7 @@ public class ModelAdapterDefinition {
 	}
 
     private boolean isPolymorph(){
-        return typeColumnName != null && !typeColumnName.isEmpty();
+        return typeColumn != null && !typeColumn.isEmpty();
     }
 
 	private void emitGetModelType(StringBuilder builder) {
@@ -130,7 +142,14 @@ public class ModelAdapterDefinition {
     private void emitGetTypeColumn(StringBuilder builder) {
         builder.append("	@Override\n");
         builder.append("	public String getTypeColumn() {\n");
-        builder.append("		return \"").append(typeColumnName).append("\";\n");
+        builder.append("		return \"").append(typeColumn).append("\";\n");
+        builder.append("	}\n");
+    }
+
+    private void emitGetTypeName(StringBuilder builder) {
+        builder.append("	@Override\n");
+        builder.append("	public String getTypeName() {\n");
+        builder.append("		return \"").append(typeName).append("\";\n");
         builder.append("	}\n");
     }
 

@@ -9,5 +9,5 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Target(TYPE)
 @Retention(CLASS)
 public @interface Polymorphic {
-	public String value() default "Type";
+	public String value() default "type";
 }
