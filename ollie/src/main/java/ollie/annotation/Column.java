@@ -8,6 +8,6 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 @Target(FIELD)
 @Retention(CLASS)
-public @interface Column{
+public @interface Column {
 	public String value();
 }
