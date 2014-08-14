@@ -173,7 +173,9 @@ public class ModelAdapterDefinition {
 			builder.append("entity.").append(columnDefinition.targetName);
 
 			if (columnDefinition.isModel) {
-				builder.append(".id");
+				builder.append(" != null ? ");
+				builder.append("entity.").append(columnDefinition.targetName).append(".id");
+				builder.append(" : null");
 			}
 
 			for (int i = 0; i < closeParens; i++) {

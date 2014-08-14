@@ -22,7 +22,6 @@ import java.io.File;
 import java.util.*;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.not;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, shadows = PersistentShadowSQLiteOpenHelper.class)
@@ -279,20 +278,20 @@ public class OllieTest {
 		assertThat(count).isGreaterThan(0);
 	}
 
-    @Test
-    public void testSaveNoteTagWithoutTag() {
-        NoteTag noteTag = new NoteTag();
-        noteTag.save();
-        assertThat(noteTag.id).isGreaterThan(0l);
-    }
+	@Test
+	public void testSaveNoteTagWithoutTag() {
+		NoteTag noteTag = new NoteTag();
+		noteTag.save();
+		assertThat(noteTag.id).isGreaterThan(0l);
+	}
 
-    @Test
-    public void testDeleteByQuery(){
-        Note note = new Note();
-        note.body = "this is draft";
-        note.save();
-        new Delete().from(Note.class).where("_id=?", note.id.toString()).execute();
-        assertThat(note.id).isNull();
-    }
+	@Test
+	public void testDeleteByQuery() {
+		Note note = new Note();
+		note.body = "this is draft";
+		note.save();
+		new Delete().from(Note.class).where(Note._ID + "=?", note.id.toString()).execute();
+		assertThat(note.id).isNull();
+	}
 
 }
