@@ -72,6 +72,14 @@ public final class Ollie {
 
 	// Query wrappers
 
+	public static void execSQL(String sql) {
+		sSQLiteDatabase.execSQL(sql);
+	}
+
+	public static void execSQL(String sql, String[] selectionArgs) {
+		sSQLiteDatabase.execSQL(sql, selectionArgs);
+	}
+
 	public static <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.query(distinct, getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit));
 	}

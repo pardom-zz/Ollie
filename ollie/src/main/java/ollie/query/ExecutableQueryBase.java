@@ -10,6 +10,6 @@ public abstract class ExecutableQueryBase extends QueryBase implements Executabl
 
 	@Override
 	public void execute() {
-		Ollie.rawQuery(mTable, getSql(), getArgs());
+		Ollie.execSQL(getSql(), getArgs());
 	}
 }
