@@ -68,6 +68,10 @@ public final class Ollie {
 
 	public static <T extends Model> String getTableName(Class<T> cls) {
 		return sAdapterHolder.getModelAdapter(cls).getTableName();
+    }
+
+    public static <T extends Model> ModelAdapter getModelAdapter(Class<T> cls){
+        return sAdapterHolder.getModelAdapter(cls);
 	}
 
 	// Query wrappers
@@ -200,12 +204,16 @@ public final class Ollie {
 	private static <T extends Model> List<T> processCursor(Class<T> cls, Cursor cursor) {
 		final List<T> entities = new ArrayList<T>();
 		try {
-			Constructor<T> entityConstructor = cls.getConstructor();
 			if (cursor.moveToFirst()) {
 				do {
+                    ModelAdapter adapter = getModelAdapter(cls);
+                    String type = adapter.isPolymorphic() ?
+                            cursor.getString(cursor.getColumnIndex(adapter.getTypeColumn())) : null;
+
 					T entity = getEntity(cls, cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
 					if (entity == null) {
-						entity = entityConstructor.newInstance();
+                        entity = (T) adapter.newEntity(type);
+                        if (entity == null) continue;
 					}
 
 					entity.load(cursor);
