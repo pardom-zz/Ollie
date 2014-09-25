@@ -1,0 +1,28 @@
+apply plugin: 'java'
+
+targetCompatibility = '1.6'
+sourceCompatibility = '1.6'
+
+def Properties props = new Properties()
+props.load(new FileInputStream(file('../local.properties')))
+
+def android = [
+		sdk   : props["sdk.dir"],
+		target: 'android-19'
+]
+
+repositories {
+	maven {
+		url "${android.sdk}/extras/android/m2repository/"
+	}
+}
+
+dependencies {
+	compile files("${android.sdk}/platforms/${android.target}/android.jar")
+
+	testCompile project(':compiler')
+
+	testCompile 'com.squareup.assertj:assertj-android:1.0.0'
+	testCompile 'junit:junit:4.11'
+	testCompile 'org.robolectric:robolectric:2.3'
+}
