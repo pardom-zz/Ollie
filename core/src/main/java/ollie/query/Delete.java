@@ -23,7 +23,7 @@ public final class Delete extends QueryBase {
 		}
 
 		public Where where(String where) {
-			return where(where, null);
+			return where(where, (String[]) null);
 		}
 
 		public Where where(String where, String... args) {

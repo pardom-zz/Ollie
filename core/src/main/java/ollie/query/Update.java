@@ -9,7 +9,7 @@ public final class Update extends QueryBase {
 	}
 
 	public Set set(String set) {
-		return set(set, null);
+		return set(set, (String[]) null);
 	}
 
 	public Set set(String set, String... args) {
@@ -32,7 +32,7 @@ public final class Update extends QueryBase {
 		}
 
 		public Where where(String where) {
-			return where(where, null);
+			return where(where, (String[]) null);
 		}
 
 		public Where where(String where, String... args) {
