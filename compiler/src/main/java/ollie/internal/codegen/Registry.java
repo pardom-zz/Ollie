@@ -1,7 +1,6 @@
 package ollie.internal.codegen;
 
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import ollie.internal.codegen.element.ColumnElement;
@@ -13,7 +12,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class Registry {
 	private Types types;
@@ -45,7 +47,7 @@ public class Registry {
 		return typeAdapters.get(deserializedType.getQualifiedName().toString());
 	}
 
-	public Set<TypeAdapterElement> getTypeAdapters() {
+	public Set<TypeAdapterElement> getTypeAdapterElements() {
 		return Sets.newHashSet(typeAdapters.values());
 	}
 
@@ -56,8 +58,8 @@ public class Registry {
 
 	// Columns
 
-	public List<ColumnElement> getColumnElements(TypeElement enclosingType) {
-		return Lists.newArrayList(columnModels.get(enclosingType.getQualifiedName().toString()));
+	public Set<ColumnElement> getColumnElements(TypeElement enclosingType) {
+		return Sets.newHashSet(columnModels.get(enclosingType.getQualifiedName().toString()));
 	}
 
 	public void addColumnElement(VariableElement element) {

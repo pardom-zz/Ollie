@@ -60,7 +60,7 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		final String modelSimpleName = element.getSimpleName().toString();
 		final String modelQualifiedName = element.getQualifiedName().toString();
 		final String tableName = element.getAnnotation(Table.class).value();
-		final List<ColumnElement> columns = registry.getColumnElements(element);
+		final Set<ColumnElement> columns = registry.getColumnElements(element);
 
 		JavaWriter javaWriter = new JavaWriter(writer);
 		javaWriter.setCompressingTypes(true);
@@ -83,7 +83,7 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		javaWriter.endType();
 	}
 
-	private void writeImports(JavaWriter writer, String modelQualifiedName, List<ColumnElement> columns)
+	private void writeImports(JavaWriter writer, String modelQualifiedName, Set<ColumnElement> columns)
 			throws IOException {
 
 		Set<String> imports = Sets.newHashSet(
@@ -121,7 +121,7 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		writer.emitEmptyLine();
 	}
 
-	private void writeGetSchema(JavaWriter writer, String tableName, List<ColumnElement> columns) throws IOException {
+	private void writeGetSchema(JavaWriter writer, String tableName, Set<ColumnElement> columns) throws IOException {
 		writer.beginMethod("String", "getSchema", MODIFIERS);
 
 		List<String> definitions = new ArrayList<String>();
@@ -146,7 +146,7 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		writer.emitEmptyLine();
 	}
 
-	private void writeLoad(JavaWriter writer, String modelQualifiedName, List<ColumnElement> columns) throws
+	private void writeLoad(JavaWriter writer, String modelQualifiedName, Set<ColumnElement> columns) throws
 			IOException {
 
 		writer.beginMethod("void", "load", MODIFIERS, modelQualifiedName, "entity", "Cursor", "cursor");
@@ -181,7 +181,7 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		writer.emitEmptyLine();
 	}
 
-	private void writeSave(JavaWriter writer, String modelQualifiedName, List<ColumnElement> columns) throws
+	private void writeSave(JavaWriter writer, String modelQualifiedName, Set<ColumnElement> columns) throws
 			IOException {
 
 		writer.beginMethod("Long", "save", MODIFIERS, modelQualifiedName, "entity", "SQLiteDatabase", "db");

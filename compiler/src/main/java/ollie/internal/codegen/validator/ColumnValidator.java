@@ -9,7 +9,7 @@ import ollie.internal.codegen.element.ColumnElement;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.List;
+import java.util.Set;
 
 import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.ElementKind.FIELD;
@@ -39,7 +39,7 @@ public class ColumnValidator implements Validator {
 		}
 
 		Column column = element.getAnnotation(Column.class);
-		List<ColumnElement> existingColumns = registry.getColumnElements(enclosingElement);
+		Set<ColumnElement> existingColumns = registry.getColumnElements(enclosingElement);
 		for (ColumnElement existingColumn : existingColumns) {
 			if (existingColumn.getColumnName().equals(column.value())) {
 				messager.printMessage(ERROR, Errors.COLUMN_DUPLICATE_ERROR + column.value(), element);

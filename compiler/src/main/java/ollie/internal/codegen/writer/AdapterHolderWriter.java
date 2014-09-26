@@ -65,7 +65,7 @@ public class AdapterHolderWriter implements SourceWriter<TypeElement> {
 				ModelAdapter.class.getName()
 		);
 
-		Set<TypeAdapterElement> typeAdapters = registry.getTypeAdapters();
+		Set<TypeAdapterElement> typeAdapters = registry.getTypeAdapterElements();
 		for (TypeAdapterElement typeAdapter : typeAdapters) {
 			imports.add(typeAdapter.getQualifiedName());
 		}
@@ -117,7 +117,7 @@ public class AdapterHolderWriter implements SourceWriter<TypeElement> {
 		}
 		writer.emitEmptyLine();
 
-		for (TypeAdapterElement typeAdapter : registry.getTypeAdapters()) {
+		for (TypeAdapterElement typeAdapter : registry.getTypeAdapterElements()) {
 			writer.emitStatement("TYPE_ADAPTERS.put(%s.class, new %s())",
 					typeAdapter.getDeserializedQualifiedName(),
 					typeAdapter.getSimpleName());
