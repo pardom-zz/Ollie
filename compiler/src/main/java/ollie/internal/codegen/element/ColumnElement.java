@@ -10,8 +10,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
@@ -51,19 +49,20 @@ public class ColumnElement {
 
 	private Map<Class<? extends Annotation>, Annotation> annotations = Maps.newHashMap();
 
-	public ColumnElement(Types typeUtils, Elements elementUtils, Registry registry, VariableElement element) {
+	public ColumnElement(Registry registry, TypeElement enclosingType, VariableElement element) {
 		this.element = element;
 		this.column = element.getAnnotation(Column.class);
-		this.enclosingType = (TypeElement) element.getEnclosingElement();
-		this.deserializedType = elementUtils.getTypeElement(element.asType().toString());
+		this.enclosingType = enclosingType;
+		this.deserializedType = registry.getElements().getTypeElement(element.asType().toString());
 
 		final TypeAdapterElement typeAdapterElement = registry.getTypeAdapterElement(deserializedType);
-		final DeclaredType modelType = typeUtils.getDeclaredType(elementUtils.getTypeElement("ollie.Model"));
-		isModel = typeUtils.isAssignable(element.asType(), modelType);
+		final TypeElement modelElement = registry.getElements().getTypeElement("ollie.Model");
+		final DeclaredType modelType = registry.getTypes().getDeclaredType(modelElement);
+		isModel = registry.getTypes().isAssignable(element.asType(), modelType);
 
 		if (isModel) {
 			final Table table = deserializedType.getAnnotation(Table.class);
-			serializedType = elementUtils.getTypeElement(Long.class.getName());
+			serializedType = registry.getElements().getTypeElement(Long.class.getName());
 			modelTableName = table.value();
 		} else if (typeAdapterElement != null) {
 			serializedType = typeAdapterElement.getSerializedType();

@@ -5,9 +5,11 @@ import android.provider.BaseColumns;
 import ollie.annotation.AutoIncrement;
 import ollie.annotation.Column;
 import ollie.annotation.PrimaryKey;
+import ollie.annotation.Table;
 
 import java.util.List;
 
+@Table("")
 public abstract class Model {
 	public static final String _ID = BaseColumns._ID;
 

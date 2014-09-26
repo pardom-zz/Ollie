@@ -1,43 +1,64 @@
 package ollie.internal.codegen;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import ollie.internal.codegen.element.ColumnElement;
 import ollie.internal.codegen.element.MigrationElement;
 import ollie.internal.codegen.element.ModelAdapterElement;
 import ollie.internal.codegen.element.TypeAdapterElement;
 
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.Map;
 import java.util.Set;
 
 public class Registry {
+	private Messager messager;
 	private Types types;
 	private Elements elements;
+	private Filer filer;
 
-	private Set<MigrationElement> migrationElements = Sets.newHashSet();
+	private Set<MigrationElement> migrations = Sets.newHashSet();
 	private Map<String, TypeAdapterElement> typeAdapters = Maps.newHashMap();
-	private Multimap<String, ColumnElement> columnModels = HashMultimap.create();
-	private Set<ModelAdapterElement> modelAdapterModels = Sets.newHashSet();
+	private SetMultimap<String, ColumnElement> columns = LinkedHashMultimap.create();
+	private Set<ModelAdapterElement> modelAdapters = Sets.newHashSet();
 
-	public Registry(Types types, Elements elements) {
+	public Registry(Messager messager, Types types, Elements elements, Filer filer) {
+		this.messager = messager;
 		this.types = types;
 		this.elements = elements;
+		this.filer = filer;
+	}
+
+	public Messager getMessager() {
+		return messager;
+	}
+
+	public Types getTypes() {
+		return types;
+	}
+
+	public Elements getElements() {
+		return elements;
+	}
+
+	public Filer getFiler() {
+		return filer;
 	}
 
 	// Migrations
 
 	public Set<MigrationElement> getMigrationElements() {
-		return migrationElements;
+		return migrations;
 	}
 
 	public void addMigrationElement(TypeElement element) {
-		migrationElements.add(new MigrationElement(element));
+		migrations.add(new MigrationElement(element));
 	}
 
 	// Type adapters
@@ -58,21 +79,20 @@ public class Registry {
 	// Columns
 
 	public Set<ColumnElement> getColumnElements(TypeElement enclosingType) {
-		return Sets.newHashSet(columnModels.get(enclosingType.getQualifiedName().toString()));
+		return Sets.newLinkedHashSet(columns.get(enclosingType.getQualifiedName().toString()));
 	}
 
-	public void addColumnElement(VariableElement element) {
-		ColumnElement columnElement = new ColumnElement(types, elements, this, element);
-		columnModels.put(columnElement.getEnclosingQualifiedName(), columnElement);
+	public void addColumnElements(ColumnElement element) {
+		columns.put(element.getEnclosingQualifiedName(), element);
 	}
 
 	// Model adapters
 
 	public Set<ModelAdapterElement> getModelAdapterElements() {
-		return modelAdapterModels;
+		return modelAdapters;
 	}
 
 	public void addModelAdapterElement(TypeElement element) {
-		modelAdapterModels.add(new ModelAdapterElement(element));
+		modelAdapters.add(new ModelAdapterElement(element));
 	}
 }

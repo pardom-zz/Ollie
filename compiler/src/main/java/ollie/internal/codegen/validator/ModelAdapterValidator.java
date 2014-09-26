@@ -10,15 +10,13 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 
 public class ModelAdapterValidator implements Validator {
 	private Messager messager;
-	private Registry registry;
 
-	public ModelAdapterValidator(Messager messager, Registry registry) {
-		this.messager = messager;
-		this.registry = registry;
+	public ModelAdapterValidator(Registry registry) {
+		this.messager = registry.getMessager();
 	}
 
 	@Override
-	public boolean validate(Element element) {
+	public boolean validate(Element enclosingElement, Element element) {
 		if (!element.getKind().equals(CLASS)) {
 			messager.printMessage(ERROR, "@Table applies only to Model classes.", element);
 			return false;
