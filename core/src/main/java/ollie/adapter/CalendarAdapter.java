@@ -4,7 +4,7 @@ import ollie.TypeAdapter;
 
 import java.util.Calendar;
 
-public class CalendarAdapter implements TypeAdapter<Calendar, Long> {
+public class CalendarAdapter extends TypeAdapter<Calendar, Long> {
 	@Override
 	public Long serialize(Calendar value) {
 		if (value != null) {

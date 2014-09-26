@@ -8,6 +8,6 @@ public abstract class Migration implements Comparable<Migration> {
 
 	@Override
 	public int compareTo(Migration migration) {
-		return getVersion() < migration.getVersion() ? -1 : (getVersion() == migration.getVersion() ? 0 : 1);
+		return Integer.compare(getVersion(), migration.getVersion());
 	}
 }

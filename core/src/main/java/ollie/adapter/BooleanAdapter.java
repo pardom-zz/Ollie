@@ -2,7 +2,7 @@ package ollie.adapter;
 
 import ollie.TypeAdapter;
 
-public class BooleanAdapter implements TypeAdapter<Boolean, Integer> {
+public class BooleanAdapter extends TypeAdapter<Boolean, Integer> {
 	@Override
 	public Integer serialize(Boolean value) {
 		return value ? 1 : 0;

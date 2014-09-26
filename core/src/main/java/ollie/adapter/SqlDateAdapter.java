@@ -4,7 +4,7 @@ import ollie.TypeAdapter;
 
 import java.sql.Date;
 
-public class SqlDateAdapter implements TypeAdapter<Date, Long> {
+public class SqlDateAdapter extends TypeAdapter<Date, Long> {
 	@Override
 	public Long serialize(Date value) {
 		if (value != null) {

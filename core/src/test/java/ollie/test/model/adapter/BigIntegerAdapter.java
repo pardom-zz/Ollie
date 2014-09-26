@@ -4,7 +4,7 @@ import ollie.TypeAdapter;
 
 import java.math.BigInteger;
 
-public class BigIntegerAdapter implements TypeAdapter<BigInteger, String> {
+public class BigIntegerAdapter extends TypeAdapter<BigInteger, String> {
 	@Override
 	public String serialize(BigInteger value) {
 		return value.toString();
