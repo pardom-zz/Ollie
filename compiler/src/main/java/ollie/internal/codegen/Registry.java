@@ -57,8 +57,8 @@ public class Registry {
 		return migrations;
 	}
 
-	public void addMigrationElement(TypeElement element) {
-		migrations.add(new MigrationElement(element));
+	public void addMigrationElement(MigrationElement element) {
+		migrations.add(element);
 	}
 
 	// Type adapters
@@ -71,9 +71,8 @@ public class Registry {
 		return Sets.newHashSet(typeAdapters.values());
 	}
 
-	public void addTypeAdapterModel(TypeElement element) {
-		TypeAdapterElement model = new TypeAdapterElement(types, elements, element);
-		typeAdapters.put(model.getDeserializedQualifiedName(), model);
+	public void addTypeAdapterModel(TypeAdapterElement element) {
+		typeAdapters.put(element.getDeserializedQualifiedName(), element);
 	}
 
 	// Columns
@@ -82,7 +81,7 @@ public class Registry {
 		return Sets.newLinkedHashSet(columns.get(enclosingType.getQualifiedName().toString()));
 	}
 
-	public void addColumnElements(ColumnElement element) {
+	public void addColumnElement(ColumnElement element) {
 		columns.put(element.getEnclosingQualifiedName(), element);
 	}
 
@@ -92,7 +91,7 @@ public class Registry {
 		return modelAdapters;
 	}
 
-	public void addModelAdapterElement(TypeElement element) {
-		modelAdapters.add(new ModelAdapterElement(element));
+	public void addModelAdapterElement(ModelAdapterElement element) {
+		modelAdapters.add(element);
 	}
 }

@@ -141,7 +141,7 @@ public class ModelAdapterTest {
 	}
 
 	@Test
-	public void uniqueColumnNames() {
+	public void columnsAreUnique() {
 		JavaFileObject source = JavaFileObjects.forSourceString("ollie.test.Note",
 				Joiner.on('\n').join(
 						"package ollie.test;",

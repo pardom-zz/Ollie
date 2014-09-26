@@ -1,10 +1,10 @@
 package ollie.internal.codegen.step;
 
-import com.google.common.collect.Sets;
 import ollie.annotation.Column;
 import ollie.annotation.Table;
 import ollie.internal.codegen.Registry;
 import ollie.internal.codegen.element.ColumnElement;
+import ollie.internal.codegen.element.ModelAdapterElement;
 import ollie.internal.codegen.validator.ColumnValidator;
 import ollie.internal.codegen.validator.ModelAdapterValidator;
 import ollie.internal.codegen.writer.ModelAdapterWriter;
@@ -44,12 +44,9 @@ public class ModelAdapterStep implements ProcessingStep {
 		Set<? extends Element> tableElements = roundEnv.getElementsAnnotatedWith(Table.class);
 		for (Element tableElement : tableElements) {
 			if (validator.validate(tableElement.getEnclosingElement(), tableElement)) {
-				registry.addModelAdapterElement((TypeElement) tableElement);
+				registry.addModelAdapterElement(new ModelAdapterElement((TypeElement) tableElement));
 
-				Set<ColumnElement> columnElements = getColumnElements((TypeElement) tableElement);
-				for (ColumnElement columnElement : columnElements) {
-					registry.addColumnElements(columnElement);
-				}
+				addColumnElements((TypeElement) tableElement);
 
 				try {
 					String name = sourceWriter.createSourceName(tableElement);
@@ -66,18 +63,15 @@ public class ModelAdapterStep implements ProcessingStep {
 		return false;
 	}
 
-	private Set<ColumnElement> getColumnElements(TypeElement element) {
-		final Set<ColumnElement> columnElements = Sets.newLinkedHashSet();
+	private void addColumnElements(TypeElement element) {
 		final List<? extends Element> members = elements.getAllMembers(element);
-
 		boolean isColumn;
+
 		for (Element member : members) {
 			isColumn = (member.getAnnotation(Column.class) != null);
 			if (isColumn && columnValidator.validate(element, member)) {
-				columnElements.add(new ColumnElement(registry, element, (VariableElement) member));
+				registry.addColumnElement(new ColumnElement(registry, element, (VariableElement) member));
 			}
 		}
-
-		return columnElements;
 	}
 }

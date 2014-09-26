@@ -31,8 +31,8 @@ public class OllieProcessor extends AbstractProcessor {
 		return ImmutableSet.of(
 				Migration.class.getName(),
 				TypeAdapter.class.getName(),
-				Column.class.getName(),
-				Table.class.getName()
+				Table.class.getName(),
+				Column.class.getName()
 		);
 	}
 

@@ -2,6 +2,7 @@ package ollie.internal.codegen.step;
 
 import ollie.annotation.Migration;
 import ollie.internal.codegen.Registry;
+import ollie.internal.codegen.element.MigrationElement;
 import ollie.internal.codegen.validator.MigrationValidator;
 import ollie.internal.codegen.validator.Validator;
 
@@ -24,7 +25,7 @@ public class MigrationStep implements ProcessingStep {
 		Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Migration.class);
 		for (Element element : elements) {
 			if (validator.validate(element.getEnclosingElement(), element)) {
-				registry.addMigrationElement((TypeElement) element);
+				registry.addMigrationElement(new MigrationElement((TypeElement) element));
 			}
 		}
 		return false;

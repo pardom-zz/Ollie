@@ -7,6 +7,7 @@ import ollie.adapter.SqlDateAdapter;
 import ollie.adapter.UtilDateAdapter;
 import ollie.annotation.TypeAdapter;
 import ollie.internal.codegen.Registry;
+import ollie.internal.codegen.element.TypeAdapterElement;
 import ollie.internal.codegen.validator.TypeAdapterValidator;
 import ollie.internal.codegen.validator.Validator;
 
@@ -40,7 +41,10 @@ public class TypeAdapterStep implements ProcessingStep {
 
 		for (Element element : elements) {
 			if (validator.validate(element.getEnclosingElement(), element)) {
-				registry.addTypeAdapterModel((TypeElement) element);
+				registry.addTypeAdapterModel(new TypeAdapterElement(
+						registry.getTypes(),
+						registry.getElements(),
+						(TypeElement) element));
 			}
 		}
 

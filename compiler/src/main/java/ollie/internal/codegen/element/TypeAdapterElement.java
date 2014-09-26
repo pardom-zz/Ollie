@@ -12,19 +12,19 @@ public class TypeAdapterElement {
 	private TypeElement deserializedTypeElement;
 	private TypeElement serializedTypeElement;
 
-	public TypeAdapterElement(Types typeUtils, Elements elementUtils, TypeElement element) {
+	public TypeAdapterElement(Types types, Elements elements, TypeElement element) {
 		this.element = element;
 
 		DeclaredType typeAdapterInterface = null;
-		final DeclaredType typeAdapterType = typeUtils.getDeclaredType(
-				elementUtils.getTypeElement("ollie.TypeAdapter"),
-				typeUtils.getWildcardType(null, null),
-				typeUtils.getWildcardType(null, null)
+		final DeclaredType typeAdapterType = types.getDeclaredType(
+				elements.getTypeElement("ollie.TypeAdapter"),
+				types.getWildcardType(null, null),
+				types.getWildcardType(null, null)
 		);
 
 
-		for (TypeMirror superType : typeUtils.directSupertypes(element.asType())) {
-			if (typeUtils.isAssignable(superType, typeAdapterType)) {
+		for (TypeMirror superType : types.directSupertypes(element.asType())) {
+			if (types.isAssignable(superType, typeAdapterType)) {
 				typeAdapterInterface = (DeclaredType) superType;
 				break;
 			}
@@ -32,8 +32,8 @@ public class TypeAdapterElement {
 
 		if (typeAdapterInterface != null) {
 			final List<? extends TypeMirror> typeArguments = typeAdapterInterface.getTypeArguments();
-			deserializedTypeElement = elementUtils.getTypeElement(typeArguments.get(0).toString());
-			serializedTypeElement = elementUtils.getTypeElement(typeArguments.get(1).toString());
+			deserializedTypeElement = elements.getTypeElement(typeArguments.get(0).toString());
+			serializedTypeElement = elements.getTypeElement(typeArguments.get(1).toString());
 		}
 	}
 
