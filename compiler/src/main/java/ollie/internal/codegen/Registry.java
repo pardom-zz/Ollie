@@ -1,6 +1,7 @@
 package ollie.internal.codegen;
 
-import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import ollie.internal.codegen.element.ColumnElement;
@@ -12,8 +13,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,10 +20,10 @@ public class Registry {
 	private Types types;
 	private Elements elements;
 
-	private Set<MigrationElement> migrationElements = new HashSet<MigrationElement>();
-	private Map<String, TypeAdapterElement> typeAdapters = new HashMap<String, TypeAdapterElement>();
-	private Multimap<String, ColumnElement> columnModels = LinkedHashMultimap.create();
-	private Set<ModelAdapterElement> modelAdapterModels = new HashSet<ModelAdapterElement>();
+	private Set<MigrationElement> migrationElements = Sets.newHashSet();
+	private Map<String, TypeAdapterElement> typeAdapters = Maps.newHashMap();
+	private Multimap<String, ColumnElement> columnModels = HashMultimap.create();
+	private Set<ModelAdapterElement> modelAdapterModels = Sets.newHashSet();
 
 	public Registry(Types types, Elements elements) {
 		this.types = types;
