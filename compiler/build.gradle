@@ -1,18 +1,28 @@
 apply plugin: 'java'
+apply from: '../gradle-mvn-push.gradle'
 
 targetCompatibility = '1.6'
 sourceCompatibility = '1.6'
+
+repositories {
+	mavenCentral()
+}
 
 dependencies {
 	compile project(':core')
 
 	compile 'com.google.auto.service:auto-service:1.0-rc1'
-	compile 'com.google.auto.value:auto-value:1.0-rc1'
 	compile 'com.google.guava:guava:18.0'
 	compile 'com.squareup:javawriter:2.5.0'
 
-	testCompile 'com.android.support:support-annotations:20.0.0'
-	testCompile 'com.android.support:support-v4:19.1.0'
+	// I don't think this should be necessary, but my environment won't build without it.
+	testCompile files("${System.properties['java.home']}/../lib/tools.jar")
+
 	testCompile 'com.google.testing.compile:compile-testing:0.5'
-	testCompile 'junit:junit:4.11'
+	testCompile 'junit:junit:4.10'
+}
+
+tasks.withType(Test) {
+	scanForTestClasses = false
+	include "**/*Test.class"
 }

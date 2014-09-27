@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply from: '../gradle-mvn-push.gradle'
 
 targetCompatibility = '1.6'
 sourceCompatibility = '1.6'
@@ -12,6 +13,7 @@ def android = [
 ]
 
 repositories {
+	mavenCentral()
 	maven {
 		url "${android.sdk}/extras/android/m2repository/"
 	}
@@ -25,4 +27,9 @@ dependencies {
 	testCompile 'com.squareup.assertj:assertj-android:1.0.0'
 	testCompile 'junit:junit:4.11'
 	testCompile 'org.robolectric:robolectric:2.3'
+}
+
+tasks.withType(Test) {
+	scanForTestClasses = false
+	include "**/*Test.class"
 }
