@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Michael Pardo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ollie.test;
 
 import android.content.ContentProvider;
@@ -138,7 +154,8 @@ public class OllieTest {
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
-		sql = "SELECT * FROM notes INNER JOIN noteTags ON notes.id=noteTags.note INNER JOIN tags ON tag.id=noteTags.tag WHERE tag.name=? ORDER BY notes.title ASC LIMIT 10 OFFSET 10";
+		sql = "SELECT * FROM notes INNER JOIN noteTags ON notes.id=noteTags.note INNER JOIN tags ON tag.id=noteTags" +
+				".tag WHERE tag.name=? ORDER BY notes.title ASC LIMIT 10 OFFSET 10";
 		query = new Select()
 				.from(Note.class)
 				.innerJoin(NoteTag.class).on("notes.id=noteTags.note")
@@ -172,12 +189,14 @@ public class OllieTest {
 		assertThat(query.getArgs()).isEqualTo(new String[]{"Testing INSERT", "Testing INSERT body."});
 
 		sql = "INSERT INTO notes(title, body, date) VALUES(?, ?, ?)";
-		query = new Insert().into(Note.class, "title", "body", "date").values("Testing INSERT", "Testing INSERT body.", "0");
+		query = new Insert().into(Note.class, "title", "body", "date").values("Testing INSERT",
+				"Testing INSERT body.", "0");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"Testing INSERT", "Testing INSERT body.", "0"});
 
 		try {
-			new Insert().into(Note.class, "title", "body", "date").values("Testing INSERT", "Testing INSERT body.").execute();
+			new Insert().into(Note.class, "title", "body", "date").values("Testing INSERT",
+					"Testing INSERT body.").execute();
 			assert false;
 		} catch (Query.MalformedQueryException e) {
 			// Successfully threw exception

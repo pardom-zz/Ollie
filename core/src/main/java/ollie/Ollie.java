@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Michael Pardo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ollie;
 
 import android.annotation.TargetApi;
@@ -82,30 +98,52 @@ public final class Ollie {
 		sSQLiteDatabase.execSQL(sql, selectionArgs);
 	}
 
-	public static <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.query(distinct, getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit));
+	public static <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection,
+												  String[] selectionArgs, String groupBy, String having,
+												  String orderBy, String limit) {
+		return processAndCloseCursor(cls, sSQLiteDatabase.query(distinct, getTableName(cls), columns, selection,
+				selectionArgs, groupBy, having, orderBy, limit));
 	}
 
 	@TargetApi(VERSION_CODES.JELLY_BEAN)
-	public static <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.query(distinct, getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal));
+	public static <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection,
+												  String[] selectionArgs, String groupBy, String having,
+												  String orderBy, String limit, CancellationSignal
+			cancellationSignal) {
+		return processAndCloseCursor(cls, sSQLiteDatabase.query(distinct, getTableName(cls), columns, selection,
+				selectionArgs, groupBy, having, orderBy, limit, cancellationSignal));
 	}
 
-	public static <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.queryWithFactory(cursorFactory, distinct, getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit));
+	public static <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory,
+															 boolean distinct, String[] columns, String selection,
+															 String[] selectionArgs, String groupBy, String having,
+															 String orderBy, String limit) {
+		return processAndCloseCursor(cls, sSQLiteDatabase.queryWithFactory(cursorFactory, distinct, getTableName(cls),
+				columns, selection, selectionArgs, groupBy, having, orderBy, limit));
 	}
 
 	@TargetApi(VERSION_CODES.JELLY_BEAN)
-	public static <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory, boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.queryWithFactory(cursorFactory, distinct, getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal));
+	public static <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory,
+															 boolean distinct, String[] columns, String selection,
+															 String[] selectionArgs, String groupBy, String having,
+															 String orderBy, String limit, CancellationSignal
+			cancellationSignal) {
+		return processAndCloseCursor(cls, sSQLiteDatabase.queryWithFactory(cursorFactory, distinct, getTableName(cls),
+				columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal));
 	}
 
-	public static <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.query(getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy));
+	public static <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection,
+												  String[] selectionArgs, String groupBy, String having,
+												  String orderBy) {
+		return processAndCloseCursor(cls, sSQLiteDatabase.query(getTableName(cls), columns, selection, selectionArgs,
+				groupBy, having, orderBy));
 	}
 
-	public static <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.query(getTableName(cls), columns, selection, selectionArgs, groupBy, having, orderBy, limit));
+	public static <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection,
+												  String[] selectionArgs, String groupBy, String having,
+												  String orderBy, String limit) {
+		return processAndCloseCursor(cls, sSQLiteDatabase.query(getTableName(cls), columns, selection, selectionArgs,
+				groupBy, having, orderBy, limit));
 	}
 
 	public static <T extends Model> List<T> rawQuery(Class<T> cls, String sql, String[] selectionArgs) {
@@ -113,17 +151,23 @@ public final class Ollie {
 	}
 
 	@TargetApi(VERSION_CODES.JELLY_BEAN)
-	public static <T extends Model> List<T> rawQuery(Class<T> cls, String sql, String[] selectionArgs, CancellationSignal cancellationSignal) {
+	public static <T extends Model> List<T> rawQuery(Class<T> cls, String sql, String[] selectionArgs,
+													 CancellationSignal cancellationSignal) {
 		return processAndCloseCursor(cls, sSQLiteDatabase.rawQuery(sql, selectionArgs, cancellationSignal));
 	}
 
-	public static <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql, String[] selectionArgs, String editTable) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.rawQueryWithFactory(cursorFactory, sql, selectionArgs, editTable));
+	public static <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql,
+																String[] selectionArgs, String editTable) {
+		return processAndCloseCursor(cls, sSQLiteDatabase.rawQueryWithFactory(cursorFactory, sql, selectionArgs,
+				editTable));
 	}
 
 	@TargetApi(VERSION_CODES.JELLY_BEAN)
-	public static <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql, String[] selectionArgs, String editTable, CancellationSignal cancellationSignal) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.rawQueryWithFactory(cursorFactory, sql, selectionArgs, editTable, cancellationSignal));
+	public static <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql,
+																String[] selectionArgs, String editTable,
+																CancellationSignal cancellationSignal) {
+		return processAndCloseCursor(cls, sSQLiteDatabase.rawQueryWithFactory(cursorFactory, sql, selectionArgs,
+				editTable, cancellationSignal));
 	}
 
 	// Finder methods
