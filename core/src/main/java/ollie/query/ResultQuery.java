@@ -26,11 +26,11 @@ public interface ResultQuery extends ExecutableQuery {
 
 	<T extends Model> T fetchSingle();
 
-	<T> T fetchValueAs(Class<T> type);
+	<T> T fetchValue(Class<T> type);
 
-	<T extends Model> Observable<List<T>> observable();
+	<T extends Model> Observable<List<T>> fetchAsync();
 
-	<T extends Model> Observable<T> observableSingle();
+	<T extends Model> Observable<T> fetchSingleAsync();
 
-	<T> Observable<T> observableValueAs(Class<T> type);
+	<T> Observable<T> fetchValueAsync(Class<T> type);
 }

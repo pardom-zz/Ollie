@@ -46,7 +46,7 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public <T> T fetchValueAs(Class<T> type) {
+	public <T> T fetchValue(Class<T> type) {
 		final Cursor cursor = Ollie.getDatabase().rawQuery(getSql(), getArgs());
 		if (!cursor.moveToFirst()) {
 			return null;
@@ -72,7 +72,7 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public Observable<List<? extends Model>> observable() {
+	public Observable<List<? extends Model>> fetchAsync() {
 		return Observable.create(new OnSubscribe<List<? extends Model>>() {
 			@Override
 			public void call(Subscriber<? super List<? extends Model>> subscriber) {
@@ -86,7 +86,7 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public Observable<? extends Model> observableSingle() {
+	public Observable<? extends Model> fetchSingleAsync() {
 		return Observable.create(new OnSubscribe<Model>() {
 			@Override
 			public void call(Subscriber<? super Model> subscriber) {
@@ -100,11 +100,11 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public <T> Observable<T> observableValueAs(final Class<T> type) {
+	public <T> Observable<T> fetchValueAsync(final Class<T> type) {
 		return Observable.create(new OnSubscribe<T>() {
 			@Override
 			public void call(Subscriber<? super T> subscriber) {
-				final T result = fetchValueAs(type);
+				final T result = fetchValue(type);
 				if (!subscriber.isUnsubscribed()) {
 					subscriber.onNext(result);
 					subscriber.onCompleted();

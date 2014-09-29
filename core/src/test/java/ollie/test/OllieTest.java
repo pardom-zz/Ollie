@@ -294,10 +294,10 @@ public class OllieTest {
 
 	@Test
 	public void testFetchValue() {
-		long sum = new Select("SUM(date)").from(Note.class).fetchValueAs(long.class);
+		long sum = new Select("SUM(date)").from(Note.class).fetchValue(long.class);
 		assertThat(sum).isGreaterThan(0);
 
-		int count = new Select("COUNT(*)").from(Note.class).fetchValueAs(int.class);
+		int count = new Select("COUNT(*)").from(Note.class).fetchValue(int.class);
 		assertThat(count).isGreaterThan(0);
 	}
 
