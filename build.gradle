@@ -1,0 +1,8 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
+	}
+}
