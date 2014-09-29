@@ -19,9 +19,8 @@ package ollie;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.*;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.CancellationSignal;
@@ -270,7 +269,7 @@ public final class Ollie {
 
 	private static final class DatabaseHelper extends SQLiteOpenHelper {
 		public DatabaseHelper(Context context, String name, int version) {
-			super(context, name, null, version);
+			super(context, name, new LoggingCursorAdapter(), version);
 		}
 
 		@Override
@@ -330,6 +329,15 @@ public final class Ollie {
 			db.endTransaction();
 
 			return migrationExecuted;
+		}
+	}
+
+	private static final class LoggingCursorAdapter implements CursorFactory {
+
+		@Override
+		public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver driver, String editTable, SQLiteQuery query) {
+			Log.v("Ollie", query.toString() );
+			return new SQLiteCursor(db, driver, editTable, query);
 		}
 	}
 }

@@ -33,6 +33,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowContentResolver;
+import org.robolectric.shadows.ShadowLog;
 
 import java.io.File;
 import java.util.*;
@@ -54,6 +55,8 @@ public class OllieTest {
 	public void initialize() {
 		ContentProvider contentProvider = new OllieSampleProvider();
 		contentProvider.onCreate();
+
+		ShadowLog.stream = System.out;
 		ShadowContentResolver.registerProvider("com.example.ollie", contentProvider);
 
 		Ollie.init(Robolectric.application, "OllieSample.db", 1);
