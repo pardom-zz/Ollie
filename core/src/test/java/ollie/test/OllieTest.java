@@ -34,6 +34,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowContentResolver;
 import org.robolectric.shadows.ShadowLog;
+import rx.functions.Action1;
 
 import java.io.File;
 import java.util.*;
@@ -263,6 +264,18 @@ public class OllieTest {
 		assertThat(note).isNotNull();
 		assertThat(note.id).isNotNull();
 		assertThat(note.id).isGreaterThan(0l);
+
+		// Single note async
+		new Select().from(Note.class).observableSingle()
+				.subscribe(new Action1<Model>() {
+					@Override
+					public void call(Model note) {
+						System.out.println("2");
+						assertThat(note).isNotNull();
+						assertThat(note.id).isNotNull();
+						assertThat(note.id).isGreaterThan(0l);
+					}
+				});
 
 		// Single tag
 		Tag tag = new Select().from(Tag.class).fetchSingle();

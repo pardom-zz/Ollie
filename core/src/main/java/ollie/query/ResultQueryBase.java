@@ -72,11 +72,11 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public Observable<List<? extends Model>> fetchAsync() {
-		return Observable.create(new OnSubscribe<List<? extends Model>>() {
+	public <T extends Model> Observable<List<T>> observable() {
+		return Observable.create(new OnSubscribe<List<T>>() {
 			@Override
-			public void call(Subscriber<? super List<? extends Model>> subscriber) {
-				final List<? extends Model> result = fetch();
+			public void call(Subscriber<? super List<T>> subscriber) {
+				final List<T> result = fetch();
 				if (!subscriber.isUnsubscribed()) {
 					subscriber.onNext(result);
 					subscriber.onCompleted();
@@ -86,11 +86,11 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public Observable<? extends Model> fetchSingleAsync() {
-		return Observable.create(new OnSubscribe<Model>() {
+	public <T extends Model> Observable<T> observableSingle() {
+		return Observable.create(new OnSubscribe<T>() {
 			@Override
-			public void call(Subscriber<? super Model> subscriber) {
-				final Model result = fetchSingle();
+			public void call(Subscriber<? super T> subscriber) {
+				final T result = fetchSingle();
 				if (!subscriber.isUnsubscribed()) {
 					subscriber.onNext(result);
 					subscriber.onCompleted();
@@ -100,7 +100,7 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public <T> Observable<T> fetchValueAsync(final Class<T> type) {
+	public <T> Observable<T> observableValue(final Class<T> type) {
 		return Observable.create(new OnSubscribe<T>() {
 			@Override
 			public void call(Subscriber<? super T> subscriber) {
