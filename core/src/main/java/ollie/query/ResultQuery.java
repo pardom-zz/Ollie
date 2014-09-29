@@ -17,6 +17,7 @@
 package ollie.query;
 
 import ollie.Model;
+import rx.Observable;
 
 import java.util.List;
 
@@ -26,4 +27,10 @@ public interface ResultQuery extends ExecutableQuery {
 	<T extends Model> T fetchSingle();
 
 	<T> T fetchValueAs(Class<T> type);
+
+	<T extends Model> Observable<List<T>> observable();
+
+	<T extends Model> Observable<T> observableSingle();
+
+	<T> Observable<T> observableValueAs(Class<T> type);
 }

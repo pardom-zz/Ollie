@@ -22,6 +22,8 @@ repositories {
 dependencies {
 	compile files("${android.sdk}/platforms/${android.target}/android.jar")
 
+	compile 'io.reactivex:rxjava:1.0.0-rc.3'
+
 	testCompile project(':compiler')
 
 	testCompile 'com.squareup.assertj:assertj-android:1.0.0'

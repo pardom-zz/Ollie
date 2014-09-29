@@ -19,8 +19,12 @@ package ollie.query;
 import android.database.Cursor;
 import ollie.Model;
 import ollie.Ollie;
+import rx.Observable;
+import rx.Subscriber;
 
 import java.util.List;
+
+import static rx.Observable.OnSubscribe;
 
 public abstract class ResultQueryBase extends ExecutableQueryBase implements ResultQuery {
 	public ResultQueryBase(Query parent, Class<? extends Model> table) {
@@ -65,5 +69,44 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 		}
 
 		return null;
+	}
+
+	@Override
+	public Observable<List<? extends Model>> observable() {
+		return Observable.create(new OnSubscribe<List<? extends Model>>() {
+			@Override
+			public void call(Subscriber<? super List<? extends Model>> subscriber) {
+				if (!subscriber.isUnsubscribed()) {
+					subscriber.onNext(fetch());
+					subscriber.onCompleted();
+				}
+			}
+		});
+	}
+
+	@Override
+	public Observable<? extends Model> observableSingle() {
+		return Observable.create(new OnSubscribe<Model>() {
+			@Override
+			public void call(Subscriber<? super Model> subscriber) {
+				if (!subscriber.isUnsubscribed()) {
+					subscriber.onNext(fetchSingle());
+					subscriber.onCompleted();
+				}
+			}
+		});
+	}
+
+	@Override
+	public <T> Observable<T> observableValueAs(final Class<T> type) {
+		return Observable.create(new OnSubscribe<T>() {
+			@Override
+			public void call(Subscriber<? super T> subscriber) {
+				if (!subscriber.isUnsubscribed()) {
+					subscriber.onNext(fetchValueAs(type));
+					subscriber.onCompleted();
+				}
+			}
+		});
 	}
 }
