@@ -25,6 +25,10 @@ import ollie.annotation.Table;
 
 import java.util.List;
 
+/**
+ * A Model represents a single table record and uses annotations to define the table's schema. The Model contains
+ * methods for interacting with the database directly.
+ */
 @Table("")
 public abstract class Model {
 	public static final String _ID = BaseColumns._ID;
@@ -34,6 +38,15 @@ public abstract class Model {
 	@AutoIncrement
 	public Long id;
 
+	/**
+	 * <p>
+	 * Find a record by id.
+	 * </p>
+	 *
+	 * @param cls The model class.
+	 * @param id  The model Id.
+	 * @return The query result.
+	 */
 	public static final <T extends Model> T find(Class<T> cls, Long id) {
 		List<T> result = Ollie.query(cls, false, null, _ID + "=?", new String[]{id.toString()}, null, null, null, "1");
 		if (result.size() > 0) {
@@ -42,11 +55,26 @@ public abstract class Model {
 		return null;
 	}
 
+	/**
+	 * <p>
+	 * Load this objects values from a cursor.
+	 * </p>
+	 *
+	 * @param cursor
+	 */
 	public final void load(Cursor cursor) {
 		Ollie.load(this, cursor);
 		Ollie.putEntity(this);
 	}
 
+	/**
+	 * <p>
+	 * Persist the record to the database. Inserts the record if it does not exists and updates the record if it
+	 * does exists.
+	 * </p>
+	 *
+	 * @return The record id.
+	 */
 	public final Long save() {
 		id = Ollie.save(this);
 		Ollie.putEntity(this);
@@ -54,6 +82,11 @@ public abstract class Model {
 		return id;
 	}
 
+	/**
+	 * <p>
+	 * Delete the record from the database.
+	 * </p>
+	 */
 	public final void delete() {
 		Ollie.delete(this);
 		Ollie.removeEntity(this);
@@ -61,6 +94,11 @@ public abstract class Model {
 		id = null;
 	}
 
+	/**
+	 * <p>
+	 * Notify observers that this record has changed.
+	 * </p>
+	 */
 	private void notifyChange() {
 		if (OllieProvider.isImplemented()) {
 			Ollie.getContext().getContentResolver().notifyChange(OllieProvider.createUri(getClass(), id), null);
