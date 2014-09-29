@@ -1,4 +1,5 @@
 apply plugin: 'android-sdk-manager'
+apply plugin: AndroidStubPlugin
 apply plugin: 'java'
 apply from: '../gradle-mvn-push.gradle'
 
@@ -35,4 +36,18 @@ dependencies {
 tasks.withType(Test) {
 	scanForTestClasses = false
 	include "**/*Test.class"
+}
+
+// This plugin's only purpose is to provide the android-sdk-manager plugin the
+// properties it expects from the android plugin. This is necessary because
+// this is a Java project reliant on the Android library, but not an Android
+// project.
+class AndroidStubPlugin implements Plugin<Project> {
+	void apply(Project project) {
+		project.extensions.create('android', AndroidStubPluginExtension)
+	}
+}
+
+class AndroidStubPluginExtension {
+	def compileSdkVersion = 19
 }
