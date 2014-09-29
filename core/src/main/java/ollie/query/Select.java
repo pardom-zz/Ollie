@@ -55,7 +55,7 @@ public final class Select extends QueryBase {
 	public static final class From extends ResultQueryBase {
 		private List<Join> mJoins = new ArrayList<Join>();
 
-		public From(Query parent, Class<? extends Model> table) {
+		private From(Query parent, Class<? extends Model> table) {
 			super(parent, table);
 		}
 
@@ -166,7 +166,7 @@ public final class Select extends QueryBase {
 		private Type mType;
 		private String mConstraint;
 
-		public Join(Query parent, Class<? extends Model> table, Type type) {
+		private Join(Query parent, Class<? extends Model> table, Type type) {
 			super(parent, table);
 			mType = type;
 		}
@@ -191,7 +191,7 @@ public final class Select extends QueryBase {
 		private String mWhere;
 		private String[] mWhereArgs;
 
-		public Where(Query parent, Class<? extends Model> table, String where, String[] args) {
+		private Where(Query parent, Class<? extends Model> table, String where, String[] args) {
 			super(parent, table);
 			mWhere = where;
 			mWhereArgs = args;
@@ -223,7 +223,7 @@ public final class Select extends QueryBase {
 	public static final class GroupBy extends ResultQueryBase {
 		private String mGroupBy;
 
-		public GroupBy(Query parent, Class<? extends Model> table, String groupBy) {
+		private GroupBy(Query parent, Class<? extends Model> table, String groupBy) {
 			super(parent, table);
 			mGroupBy = groupBy;
 		}
@@ -249,7 +249,7 @@ public final class Select extends QueryBase {
 	public static final class Having extends ResultQueryBase {
 		private String mHaving;
 
-		public Having(Query parent, Class<? extends Model> table, String having) {
+		private Having(Query parent, Class<? extends Model> table, String having) {
 			super(parent, table);
 			mHaving = having;
 		}
@@ -271,7 +271,7 @@ public final class Select extends QueryBase {
 	public static final class OrderBy extends ResultQueryBase {
 		private String mOrderBy;
 
-		public OrderBy(Query parent, Class<? extends Model> table, String orderBy) {
+		private OrderBy(Query parent, Class<? extends Model> table, String orderBy) {
 			super(parent, table);
 			mOrderBy = orderBy;
 		}
@@ -290,7 +290,7 @@ public final class Select extends QueryBase {
 	public static final class Limit extends ResultQueryBase {
 		private String mLimit;
 
-		public Limit(Query parent, Class<? extends Model> table, String limit) {
+		private Limit(Query parent, Class<? extends Model> table, String limit) {
 			super(parent, table);
 			mLimit = limit;
 		}
@@ -308,7 +308,7 @@ public final class Select extends QueryBase {
 	public static final class Offset extends ResultQueryBase {
 		private String mOffset;
 
-		public Offset(Query parent, Class<? extends Model> table, String offset) {
+		private Offset(Query parent, Class<? extends Model> table, String offset) {
 			super(parent, table);
 			mOffset = offset;
 		}
