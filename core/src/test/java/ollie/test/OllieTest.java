@@ -38,6 +38,7 @@ import org.robolectric.shadows.ShadowLog;
 import java.io.File;
 import java.util.*;
 
+import static ollie.Ollie.LogLevel;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
@@ -59,7 +60,7 @@ public class OllieTest {
 		ShadowLog.stream = System.out;
 		ShadowContentResolver.registerProvider("com.example.ollie", contentProvider);
 
-		Ollie.init(Robolectric.application, "OllieSample.db", 1);
+		Ollie.init(Robolectric.application, "OllieSample.db", 1, LogLevel.FULL);
 	}
 
 	@Test

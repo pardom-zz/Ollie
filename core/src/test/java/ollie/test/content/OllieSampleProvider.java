@@ -18,6 +18,8 @@ package ollie.test.content;
 
 import ollie.OllieProvider;
 
+import static ollie.Ollie.LogLevel;
+
 public class OllieSampleProvider extends OllieProvider {
 	@Override
 	protected String getDatabaseName() {
@@ -27,5 +29,10 @@ public class OllieSampleProvider extends OllieProvider {
 	@Override
 	protected int getDatabaseVersion() {
 		return 1;
+	}
+
+	@Override
+	protected LogLevel getLogLevel() {
+		return LogLevel.FULL;
 	}
 }

@@ -44,7 +44,27 @@ public final class Ollie {
 	private static DatabaseHelper sDatabaseHelper;
 	private static SQLiteDatabase sSQLiteDatabase;
 	private static LruCache<String, Model> sCache;
+	private static LogLevel sLogLevel = LogLevel.NONE;
 	private static boolean sInitialized = false;
+
+	public enum LogLevel {
+		/**
+		 * No logging.
+		 */
+		NONE,
+		/**
+		 * Log basic events.
+		 */
+		BASIC,
+		/**
+		 * Log all queries.
+		 */
+		FULL;
+
+		public boolean log(LogLevel logLevel) {
+			return this.ordinal() >= logLevel.ordinal();
+		}
+	}
 
 	private Ollie() {
 	}
@@ -52,11 +72,24 @@ public final class Ollie {
 	// Public methods
 
 	public static void init(Context context, String name, int version) {
-		init(context, name, version, DEFAULT_CACHE_SIZE);
+		init(context, name, version, DEFAULT_CACHE_SIZE, LogLevel.NONE);
 	}
 
 	public static void init(Context context, String name, int version, int cacheSize) {
+		init(context, name, version, cacheSize, LogLevel.NONE);
+	}
+
+	public static void init(Context context, String name, int version, LogLevel logLevel) {
+		init(context, name, version, DEFAULT_CACHE_SIZE, logLevel);
+	}
+
+	public static void init(Context context, String name, int version, int cacheSize, LogLevel logLevel) {
+		sLogLevel = logLevel;
+
 		if (sInitialized) {
+			if (sLogLevel.log(LogLevel.BASIC)) {
+				Log.d(TAG, "Already initialized.");
+			}
 			return;
 		}
 
@@ -64,7 +97,9 @@ public final class Ollie {
 			Class adapterClass = Class.forName(AdapterHolder.IMPL_CLASS_FQCN);
 			sAdapterHolder = (AdapterHolder) adapterClass.newInstance();
 		} catch (Exception e) {
-			Log.e(TAG, "Failed to initialize.", e);
+			if (sLogLevel.log(LogLevel.BASIC)) {
+				Log.e(TAG, "Failed to initialize.", e);
+			}
 		}
 
 		sContext = context.getApplicationContext();
@@ -269,7 +304,7 @@ public final class Ollie {
 
 	private static final class DatabaseHelper extends SQLiteOpenHelper {
 		public DatabaseHelper(Context context, String name, int version) {
-			super(context, name, new LoggingCursorAdapter(), version);
+			super(context, name, sLogLevel.log(LogLevel.FULL) ? new LoggingCursorAdapter() : null, version);
 		}
 
 		@Override
@@ -333,10 +368,9 @@ public final class Ollie {
 	}
 
 	private static final class LoggingCursorAdapter implements CursorFactory {
-
 		@Override
 		public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver driver, String editTable, SQLiteQuery query) {
-			Log.v("Ollie", query.toString() );
+			Log.v(TAG, query.toString());
 			return new SQLiteCursor(db, driver, editTable, query);
 		}
 	}

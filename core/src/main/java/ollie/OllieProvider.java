@@ -24,6 +24,8 @@ import android.net.Uri;
 import android.util.SparseArray;
 import ollie.internal.ModelAdapter;
 
+import static ollie.Ollie.LogLevel;
+
 public abstract class OllieProvider extends ContentProvider {
 	private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 	private static final SparseArray<Class<? extends Model>> TYPE_CODES = new SparseArray<Class<? extends Model>>();
@@ -57,7 +59,7 @@ public abstract class OllieProvider extends ContentProvider {
 
 	@Override
 	public boolean onCreate() {
-		Ollie.init(getContext(), getDatabaseName(), getDatabaseVersion(), getCacheSize());
+		Ollie.init(getContext(), getDatabaseName(), getDatabaseVersion(), getCacheSize(), getLogLevel());
 		sAuthority = getAuthority();
 		sIsImplemented = true;
 
@@ -175,6 +177,10 @@ public abstract class OllieProvider extends ContentProvider {
 
 	protected int getCacheSize() {
 		return Ollie.DEFAULT_CACHE_SIZE;
+	}
+
+	protected LogLevel getLogLevel() {
+		return LogLevel.NONE;
 	}
 
 	private Class<? extends Model> getModelType(Uri uri) {
