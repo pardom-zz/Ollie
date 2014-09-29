@@ -76,8 +76,9 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 		return Observable.create(new OnSubscribe<List<? extends Model>>() {
 			@Override
 			public void call(Subscriber<? super List<? extends Model>> subscriber) {
+				final List<? extends Model> result = fetch();
 				if (!subscriber.isUnsubscribed()) {
-					subscriber.onNext(fetch());
+					subscriber.onNext(result);
 					subscriber.onCompleted();
 				}
 			}
@@ -89,8 +90,9 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 		return Observable.create(new OnSubscribe<Model>() {
 			@Override
 			public void call(Subscriber<? super Model> subscriber) {
+				final Model result = fetchSingle();
 				if (!subscriber.isUnsubscribed()) {
-					subscriber.onNext(fetchSingle());
+					subscriber.onNext(result);
 					subscriber.onCompleted();
 				}
 			}
@@ -102,8 +104,9 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 		return Observable.create(new OnSubscribe<T>() {
 			@Override
 			public void call(Subscriber<? super T> subscriber) {
+				final T result = fetchValueAs(type);
 				if (!subscriber.isUnsubscribed()) {
-					subscriber.onNext(fetchValueAs(type));
+					subscriber.onNext(result);
 					subscriber.onCompleted();
 				}
 			}
