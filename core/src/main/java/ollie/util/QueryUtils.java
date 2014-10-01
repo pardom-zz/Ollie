@@ -8,6 +8,9 @@ import java.util.List;
 
 import static android.database.sqlite.SQLiteDatabase.CursorFactory;
 
+/**
+ * Utility class for interacting with the database using SQLiteDatabase methods.
+ */
 public class QueryUtils {
 	public static void execSQL(String sql) {
 		Ollie.getDatabase().execSQL(sql);
