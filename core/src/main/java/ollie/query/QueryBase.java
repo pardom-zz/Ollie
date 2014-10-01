@@ -52,6 +52,9 @@ public abstract class QueryBase implements Query {
 	}
 
 	protected final String[] toStringArray(final Object[] array) {
+		if (array == null) {
+			return null;
+		}
 		final String[] transformedArray = new String[array.length];
 		for (int i = 0; i < array.length; i++) {
 			transformedArray[i] = String.valueOf(array[i]);
