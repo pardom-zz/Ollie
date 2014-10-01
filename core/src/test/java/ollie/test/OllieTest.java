@@ -277,6 +277,13 @@ public class OllieTest {
 					}
 				});
 
+
+		// Single note by id
+		note = new Select().from(Note.class).where(Note._ID + "=?", 1).fetchSingle();
+		assertThat(note).isNotNull();
+		assertThat(note.id).isNotNull();
+		assertThat(note.id).isGreaterThan(0l);
+
 		// Single tag
 		Tag tag = new Select().from(Tag.class).fetchSingle();
 		assertThat(tag).isNotNull();
@@ -331,5 +338,4 @@ public class OllieTest {
 		// TODO: This seems like a bit of work
 		// assertThat(note.id).isNull();
 	}
-
 }

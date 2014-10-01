@@ -46,7 +46,7 @@ public final class Insert extends QueryBase {
 			mColumns = columns;
 		}
 
-		public Values values(String... args) {
+		public Values values(Object... args) {
 			return new Values(this, mTable, args);
 		}
 
@@ -64,9 +64,9 @@ public final class Insert extends QueryBase {
 	}
 
 	public static final class Values extends ExecutableQueryBase {
-		private String[] mValuesArgs;
+		private Object[] mValuesArgs;
 
-		private Values(Query parent, Class<? extends Model> table, String[] args) {
+		private Values(Query parent, Class<? extends Model> table, Object[] args) {
 			super(parent, table);
 			mValuesArgs = args;
 		}
@@ -95,7 +95,7 @@ public final class Insert extends QueryBase {
 
 		@Override
 		protected String[] getPartArgs() {
-			return mValuesArgs;
+			return toStringArray(mValuesArgs);
 		}
 	}
 }

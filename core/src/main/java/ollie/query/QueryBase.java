@@ -51,7 +51,15 @@ public abstract class QueryBase implements Query {
 		return null;
 	}
 
-	private String[] join(final String[] array1, final String... array2) {
+	protected final String[] toStringArray(final Object[] array) {
+		final String[] transformedArray = new String[array.length];
+		for (int i = 0; i < array.length; i++) {
+			transformedArray[i] = String.valueOf(array[i]);
+		}
+		return transformedArray;
+	}
+
+	private final String[] join(final String[] array1, final String... array2) {
 		if (array1 == null) {
 			return clone(array2);
 		} else if (array2 == null) {
@@ -63,7 +71,7 @@ public abstract class QueryBase implements Query {
 		return joinedArray;
 	}
 
-	private String[] clone(final String[] array) {
+	private final String[] clone(final String[] array) {
 		if (array == null) {
 			return null;
 		}

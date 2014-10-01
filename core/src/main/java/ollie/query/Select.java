@@ -103,7 +103,7 @@ public final class Select extends QueryBase {
 			return new Where(this, mTable, where, null);
 		}
 
-		public Where where(String where, String... args) {
+		public Where where(String where, Object... args) {
 			return new Where(this, mTable, where, args);
 		}
 
@@ -189,9 +189,9 @@ public final class Select extends QueryBase {
 
 	public static final class Where extends ResultQueryBase {
 		private String mWhere;
-		private String[] mWhereArgs;
+		private Object[] mWhereArgs;
 
-		private Where(Query parent, Class<? extends Model> table, String where, String[] args) {
+		private Where(Query parent, Class<? extends Model> table, String where, Object[] args) {
 			super(parent, table);
 			mWhere = where;
 			mWhereArgs = args;
@@ -216,7 +216,7 @@ public final class Select extends QueryBase {
 
 		@Override
 		public String[] getPartArgs() {
-			return mWhereArgs;
+			return toStringArray(mWhereArgs);
 		}
 	}
 

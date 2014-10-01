@@ -25,10 +25,10 @@ public final class Update extends QueryBase {
 	}
 
 	public Set set(String set) {
-		return set(set, (String[]) null);
+		return set(set, (Object[]) null);
 	}
 
-	public Set set(String set, String... args) {
+	public Set set(String set, Object... args) {
 		return new Set(this, mTable, set, args);
 	}
 
@@ -39,19 +39,19 @@ public final class Update extends QueryBase {
 
 	public static final class Set extends ExecutableQueryBase {
 		private String mSet;
-		private String[] mSetArgs;
+		private Object[] mSetArgs;
 
-		private Set(Query parent, Class<? extends Model> table, String set, String... args) {
+		private Set(Query parent, Class<? extends Model> table, String set, Object... args) {
 			super(parent, table);
 			mSet = set;
 			mSetArgs = args;
 		}
 
 		public Where where(String where) {
-			return where(where, (String[]) null);
+			return where(where, (Object[]) null);
 		}
 
-		public Where where(String where, String... args) {
+		public Where where(String where, Object... args) {
 			return new Where(this, mTable, where, args);
 		}
 
@@ -62,15 +62,15 @@ public final class Update extends QueryBase {
 
 		@Override
 		public String[] getPartArgs() {
-			return mSetArgs;
+			return toStringArray(mSetArgs);
 		}
 	}
 
 	public static final class Where extends ExecutableQueryBase {
 		private String mWhere;
-		private String[] mWhereArgs;
+		private Object[] mWhereArgs;
 
-		public Where(Query parent, Class<? extends Model> table, String where, String[] args) {
+		private Where(Query parent, Class<? extends Model> table, String where, Object[] args) {
 			super(parent, table);
 			mWhere = where;
 			mWhereArgs = args;
@@ -83,7 +83,7 @@ public final class Update extends QueryBase {
 
 		@Override
 		public String[] getPartArgs() {
-			return mWhereArgs;
+			return toStringArray(mWhereArgs);
 		}
 	}
 }
