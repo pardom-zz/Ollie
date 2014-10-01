@@ -22,8 +22,22 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
+/**
+ * <p>
+ * An annotation that indicates a member should define its SQLite column using the DEFAULT constraint and a default
+ * value. Must be used in conjunction with {@link ollie.annotation.Column}
+ * </p>
+ * <p>
+ * <a href="http://www.sqlite.org/syntaxdiagrams.html#column-constraint">
+ * http://www.sqlite.org/syntaxdiagrams.html#column-constraint
+ * </a>
+ * </p>
+ */
 @Target(FIELD)
 @Retention(CLASS)
 public @interface Default {
+	/**
+	 * @return The default value.
+	 */
 	public String value();
 }

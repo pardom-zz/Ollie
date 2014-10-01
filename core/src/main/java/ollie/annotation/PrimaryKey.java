@@ -28,6 +28,9 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * used in conjunction with {@link ollie.annotation.Column}
  * </p>
  * <p>
+ * <a href="http://www.sqlite.org/lang_createtable.html#primkeyconst">
+ * http://www.sqlite.org/lang_createtable.html#primkeyconst
+ * </a>
  * <a href="http://www.sqlite.org/syntaxdiagrams.html#column-constraint">
  * http://www.sqlite.org/syntaxdiagrams.html#column-constraint
  * </a>

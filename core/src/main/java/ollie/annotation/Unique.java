@@ -22,8 +22,26 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
+/**
+ * <p>
+ * An annotation that indicates a member should define its SQLite column using the UNIQUE constraint. A conflict
+ * clause may be defined, but there is none by default. Must be used in conjunction with
+ * {@link ollie.annotation.Column}.
+ * </p>
+ * <p>
+ * <a href="http://www.sqlite.org/lang_createtable.html#uniqueconst">
+ * http://www.sqlite.org/lang_createtable.html#uniqueconst
+ * </a>
+ * <a href="http://www.sqlite.org/syntaxdiagrams.html#column-constraint">
+ * http://www.sqlite.org/syntaxdiagrams.html#column-constraint
+ * </a>
+ * </p>
+ */
 @Target(FIELD)
 @Retention(CLASS)
 public @interface Unique {
+	/**
+	 * @return The conflict clause.
+	 */
 	public ConflictClause value() default ConflictClause.NONE;
 }

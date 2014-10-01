@@ -22,6 +22,18 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
+/**
+ * <p>
+ * An annotation that indicates a member should define its SQLite column using the FOREIGN KEY constraint. Must be used
+ * in conjunction with {@link ollie.annotation.Column}.
+ * </p>
+ * <p>
+ * <a href="http://www.sqlite.org/foreignkeys.html">http://www.sqlite.org/foreignkeys.html</a>
+ * <a href="http://www.sqlite.org/syntaxdiagrams.html#column-def">
+ * http://www.sqlite.org/syntaxdiagrams.html#column-def
+ * </a>
+ * </p>
+ */
 @Target(FIELD)
 @Retention(CLASS)
 public @interface ForeignKey {
@@ -77,15 +89,39 @@ public @interface ForeignKey {
 
 	}
 
+	/**
+	 * <p>
+	 * Optional set of columns to reference on the foreign table.
+	 * </p>
+	 *
+	 * @return The foreign column names.
+	 */
 	public String[] foreignColumns() default {};
 
+	/**
+	 * <p>
+	 * Referential action to perform upon deletion of this key.
+	 * </p>
+	 *
+	 * @return The referential action.
+	 */
 	public ReferentialAction onDelete() default ReferentialAction.NONE;
 
+	/**
+	 * <p>
+	 * Referential action to perform upon update of this key.
+	 * </p>
+	 *
+	 * @return The referential action.
+	 */
 	public ReferentialAction onUpdate() default ReferentialAction.NONE;
 
 	public String match() default "";
 
 	public Deferrable deferrable() default Deferrable.NONE;
 
+	/**
+	 * @return The deferrable time
+	 */
 	public DeferrableTiming deferrableTiming() default DeferrableTiming.NONE;
 }

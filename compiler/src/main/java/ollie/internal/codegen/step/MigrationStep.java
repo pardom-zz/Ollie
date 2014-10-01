@@ -16,7 +16,7 @@
 
 package ollie.internal.codegen.step;
 
-import ollie.annotation.Migration;
+import ollie.internal.Migration;
 import ollie.internal.codegen.Registry;
 import ollie.internal.codegen.element.MigrationElement;
 import ollie.internal.codegen.validator.MigrationValidator;

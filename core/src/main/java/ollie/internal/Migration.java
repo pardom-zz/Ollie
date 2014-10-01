@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ollie.annotation;
+package ollie.internal;
 
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -23,8 +23,11 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
+/**
+ * Used internally to discover migrations. Extend {@link ollie.Migration} to create a migration.
+ */
 @Inherited
 @Target(TYPE)
 @Retention(CLASS)
-public @interface TypeAdapter {
+public @interface Migration {
 }

@@ -16,7 +16,7 @@
 
 package ollie;
 
-@ollie.annotation.Migration
+@ollie.internal.Migration
 public abstract class Migration implements Comparable<Migration> {
 	public abstract int getVersion();
 

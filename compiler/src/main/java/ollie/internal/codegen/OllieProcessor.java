@@ -19,9 +19,9 @@ package ollie.internal.codegen;
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
 import ollie.annotation.Column;
-import ollie.annotation.Migration;
+import ollie.internal.Migration;
 import ollie.annotation.Table;
-import ollie.annotation.TypeAdapter;
+import ollie.internal.TypeAdapter;
 import ollie.internal.codegen.step.*;
 
 import javax.annotation.processing.AbstractProcessor;

@@ -21,7 +21,7 @@ import ollie.adapter.BooleanAdapter;
 import ollie.adapter.CalendarAdapter;
 import ollie.adapter.SqlDateAdapter;
 import ollie.adapter.UtilDateAdapter;
-import ollie.annotation.TypeAdapter;
+import ollie.internal.TypeAdapter;
 import ollie.internal.codegen.Registry;
 import ollie.internal.codegen.element.TypeAdapterElement;
 import ollie.internal.codegen.validator.TypeAdapterValidator;

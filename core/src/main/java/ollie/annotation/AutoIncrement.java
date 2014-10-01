@@ -28,10 +28,10 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * used in conjunction with {@link ollie.annotation.Column}
  * </p>
  * <p>
+ * <a href="http://www.sqlite.org/autoinc.html">http://www.sqlite.org/autoinc.html</a>
  * <a href="http://www.sqlite.org/syntaxdiagrams.html#column-constraint">
  * http://www.sqlite.org/syntaxdiagrams.html#column-constraint
  * </a>
- * <a href="http://www.sqlite.org/autoinc.html">http://www.sqlite.org/autoinc.html</a>
  * </p>
  */
 @Target(FIELD)

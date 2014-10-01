@@ -24,10 +24,14 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 /**
  * <p>
- * An annotation that indicates a member should define its SQLite column using the NOT NULL constraint. Must be
- * used in conjunction with {@link ollie.annotation.Column} TODO: conflict clause
+ * An annotation that indicates a member should define its SQLite column using the NOT NULL constraint. A conflict
+ * clause may be defined, but there is none by default. Must be used in conjunction with
+ * {@link ollie.annotation.Column}.
  * </p>
  * <p>
+ * <a href="http://www.sqlite.org/lang_createtable.html#notnullconst">
+ * http://www.sqlite.org/lang_createtable.html#notnullconst
+ * </a>
  * <a href="http://www.sqlite.org/syntaxdiagrams.html#column-constraint">
  * http://www.sqlite.org/syntaxdiagrams.html#column-constraint
  * </a>
@@ -37,7 +41,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Retention(CLASS)
 public @interface NotNull {
 	/**
-	 * @return
+	 * @return The conflict clause.
 	 */
 	public ConflictClause value() default ConflictClause.NONE;
 }

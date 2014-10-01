@@ -40,7 +40,7 @@ package ollie;
  * @see ollie.adapter.SqlDateAdapter
  * @see ollie.adapter.UtilDateAdapter
  */
-@ollie.annotation.TypeAdapter
+@ollie.internal.TypeAdapter
 public abstract class TypeAdapter<D, S> {
 	/**
 	 * Converts the Java value to a value which SQLite can store.
