@@ -25,7 +25,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 /**
  * <p>
  * An annotation that indicates a member should define its SQLite column using the PRIMARY KEY constraint. Must be
- * used in conjunction with {@link ollie.annotation.Column}
+ * used in conjunction with {@link ollie.annotation.Column}.
  * </p>
  * <p>
  * <a href="http://www.sqlite.org/lang_createtable.html#primkeyconst">

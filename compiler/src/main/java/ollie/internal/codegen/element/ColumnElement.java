@@ -17,7 +17,6 @@
 package ollie.internal.codegen.element;
 
 import android.text.TextUtils;
-import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import ollie.annotation.*;
 import ollie.internal.codegen.Registry;
@@ -191,9 +190,6 @@ public class ColumnElement {
 			}
 			if (!foreignKey.onUpdate().equals(ReferentialAction.NONE)) {
 				builder.append(" ON UPDATE ").append(foreignKey.onUpdate().keyword());
-			}
-			if (!Strings.isNullOrEmpty(foreignKey.match())) {
-				builder.append(" MATCH ").append(foreignKey.match());
 			}
 			if (!foreignKey.deferrable().equals(ForeignKey.Deferrable.NONE)) {
 				builder.append(" ").append(foreignKey.deferrable().keyword());

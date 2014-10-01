@@ -16,10 +16,25 @@
 
 package ollie;
 
+/**
+ * Migrations execute SQL statements when upgrading from one database version to another. Migrations are sorted by
+ * version number and executed in that order using migrations with versions higher than the current database version
+ * number, and excluding all those with version numbers at or below the current database version number.
+ */
 @ollie.internal.Migration
 public abstract class Migration implements Comparable<Migration> {
+	/**
+	 * Returns the database version for which to apply this migration.
+	 *
+	 * @return The database version.
+	 */
 	public abstract int getVersion();
 
+	/**
+	 * Returns the SQL statements which are to be executed in order to perform this migration.
+	 *
+	 * @return The SQL statements.
+	 */
 	public abstract String[] getStatements();
 
 	@Override

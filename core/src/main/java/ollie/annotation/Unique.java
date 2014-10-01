@@ -41,6 +41,8 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Retention(CLASS)
 public @interface Unique {
 	/**
+	 * Returns a behaviour when the operation encounters a conflict.
+	 *
 	 * @return The conflict clause.
 	 */
 	public ConflictClause value() default ConflictClause.NONE;

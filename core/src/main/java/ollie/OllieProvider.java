@@ -26,6 +26,20 @@ import ollie.internal.ModelAdapter;
 
 import static ollie.Ollie.LogLevel;
 
+/**
+ * <p>
+ * Default implementation of a <a href="https://developer.android.com/reference/android/content/ContentProvider.html">
+ * ContentProvider</a>. As with any content provider, this class must be
+ * <a href="https://developer.android.com/guide/topics/manifest/provider-element.html">declared in the manifest.</a>.
+ * When using this content provider, manual initialization is not required as the content provider does this for you.
+ * This is not a feature of the provider, but rather a requirement due to the behavior of content providers.
+ * </p>
+ * Content Uris are built in a restful manner using your package name and tables names. For example:
+ * <ul>
+ * <li>content://com.example.notes/notes</li>
+ * <li>content://com.example.notes/notes/1</li>
+ * </ul>
+ */
 public abstract class OllieProvider extends ContentProvider {
 	private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 	private static final SparseArray<Class<? extends Model>> TYPE_CODES = new SparseArray<Class<? extends Model>>();
@@ -34,14 +48,32 @@ public abstract class OllieProvider extends ContentProvider {
 	private static String sAuthority;
 	private static SparseArray<String> sMimeTypeCache = new SparseArray<String>();
 
+	/**
+	 * Returns whether the provider has been implemented.
+	 *
+	 * @return Whether the provider has been implemented.
+	 */
 	public static boolean isImplemented() {
 		return sIsImplemented;
 	}
 
+	/**
+	 * Create a Uri for a model table.
+	 *
+	 * @param type The model type.
+	 * @return The Uri for the model table.
+	 */
 	public static Uri createUri(Class<? extends Model> type) {
 		return createUri(type, null);
 	}
 
+	/**
+	 * Create a Uri for a model row.
+	 *
+	 * @param type The model type.
+	 * @param id   The row Id.
+	 * @return The Uri for the model row.
+	 */
 	public static Uri createUri(Class<? extends Model> type, Long id) {
 		final StringBuilder uri = new StringBuilder();
 		uri.append("content://");
@@ -167,18 +199,43 @@ public abstract class OllieProvider extends ContentProvider {
 		return cursor;
 	}
 
+	/**
+	 * Returns the database name.
+	 *
+	 * @return The database name.
+	 */
 	protected abstract String getDatabaseName();
 
+	/**
+	 * Returns the database version.
+	 *
+	 * @return The database version.
+	 */
 	protected abstract int getDatabaseVersion();
 
+	/**
+	 * Returns the package name as the default Uri authority. Override to provide your own Uri authority.
+	 *
+	 * @return The Uri authority.
+	 */
 	protected String getAuthority() {
 		return getContext().getPackageName();
 	}
 
+	/**
+	 * Returns the default cache size. Override to provide your own cache size.
+	 *
+	 * @return The cache size.
+	 */
 	protected int getCacheSize() {
 		return Ollie.DEFAULT_CACHE_SIZE;
 	}
 
+	/**
+	 * Returns the default log level of NONE. Override to provide your own log level.
+	 *
+	 * @return The log level.
+	 */
 	protected LogLevel getLogLevel() {
 		return LogLevel.NONE;
 	}

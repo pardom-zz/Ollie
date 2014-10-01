@@ -22,6 +22,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 import ollie.Model;
 
+/**
+ * Used internally to perform database operations on a model.
+ */
 public abstract class ModelAdapter<T extends Model> {
 	public abstract Class<? extends Model> getModelType();
 

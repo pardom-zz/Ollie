@@ -22,7 +22,9 @@ import ollie.TypeAdapter;
 
 import java.util.List;
 
-
+/**
+ * Used internally to hold mapping information.
+ */
 public interface AdapterHolder {
 	public static final String IMPL_CLASS_PACKAGE = "ollie";
 	public static final String IMPL_CLASS_NAME = "AdapterHolderImpl";

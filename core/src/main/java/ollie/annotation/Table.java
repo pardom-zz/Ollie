@@ -34,6 +34,8 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Retention(CLASS)
 public @interface Table {
 	/**
+	 * Returns the table name.
+	 *
 	 * @return The table name.
 	 */
 	public String value();

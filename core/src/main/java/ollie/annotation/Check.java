@@ -24,9 +24,8 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 /**
  * <p>
- * An annotation that indicates a member should define its SQLite column using the NOT NULL constraint. A conflict
- * clause may be defined, but there is none by default. Must be used in conjunction with
- * {@link ollie.annotation.Column}.
+ * An annotation that indicates a member should define its SQLite column using the CHECK constraint. Must be used in
+ * conjunction with {@link ollie.annotation.Column}.
  * </p>
  * <p>
  * <a href="http://www.sqlite.org/lang_createtable.html#ckconst">
@@ -40,5 +39,10 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Target(FIELD)
 @Retention(CLASS)
 public @interface Check {
+	/**
+	 * Returns a constraint violation expression to validate inserts or updates.
+	 *
+	 * @return The expression.
+	 */
 	public String value();
 }

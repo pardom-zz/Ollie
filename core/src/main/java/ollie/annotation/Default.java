@@ -25,7 +25,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 /**
  * <p>
  * An annotation that indicates a member should define its SQLite column using the DEFAULT constraint and a default
- * value. Must be used in conjunction with {@link ollie.annotation.Column}
+ * value. Must be used in conjunction with {@link ollie.annotation.Column}.
  * </p>
  * <p>
  * <a href="http://www.sqlite.org/syntaxdiagrams.html#column-constraint">
@@ -37,6 +37,8 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Retention(CLASS)
 public @interface Default {
 	/**
+	 * Returns a default value for the column.
+	 *
 	 * @return The default value.
 	 */
 	public String value();
