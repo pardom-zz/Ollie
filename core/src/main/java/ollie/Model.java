@@ -22,8 +22,7 @@ import ollie.annotation.AutoIncrement;
 import ollie.annotation.Column;
 import ollie.annotation.PrimaryKey;
 import ollie.annotation.Table;
-
-import java.util.List;
+import ollie.query.Select;
 
 /**
  * A Model represents a single table record and uses annotations to define the table's schema. The Model contains
@@ -48,11 +47,10 @@ public abstract class Model {
 	 * @return The query result.
 	 */
 	public static final <T extends Model> T find(Class<T> cls, Long id) {
-		List<T> result = Ollie.query(cls, false, null, _ID + "=?", new String[]{id.toString()}, null, null, null, "1");
-		if (result.size() > 0) {
-			return result.get(0);
-		}
-		return null;
+		return new Select()
+				.from(cls)
+				.where(_ID + "=?", new String[]{id.toString()})
+				.fetchSingle();
 	}
 
 	/**

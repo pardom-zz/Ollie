@@ -21,7 +21,6 @@ import android.database.Cursor;
 import android.database.sqlite.*;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.os.Build;
-import android.os.CancellationSignal;
 import android.provider.BaseColumns;
 import android.util.Log;
 import ollie.internal.AdapterHolder;
@@ -45,6 +44,9 @@ public final class Ollie {
 	private static LogLevel sLogLevel = LogLevel.NONE;
 	private static boolean sInitialized = false;
 
+	/**
+	 * Controls the level of logging.
+	 */
 	public enum LogLevel {
 		/**
 		 * No logging.
@@ -69,18 +71,50 @@ public final class Ollie {
 
 	// Public methods
 
+	/**
+	 * Initialize the database. Must be called before interacting with the database.
+	 *
+	 * @param context Context
+	 * @param name    The database name.
+	 * @param version The database version.
+	 */
 	public static void init(Context context, String name, int version) {
 		init(context, name, version, DEFAULT_CACHE_SIZE, LogLevel.NONE);
 	}
 
+	/**
+	 * Initialize the database. Must be called before interacting with the database.
+	 *
+	 * @param context   Context
+	 * @param name      The database name.
+	 * @param version   The database version.
+	 * @param cacheSize The cache size.
+	 */
 	public static void init(Context context, String name, int version, int cacheSize) {
 		init(context, name, version, cacheSize, LogLevel.NONE);
 	}
 
+	/**
+	 * Initialize the database. Must be called before interacting with the database.
+	 *
+	 * @param context  Context
+	 * @param name     The database name.
+	 * @param version  The database version.
+	 * @param logLevel The logging level.
+	 */
 	public static void init(Context context, String name, int version, LogLevel logLevel) {
 		init(context, name, version, DEFAULT_CACHE_SIZE, logLevel);
 	}
 
+	/**
+	 * Initialize the database. Must be called before interacting with the database.
+	 *
+	 * @param context   Context
+	 * @param name      The database name.
+	 * @param version   The database version.
+	 * @param cacheSize The cache size.
+	 * @param logLevel  The logging level.
+	 */
 	public static void init(Context context, String name, int version, int cacheSize, LogLevel logLevel) {
 		sLogLevel = logLevel;
 
@@ -120,86 +154,52 @@ public final class Ollie {
 		return sAdapterHolder.getModelAdapter(cls).getTableName();
 	}
 
-	// Query wrappers
+	// Convenience methods
 
-	public static void execSQL(String sql) {
-		sSQLiteDatabase.execSQL(sql);
+	/**
+	 * Iterate over a cursor and load entities.
+	 *
+	 * @param cls    The model class.
+	 * @param cursor The result cursor.
+	 * @return The list of entities.
+	 */
+	public static <T extends Model> List<T> processCursor(Class<T> cls, Cursor cursor) {
+		final List<T> entities = new ArrayList<T>();
+		try {
+			Constructor<T> entityConstructor = cls.getConstructor();
+			if (cursor.moveToFirst()) {
+				do {
+					T entity = getEntity(cls, cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
+					if (entity == null) {
+						entity = entityConstructor.newInstance();
+					}
+
+					entity.load(cursor);
+					entities.add(entity);
+				}
+				while (cursor.moveToNext());
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "Failed to process cursor.", e);
+		}
+
+		return entities;
 	}
 
-	public static void execSQL(String sql, String[] selectionArgs) {
-		sSQLiteDatabase.execSQL(sql, selectionArgs);
-	}
-
-	public static <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection,
-			String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.query(distinct, getTableName(cls), columns, selection,
-				selectionArgs, groupBy, having, orderBy, limit));
-	}
-
-	public static <T extends Model> List<T> query(Class<T> cls, boolean distinct, String[] columns, String selection,
-			String[] selectionArgs, String groupBy, String having, String orderBy, String limit,
-			CancellationSignal cancellationSignal) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.query(distinct, getTableName(cls), columns, selection,
-				selectionArgs, groupBy, having, orderBy, limit, cancellationSignal));
-	}
-
-	public static <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory,
-			boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy,
-			String having, String orderBy, String limit) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.queryWithFactory(cursorFactory, distinct, getTableName(cls),
-				columns, selection, selectionArgs, groupBy, having, orderBy, limit));
-	}
-
-	public static <T extends Model> List<T> queryWithFactory(Class<T> cls, CursorFactory cursorFactory,
-			boolean distinct, String[] columns, String selection, String[] selectionArgs, String groupBy,
-			String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.queryWithFactory(cursorFactory, distinct, getTableName(cls),
-				columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal));
-	}
-
-	public static <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection,
-			String[] selectionArgs, String groupBy, String having, String orderBy) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.query(getTableName(cls), columns, selection, selectionArgs,
-				groupBy, having, orderBy));
-	}
-
-	public static <T extends Model> List<T> query(Class<T> cls, String[] columns, String selection,
-			String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.query(getTableName(cls), columns, selection, selectionArgs,
-				groupBy, having, orderBy, limit));
-	}
-
-	public static <T extends Model> List<T> rawQuery(Class<T> cls, String sql, String[] selectionArgs) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.rawQuery(sql, selectionArgs));
-	}
-
-	public static <T extends Model> List<T> rawQuery(Class<T> cls, String sql, String[] selectionArgs,
-			CancellationSignal cancellationSignal) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.rawQuery(sql, selectionArgs, cancellationSignal));
-	}
-
-	public static <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql,
-			String[] selectionArgs, String editTable) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.rawQueryWithFactory(cursorFactory, sql, selectionArgs,
-				editTable));
-	}
-
-	public static <T extends Model> List<T> rawQueryWithFactory(Class<T> cls, CursorFactory cursorFactory, String sql,
-			String[] selectionArgs, String editTable, CancellationSignal cancellationSignal) {
-		return processAndCloseCursor(cls, sSQLiteDatabase.rawQueryWithFactory(cursorFactory, sql, selectionArgs,
-				editTable, cancellationSignal));
+	/**
+	 * Iterate over a cursor and load entities. Closes the cursor when finished.
+	 *
+	 * @param cls    The model class.
+	 * @param cursor The result cursor.
+	 * @return The list of entities.
+	 */
+	public static <T extends Model> List<T> processAndCloseCursor(Class<T> cls, Cursor cursor) {
+		List<T> entities = processCursor(cls, cursor);
+		cursor.close();
+		return entities;
 	}
 
 	// Finder methods
-
-	static List<String> getTableDefinitions() {
-		List<String> tableDefinitions = new ArrayList<String>();
-		for (ModelAdapter modelAdapter : sAdapterHolder.getModelAdapters()) {
-			tableDefinitions.add(modelAdapter.getSchema());
-		}
-
-		return tableDefinitions;
-	}
 
 	static <D, S> TypeAdapter<D, S> getTypeAdapter(Class<D> cls) {
 		return (TypeAdapter<D, S>) sAdapterHolder.getTypeAdapter(cls);
@@ -207,10 +207,6 @@ public final class Ollie {
 
 	static List<? extends ModelAdapter> getModelAdapters() {
 		return sAdapterHolder.getModelAdapters();
-	}
-
-	static List<? extends Migration> getMigrations() {
-		return sAdapterHolder.getMigrations();
 	}
 
 	// Cache methods
@@ -257,35 +253,6 @@ public final class Ollie {
 		return cls.getName() + "@" + id;
 	}
 
-	private static <T extends Model> List<T> processAndCloseCursor(Class<T> cls, Cursor cursor) {
-		List<T> entities = processCursor(cls, cursor);
-		cursor.close();
-		return entities;
-	}
-
-	private static <T extends Model> List<T> processCursor(Class<T> cls, Cursor cursor) {
-		final List<T> entities = new ArrayList<T>();
-		try {
-			Constructor<T> entityConstructor = cls.getConstructor();
-			if (cursor.moveToFirst()) {
-				do {
-					T entity = getEntity(cls, cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
-					if (entity == null) {
-						entity = entityConstructor.newInstance();
-					}
-
-					entity.load(cursor);
-					entities.add(entity);
-				}
-				while (cursor.moveToNext());
-			}
-		} catch (Exception e) {
-			Log.e(TAG, "Failed to process cursor.", e);
-		}
-
-		return entities;
-	}
-
 	// Private classes
 
 	private static final class DatabaseHelper extends SQLiteOpenHelper {
@@ -319,9 +286,14 @@ public final class Ollie {
 		}
 
 		private void executeCreate(SQLiteDatabase db) {
+			final List<String> tableDefinitions = new ArrayList<String>();
+			for (ModelAdapter modelAdapter : sAdapterHolder.getModelAdapters()) {
+				tableDefinitions.add(modelAdapter.getSchema());
+			}
+
 			db.beginTransaction();
 			try {
-				for (String tableDefinition : Ollie.getTableDefinitions()) {
+				for (String tableDefinition : tableDefinitions) {
 					db.execSQL(tableDefinition);
 				}
 				db.setTransactionSuccessful();
@@ -332,7 +304,7 @@ public final class Ollie {
 
 		private boolean executeMigrations(SQLiteDatabase db, int oldVersion, int newVersion) {
 			boolean migrationExecuted = false;
-			final List<? extends Migration> migrations = Ollie.getMigrations();
+			final List<? extends Migration> migrations = sAdapterHolder.getMigrations();
 
 			db.beginTransaction();
 			try {

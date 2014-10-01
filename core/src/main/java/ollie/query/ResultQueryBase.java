@@ -19,6 +19,7 @@ package ollie.query;
 import android.database.Cursor;
 import ollie.Model;
 import ollie.Ollie;
+import ollie.util.QueryUtils;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -33,12 +34,12 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 
 	@Override
 	public <T extends Model> List<T> fetch() {
-		return (List<T>) Ollie.rawQuery(mTable, getSql(), getArgs());
+		return (List<T>) QueryUtils.rawQuery(mTable, getSql(), getArgs());
 	}
 
 	@Override
 	public <T extends Model> T fetchSingle() {
-		List<T> results = (List<T>) Ollie.rawQuery(mTable, getSql(), getArgs());
+		List<T> results = (List<T>) QueryUtils.rawQuery(mTable, getSql(), getArgs());
 		if (!results.isEmpty()) {
 			return results.get(0);
 		}

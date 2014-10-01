@@ -17,7 +17,7 @@
 package ollie.query;
 
 import ollie.Model;
-import ollie.Ollie;
+import ollie.util.QueryUtils;
 
 public abstract class ExecutableQueryBase extends QueryBase implements ExecutableQuery {
 	public ExecutableQueryBase(Query parent, Class<? extends Model> table) {
@@ -26,6 +26,6 @@ public abstract class ExecutableQueryBase extends QueryBase implements Executabl
 
 	@Override
 	public void execute() {
-		Ollie.execSQL(getSql(), getArgs());
+		QueryUtils.execSQL(getSql(), getArgs());
 	}
 }
