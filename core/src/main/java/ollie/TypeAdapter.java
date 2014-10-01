@@ -23,6 +23,7 @@ package ollie;
  * <p>
  * SQLite can only store primitive values in columns. Complex Java data types must, therefore, be converted to a
  * primitive SQLite type. The SQLite types are:
+ * </p>
  * <ul>
  * <li>NULL</li>
  * <li>INTEGER</li>
@@ -31,7 +32,6 @@ package ollie;
  * <li>BLOB</li>
  * </ul>
  * <a href="http://www.sqlite.org/datatype3.html">http://www.sqlite.org/datatype3.html</a>
- * </p>
  *
  * @param <D> Deserialized type, i.e. the Java type.
  * @param <S> Serialized type, i.e. the SQLite type.
