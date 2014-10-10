@@ -6,3 +6,8 @@ buildscript {
 		classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
 	}
 }
+
+subprojects {
+	project.group = GROUP
+	project.version = VERSION_NAME
+}

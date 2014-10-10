@@ -16,12 +16,12 @@ Grab via Maven:
 <dependency>
   <groupId>com.michaelpardo</groupId>
   <artifactId>ollie</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.2.0</version>
 </dependency>
 <dependency>
   <groupId>com.michaelpardo</groupId>
   <artifactId>ollie-compiler</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.2.0</version>
   <optional>true</optional>
 </dependency>
 ```
@@ -29,11 +29,10 @@ or Gradle:
 ```groovy
 repositories {
     mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
-compile 'com.michaelpardo:ollie:0.2.0-SNAPSHOT'
-provided 'com.michaelpardo:ollie-compiler:0.2.0-SNAPSHOT'
+compile 'com.michaelpardo:ollie:0.2.0'
+provided 'com.michaelpardo:ollie-compiler:0.2.0'
 ```
 
 Build
