@@ -27,10 +27,6 @@ Grab via Maven:
 ```
 or Gradle:
 ```groovy
-repositories {
-    mavenCentral()
-}
-
 compile 'com.michaelpardo:ollie:0.2.0'
 provided 'com.michaelpardo:ollie-compiler:0.2.0'
 ```
