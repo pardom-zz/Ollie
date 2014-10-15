@@ -53,6 +53,7 @@ public class ColumnElement {
 	};
 
 	private Column column;
+	private GetSet getSet;
 	private VariableElement element;
 	private TypeElement enclosingType;
 	private TypeElement deserializedType;
@@ -66,6 +67,7 @@ public class ColumnElement {
 
 	public ColumnElement(Registry registry, TypeElement enclosingType, VariableElement element) {
 		this.element = element;
+		this.getSet = element.getAnnotation(GetSet.class);
 		this.column = element.getAnnotation(Column.class);
 		this.enclosingType = enclosingType;
 		this.deserializedType = registry.getElements().getTypeElement(element.asType().toString());
@@ -108,6 +110,38 @@ public class ColumnElement {
 
 	public String getColumnName() {
 		return column.value();
+	}
+
+	public boolean useGetSet() {
+		return getSet != null;
+	}
+
+	public String getGetMethod() {
+		String getMethodName = null;
+
+		if ( useGetSet() ) {
+			getMethodName = getSet.getMethodName();
+
+			if ( getMethodName == null || getMethodName.equals("") ) {
+				getMethodName = "get" + capitalizeFirst(getFieldName());
+			}
+		}
+
+		return getMethodName;
+	}
+
+	public String getSetMethod() {
+		String setMethodName = null;
+
+		if ( useGetSet() ) {
+			setMethodName = getSet.setMethodName();
+
+			if ( setMethodName == null || setMethodName.equals("") ) {
+				setMethodName = "set" + capitalizeFirst(getFieldName());
+			}
+		}
+
+		return setMethodName;
 	}
 
 	public TypeElement getEnclosingElement() {
@@ -207,5 +241,9 @@ public class ColumnElement {
 		if (!conflictClause.equals(ConflictClause.NONE)) {
 			builder.append(" ON CONFLICT ").append(conflictClause.keyword());
 		}
+	}
+
+	private String capitalizeFirst ( String string ) {
+		return Character.toUpperCase(string.charAt(0)) + string.substring(1);
 	}
 }
