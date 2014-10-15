@@ -17,15 +17,19 @@
 package ollie.internal.codegen.element;
 
 import android.text.TextUtils;
+import android.util.Log;
 import com.google.common.collect.Maps;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.NodeType;
 import ollie.annotation.*;
 import ollie.internal.codegen.Registry;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.NoType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +57,8 @@ public class ColumnElement {
 	};
 
 	private Column column;
-	private GetSet getSet;
+	private ExecutableElement accessorMethod;
+	private ExecutableElement mutatorMethod;
 	private VariableElement element;
 	private TypeElement enclosingType;
 	private TypeElement deserializedType;
@@ -67,7 +72,6 @@ public class ColumnElement {
 
 	public ColumnElement(Registry registry, TypeElement enclosingType, VariableElement element) {
 		this.element = element;
-		this.getSet = element.getAnnotation(GetSet.class);
 		this.column = element.getAnnotation(Column.class);
 		this.enclosingType = enclosingType;
 		this.deserializedType = registry.getElements().getTypeElement(element.asType().toString());
@@ -98,6 +102,18 @@ public class ColumnElement {
 				e.printStackTrace();
 			}
 		}
+
+		List<ExecutableElement> enclosedElements = ElementFilter.methodsIn(enclosingType.getEnclosedElements());
+		for ( ExecutableElement enclosedElement : enclosedElements ) {
+			Accessor accessor = enclosedElement.getAnnotation(Accessor.class);
+			if ( accessor != null && accessor.value().equals(column.value()) ) {
+				if ( enclosedElement.getReturnType().getKind() == TypeKind.VOID ) {
+					mutatorMethod = enclosedElement;
+				} else {
+					accessorMethod = enclosedElement;
+				}
+			}
+		}
 	}
 
 	public boolean isModel() {
@@ -112,40 +128,16 @@ public class ColumnElement {
 		return column.value();
 	}
 
-	public boolean useGetSet() {
-		return getSet != null;
-	}
-
-	public String getGetMethod() {
-		String getMethodName = null;
-
-		if ( useGetSet() ) {
-			getMethodName = getSet.getMethodName();
-
-			if ( getMethodName == null || getMethodName.equals("") ) {
-				getMethodName = "get" + capitalizeFirst(getFieldName());
-			}
-		}
-
-		return getMethodName;
-	}
-
-	public String getSetMethod() {
-		String setMethodName = null;
-
-		if ( useGetSet() ) {
-			setMethodName = getSet.setMethodName();
-
-			if ( setMethodName == null || setMethodName.equals("") ) {
-				setMethodName = "set" + capitalizeFirst(getFieldName());
-			}
-		}
-
-		return setMethodName;
-	}
-
 	public TypeElement getEnclosingElement() {
 		return enclosingType;
+	}
+
+	public ExecutableElement getMutatorMethod () {
+		return mutatorMethod;
+	}
+
+	public ExecutableElement getAccessorMethod () {
+		return accessorMethod;
 	}
 
 	public String getEnclosingQualifiedName() {
@@ -241,9 +233,5 @@ public class ColumnElement {
 		if (!conflictClause.equals(ConflictClause.NONE)) {
 			builder.append(" ON CONFLICT ").append(conflictClause.keyword());
 		}
-	}
-
-	private String capitalizeFirst ( String string ) {
-		return Character.toUpperCase(string.charAt(0)) + string.substring(1);
 	}
 }

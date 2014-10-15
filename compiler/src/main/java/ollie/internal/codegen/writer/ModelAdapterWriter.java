@@ -174,8 +174,8 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 			if (column.isModel()) {
 				closeParens++;
 				value.append("Ollie.getOrFindEntity(entity.");
-				if ( column.useGetSet() ) {
-					value.append(column.getGetMethod()).append("()");
+				if ( column.getAccessorMethod() != null ) {
+					value.append(column.getAccessorMethod().getSimpleName().toString()).append("()");
 				} else {
 					value.append(column.getFieldName());
 				}
@@ -194,8 +194,8 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 				value.append(")");
 			}
 
-			if ( column.useGetSet() ) {
-				writer.emitStatement("entity." + column.getSetMethod() + "(" + value.toString() + ")");
+			if ( column.getMutatorMethod() != null ) {
+				writer.emitStatement("entity." + column.getMutatorMethod().getSimpleName().toString() + "(" + value.toString() + ")");
 			} else {
 				writer.emitStatement("entity." + column.getFieldName() + " = " + value.toString());
 			}
@@ -225,8 +225,8 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 
 			value.append("entity.");
 
-			if ( column.useGetSet() ) {
-				value.append(column.getGetMethod()).append("()");
+			if ( column.getAccessorMethod() != null ) {
+				value.append(column.getAccessorMethod().getSimpleName().toString()).append("()");
 			} else {
 				value.append(column.getFieldName());
 			}
@@ -234,8 +234,9 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 			if (column.isModel()) {
 				value.append(" != null ? ");
 				value.append("entity.");
-				if ( column.useGetSet() ) {
-					value.append(column.getGetMethod()).append("()");
+
+				if ( column.getAccessorMethod() != null ) {
+					value.append(column.getAccessorMethod().getSimpleName().toString()).append("()");
 				} else {
 					value.append(column.getFieldName());
 				}
