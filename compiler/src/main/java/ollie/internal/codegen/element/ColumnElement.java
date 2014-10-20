@@ -16,19 +16,19 @@
 
 package ollie.internal.codegen.element;
 
+import android.database.Cursor;
 import android.text.TextUtils;
 import com.google.common.collect.Maps;
 import ollie.annotation.*;
+import ollie.cursor_name_resolver.CursorNameResolver;
 import ollie.internal.codegen.Registry;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ollie.annotation.ForeignKey.DeferrableTiming;
 import static ollie.annotation.ForeignKey.ReferentialAction;
@@ -53,6 +53,9 @@ public class ColumnElement {
 	};
 
 	private Column column;
+	private InCursor inCursor;
+	private ExecutableElement accessorMethod;
+	private ExecutableElement mutatorMethod;
 	private VariableElement element;
 	private TypeElement enclosingType;
 	private TypeElement deserializedType;
@@ -69,6 +72,7 @@ public class ColumnElement {
 		this.column = element.getAnnotation(Column.class);
 		this.enclosingType = enclosingType;
 		this.deserializedType = registry.getElements().getTypeElement(element.asType().toString());
+		this.inCursor = element.getAnnotation(InCursor.class);
 
 		final TypeAdapterElement typeAdapterElement = registry.getTypeAdapterElement(deserializedType);
 		final TypeElement modelElement = registry.getElements().getTypeElement("ollie.Model");
@@ -96,6 +100,18 @@ public class ColumnElement {
 				e.printStackTrace();
 			}
 		}
+
+		List<ExecutableElement> enclosedElements = ElementFilter.methodsIn(enclosingType.getEnclosedElements());
+		for ( ExecutableElement enclosedElement : enclosedElements ) {
+			Accessor accessor = enclosedElement.getAnnotation(Accessor.class);
+			if ( accessor != null && accessor.value().equals(column.value()) ) {
+				if ( enclosedElement.getReturnType().getKind() == TypeKind.VOID ) {
+					mutatorMethod = enclosedElement;
+				} else {
+					accessorMethod = enclosedElement;
+				}
+			}
+		}
 	}
 
 	public boolean isModel() {
@@ -112,6 +128,14 @@ public class ColumnElement {
 
 	public TypeElement getEnclosingElement() {
 		return enclosingType;
+	}
+
+	public ExecutableElement getMutatorMethod () {
+		return mutatorMethod;
+	}
+
+	public ExecutableElement getAccessorMethod () {
+		return accessorMethod;
 	}
 
 	public String getEnclosingQualifiedName() {
@@ -132,6 +156,10 @@ public class ColumnElement {
 
 	public String getSerializedSimpleName() {
 		return serializedType.getSimpleName().toString();
+	}
+
+	public InCursor getInCursor () {
+		return inCursor;
 	}
 
 	public boolean requiresTypeAdapter() {
@@ -208,4 +236,5 @@ public class ColumnElement {
 			builder.append(" ON CONFLICT ").append(conflictClause.keyword());
 		}
 	}
+
 }

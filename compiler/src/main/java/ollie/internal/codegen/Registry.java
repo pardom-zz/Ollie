@@ -20,6 +20,8 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
+import ollie.Model;
+import ollie.internal.ModelAdapter;
 import ollie.internal.codegen.element.ColumnElement;
 import ollie.internal.codegen.element.MigrationElement;
 import ollie.internal.codegen.element.ModelAdapterElement;
@@ -105,6 +107,16 @@ public class Registry {
 
 	public Set<ModelAdapterElement> getModelAdapterElements() {
 		return modelAdapters;
+	}
+
+	public ModelAdapterElement getModelAdapterElement(String modelClassName) {
+		for (ModelAdapterElement modelAdapterElement : modelAdapters ) {
+			if ( modelAdapterElement.getElement().getQualifiedName().toString().equals(modelClassName) ) {
+				return modelAdapterElement;
+			}
+		}
+
+		return null;
 	}
 
 	public void addModelAdapterElement(ModelAdapterElement element) {
