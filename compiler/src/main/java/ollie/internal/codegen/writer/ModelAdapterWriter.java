@@ -24,19 +24,13 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.squareup.javawriter.JavaWriter;
 import ollie.Model;
-import ollie.annotation.Column;
-import ollie.annotation.InCursor;
 import ollie.annotation.Table;
-import ollie.cursor_name_resolver.CursorNameResolver;
 import ollie.internal.ModelAdapter;
 import ollie.internal.codegen.Registry;
 import ollie.internal.codegen.element.ColumnElement;
-import ollie.internal.codegen.element.ModelAdapterElement;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.MirroredTypeException;
-import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
@@ -101,7 +95,6 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		writeLoad(javaWriter, modelQualifiedName, columns);
 		writeSave(javaWriter, modelQualifiedName, columns);
 		writeDelete(javaWriter, modelQualifiedName, tableName);
-		writeGetColumnName(javaWriter);
 
 		javaWriter.endType();
 	}
@@ -114,8 +107,7 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 				ContentValues.class.getName(),
 				Cursor.class.getName(),
 				SQLiteDatabase.class.getName(),
-				ModelAdapter.class.getName(),
-				CursorNameResolver.class.getName()
+				ModelAdapter.class.getName()
 		);
 
 		for (ColumnElement column : columns) {
@@ -173,58 +165,33 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 	private void writeLoad(JavaWriter writer, String modelQualifiedName, Set<ColumnElement> columns) throws
 			IOException {
 
-		List<ModelAdapterElement> generatedModelAdapterElements = new ArrayList<ModelAdapterElement>();
-
 		writer.beginMethod("void", "load", MODIFIERS, modelQualifiedName, "entity", "Cursor", "cursor");
-		writer.emitStatement("load(entity, cursor, null)");
-		writer.endMethod();
-		writer.emitEmptyLine();
-
-		writer.beginMethod("void", "load", MODIFIERS, modelQualifiedName, "entity", "Cursor", "cursor", "CursorNameResolver", "cursorNameResolver");
-		writer.emitEmptyLine();
 
 		for (ColumnElement column : columns) {
 			final StringBuilder value = new StringBuilder();
 
-			if ( column.getInCursor() != null ) {
-				String instanceName = column.getColumnName();
-				writer.emitStatement(column.getDeserializedSimpleName() + " " + instanceName + " = new " + column.getDeserializedSimpleName() + "()");
-
-				ModelAdapterElement modelAdapterElement = registry.getModelAdapterElement(column.getDeserializedQualifiedName());
-				if ( modelAdapterElement != null ) {
-					String adapterInstanceName = instanceName + "Adapter";
-					if ( !generatedModelAdapterElements.contains(modelAdapterElement) ) {
-						writer.emitStatement(modelAdapterElement.getSimpleName() + " " + adapterInstanceName + " = new " + modelAdapterElement.getSimpleName() + "()");
-					}
-					writer.emitStatement(adapterInstanceName + ".load(" + instanceName + ", cursor, (cursorNameResolver == null ? new " + getTypeElement(column.getInCursor()).getQualifiedName() + "() : cursorNameResolver))");
+			int closeParens = 1;
+			if (column.isModel()) {
+				closeParens++;
+				value.append("Ollie.getOrFindEntity(entity.");
+				if ( column.getAccessorMethod() != null ) {
+					value.append(column.getAccessorMethod().getSimpleName().toString()).append("()");
+				} else {
+					value.append(column.getFieldName());
 				}
+				value.append(".getClass(), ");
+			} else if (column.requiresTypeAdapter()) {
+				closeParens++;
+				value.append("Ollie.getTypeAdapter(")
+						.append(column.getDeserializedSimpleName())
+						.append(".class).deserialize(");
+			}
 
-				value.append(column.getColumnName());
-			} else {
-				String columnIndexName = column.getFieldName() + "ColumnIndex";
-				writer.emitStatement("int " + columnIndexName + " = cursor.getColumnIndex(getColumnName(cursorNameResolver, \"" + column.getColumnName() + "\"))");
-				writer.beginControlFlow("if(" + columnIndexName + " >= 0)");
+			value.append("cursor.").append(CURSOR_METHOD_MAP.get(column.getSerializedQualifiedName())).append("(");
+			value.append("cursor.getColumnIndex(\"").append(column.getColumnName()).append("\")");
 
-				int closeParens = 1;
-				if (column.isModel()) {
-					closeParens++;
-					value.append("Ollie.getOrFindEntity(entity.");
-					if (column.getAccessorMethod() != null) {
-						value.append(column.getAccessorMethod().getSimpleName().toString()).append("()");
-					} else {
-						value.append(column.getFieldName());
-					}
-					value.append(".getClass(), ");
-				} else if (column.requiresTypeAdapter()) {
-					closeParens++;
-					value.append("Ollie.getTypeAdapter(").append(column.getDeserializedSimpleName()).append(".class).deserialize(");
-				}
-
-				value.append("cursor.").append(CURSOR_METHOD_MAP.get(column.getSerializedQualifiedName())).append("(").append(columnIndexName);
-
-				for (int i = 0; i < closeParens; i++) {
-					value.append(")");
-				}
+			for (int i = 0; i < closeParens; i++) {
+				value.append(")");
 			}
 
 			if ( column.getMutatorMethod() != null ) {
@@ -232,12 +199,6 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 			} else {
 				writer.emitStatement("entity." + column.getFieldName() + " = " + value.toString());
 			}
-
-			if ( column.getInCursor() == null ) {
-				writer.endControlFlow();
-			}
-
-			writer.emitEmptyLine();
 		}
 
 		writer.endMethod();
@@ -303,32 +264,7 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		writer.emitEmptyLine();
 	}
 
-	private void writeGetColumnName(JavaWriter writer) throws IOException {
-		writer.beginMethod("String", "getColumnName", MODIFIERS, "CursorNameResolver", "cursorNameResolver", "String", "columnName");
-		writer.beginControlFlow("if (cursorNameResolver == null)");
-		writer.emitStatement("return columnName");
-		writer.nextControlFlow("else");
-		writer.emitStatement("return cursorNameResolver.getCursorName(getModelType(), columnName)");
-		writer.endControlFlow();
-		writer.endMethod();
-		writer.emitEmptyLine();
-	}
-
 	private String createSimpleName(TypeElement element) {
 		return element.getSimpleName().toString() + "$$ModelAdapter";
-	}
-
-	private TypeElement getTypeElement(InCursor annotation) {
-		return (TypeElement) registry.getTypes().asElement(getTypeMirror(annotation));
-	}
-
-	private TypeMirror getTypeMirror(InCursor annotation) {
-		try {
-			annotation.value();
-		} catch( MirroredTypeException mte ) {
-			return mte.getTypeMirror();
-		}
-
-		return null;
 	}
 }

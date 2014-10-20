@@ -16,19 +16,23 @@
 
 package ollie.internal.codegen.element;
 
-import android.database.Cursor;
 import android.text.TextUtils;
+import android.util.Log;
 import com.google.common.collect.Maps;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.NodeType;
 import ollie.annotation.*;
-import ollie.cursor_name_resolver.CursorNameResolver;
 import ollie.internal.codegen.Registry;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.NoType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static ollie.annotation.ForeignKey.DeferrableTiming;
 import static ollie.annotation.ForeignKey.ReferentialAction;
@@ -53,7 +57,6 @@ public class ColumnElement {
 	};
 
 	private Column column;
-	private InCursor inCursor;
 	private ExecutableElement accessorMethod;
 	private ExecutableElement mutatorMethod;
 	private VariableElement element;
@@ -72,7 +75,6 @@ public class ColumnElement {
 		this.column = element.getAnnotation(Column.class);
 		this.enclosingType = enclosingType;
 		this.deserializedType = registry.getElements().getTypeElement(element.asType().toString());
-		this.inCursor = element.getAnnotation(InCursor.class);
 
 		final TypeAdapterElement typeAdapterElement = registry.getTypeAdapterElement(deserializedType);
 		final TypeElement modelElement = registry.getElements().getTypeElement("ollie.Model");
@@ -158,10 +160,6 @@ public class ColumnElement {
 		return serializedType.getSimpleName().toString();
 	}
 
-	public InCursor getInCursor () {
-		return inCursor;
-	}
-
 	public boolean requiresTypeAdapter() {
 		return !serializedType.getQualifiedName().equals(deserializedType.getQualifiedName());
 	}
@@ -236,5 +234,4 @@ public class ColumnElement {
 			builder.append(" ON CONFLICT ").append(conflictClause.keyword());
 		}
 	}
-
 }
