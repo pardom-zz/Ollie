@@ -25,19 +25,11 @@ public class ModelAdapterElement {
 		this.element = element;
 	}
 
-	public String getSimpleName() {
-		return element.getSimpleName() + "$$ModelAdapter";
-	}
-
 	public String getQualifiedName() {
-		return "ollie." + getSimpleName();
+		return "ollie." + element.getSimpleName() + "$$ModelAdapter";
 	}
 
 	public String getModelQualifiedName() {
 		return element.getQualifiedName().toString();
-	}
-
-	public TypeElement getElement() {
-		return element;
 	}
 }

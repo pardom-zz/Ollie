@@ -63,11 +63,7 @@ public class ModelAdapterStep implements ProcessingStep {
 				registry.addModelAdapterElement(new ModelAdapterElement((TypeElement) tableElement));
 
 				addColumnElements((TypeElement) tableElement);
-			}
-		}
 
-		for (Element tableElement : tableElements) {
-			if (validator.validate(tableElement.getEnclosingElement(), tableElement)) {
 				try {
 					String name = sourceWriter.createSourceName(tableElement);
 					JavaFileObject object = filer.createSourceFile(name, tableElement);
@@ -80,7 +76,6 @@ public class ModelAdapterStep implements ProcessingStep {
 				}
 			}
 		}
-
 		return false;
 	}
 
