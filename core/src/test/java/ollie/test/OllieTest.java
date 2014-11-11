@@ -49,8 +49,9 @@ public class OllieTest {
 	private static final int TAG_COUNT = 10;
 
 	@BeforeClass
-	public static void setup() {
+	public static void setup() throws Exception {
 		new File("path").delete();
+		new File("path").createNewFile();
 	}
 
 	@Before
