@@ -173,9 +173,9 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 			int closeParens = 1;
 			if (column.isModel()) {
 				closeParens++;
-				value.append("Ollie.getOrFindEntity(entity.")
-						.append(column.getFieldName())
-						.append(".getClass(), ");
+				value.append("Ollie.getOrFindEntity(")
+						.append(column.getDeserializedQualifiedName())
+						.append(".class, ");
 			} else if (column.requiresTypeAdapter()) {
 				closeParens++;
 				value.append("Ollie.getTypeAdapter(")
