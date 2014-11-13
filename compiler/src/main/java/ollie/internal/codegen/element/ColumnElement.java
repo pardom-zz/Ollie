@@ -18,20 +18,31 @@ package ollie.internal.codegen.element;
 
 import android.text.TextUtils;
 import com.google.common.collect.Maps;
-import ollie.annotation.*;
+import ollie.annotation.AutoIncrement;
+import ollie.annotation.Check;
+import ollie.annotation.Collate;
+import ollie.annotation.Column;
+import ollie.annotation.ConflictClause;
+import ollie.annotation.Default;
+import ollie.annotation.ForeignKey;
+import ollie.annotation.NotNull;
+import ollie.annotation.PrimaryKey;
+import ollie.annotation.Table;
+import ollie.annotation.Unique;
 import ollie.internal.codegen.Registry;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ollie.annotation.ForeignKey.DeferrableTiming;
-import static ollie.annotation.ForeignKey.ReferentialAction;
+import static ollie.annotation.ForeignKey.*;
 
 public class ColumnElement {
 	private static final Map<String, String> SQL_TYPE_MAP = new HashMap<String, String>() {
@@ -68,7 +79,7 @@ public class ColumnElement {
 		this.element = element;
 		this.column = element.getAnnotation(Column.class);
 		this.enclosingType = enclosingType;
-		this.deserializedType = registry.getElements().getTypeElement(element.asType().toString());
+		this.deserializedType = registry.getElements().getTypeElement(getType(element));
 
 		final TypeAdapterElement typeAdapterElement = registry.getTypeAdapterElement(deserializedType);
 		final TypeElement modelElement = registry.getElements().getTypeElement("ollie.Model");
@@ -207,5 +218,31 @@ public class ColumnElement {
 		if (!conflictClause.equals(ConflictClause.NONE)) {
 			builder.append(" ON CONFLICT ").append(conflictClause.keyword());
 		}
+	}
+
+	private String getType(VariableElement typeElement) {
+		if (typeElement.asType() instanceof PrimitiveType) {
+			TypeKind kind = typeElement.asType().getKind();
+			switch (kind) {
+				case BOOLEAN:
+					return Boolean.class.getName();
+				case BYTE:
+					return Byte.class.getName();
+				case SHORT:
+					return Short.class.getName();
+				case INT:
+					return Integer.class.getName();
+				case LONG:
+					return Long.class.getName();
+				case CHAR:
+					return Character.class.getName();
+				case FLOAT:
+					return Float.class.getName();
+				case DOUBLE:
+					return Double.class.getName();
+			}
+		}
+
+		return typeElement.asType().toString();
 	}
 }

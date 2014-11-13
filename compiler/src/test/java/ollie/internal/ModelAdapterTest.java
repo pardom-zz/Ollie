@@ -43,9 +43,11 @@ public class ModelAdapterTest {
 						"	public static final String TITLE = \"title\";",
 						"	public static final String BODY = \"body\";",
 						"	public static final String DATE = \"date\";",
+						"	public static final String SHARES = \"shares\";",
 						"	@Column(TITLE) public String title;",
 						"	@Column(BODY) @NotNull public String body;",
 						"	@Column(DATE) public Date date;",
+						"	@Column(SHARES) public int shares;",
 						"}"
 				));
 
@@ -71,7 +73,8 @@ public class ModelAdapterTest {
 						"			\"_id INTEGER PRIMARY KEY AUTOINCREMENT, \" +",
 						"			\"title TEXT, \" +",
 						"			\"body TEXT NOT NULL, \" +",
-						"			\"date INTEGER)\";",
+						"			\"date INTEGER, \" +",
+				        "           \"shares INTEGER)\";",
 						"	}",
 						"	public final void load(Note entity, Cursor cursor) {",
 						"		entity.id = cursor.getLong(cursor.getColumnIndex(\"_id\"));",
@@ -79,6 +82,7 @@ public class ModelAdapterTest {
 						"		entity.body = cursor.getString(cursor.getColumnIndex(\"body\"));",
 						"		entity.date = Ollie.getTypeAdapter(Date.class)",
 						"				.deserialize(cursor.getLong(cursor.getColumnIndex(\"date\")));",
+						"       entity.shares = cursor.getInt(cursor.getColumnIndex(\"shares\"));",
 						"	}",
 						"	public final Long save(Note entity, SQLiteDatabase db) {",
 						"		ContentValues values = new ContentValues();",
@@ -87,6 +91,7 @@ public class ModelAdapterTest {
 						"		values.put(\"body\", entity.body);",
 						"		values.put(\"date\", (Long) Ollie.getTypeAdapter(Date.class)",
 						"				.serialize(entity.date));",
+						"		values.put(\"shares\", entity.shares);",
 						"		return insertOrUpdate(entity, db, values);",
 						"	}",
 						"	public final void delete(Note entity, SQLiteDatabase db) {",
@@ -94,6 +99,7 @@ public class ModelAdapterTest {
 						"	}",
 						"}"
 				));
+
 
 		ASSERT.about(javaSource()).that(source)
 				.processedWith(ollieProcessors())
