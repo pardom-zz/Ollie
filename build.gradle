@@ -5,6 +5,15 @@ buildscript {
 }
 
 subprojects {
+	configurations {
+		provided {
+			dependencies.all { dep ->
+				configurations.default.exclude group: dep.group, module: dep.name
+			}
+		}
+		compile.extendsFrom provided
+	}
+
 	project.group = GROUP
 	project.version = VERSION_NAME
 }

@@ -40,7 +40,7 @@ import java.io.File;
 import java.util.*;
 
 import static ollie.Ollie.LogLevel;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, shadows = PersistentShadowSQLiteOpenHelper.class)

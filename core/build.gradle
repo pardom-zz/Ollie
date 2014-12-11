@@ -4,28 +4,17 @@ apply from: '../gradle-mvn-push.gradle'
 targetCompatibility = '1.6'
 sourceCompatibility = '1.6'
 
-def Properties props = new Properties()
-props.load(new FileInputStream(file('../local.properties')))
-
-def android = [
-		sdk   : props["sdk.dir"],
-		target: 'android-19'
-]
-
 repositories {
 	mavenCentral()
-	maven {
-		url "${android.sdk}/extras/android/m2repository/"
-	}
 }
 
 dependencies {
-	compile 'com.google.android:android:4.1.1.4'
+	provided 'com.google.android:android:4.1.1.4'
 	compile 'io.reactivex:rxjava:1.0.2'
 
 	testCompile project(':compiler')
-	testCompile 'com.squareup.assertj:assertj-android:1.0.0'
 	testCompile 'junit:junit:4.12'
+	testCompile 'org.assertj:assertj-core:1.6.0'
 	testCompile 'org.robolectric:robolectric:2.4'
 }
 
