@@ -217,22 +217,22 @@ public class OllieTest {
 		Query query;
 
 		sql = "UPDATE notes SET title='Testing UPDATE'";
-		query = new Update(Note.class).set("title='Testing UPDATE'");
+		query = Update.table(Note.class).set("title='Testing UPDATE'");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "UPDATE notes SET title=?";
-		query = new Update(Note.class).set("title=?", "Testing UPDATE");
+		query = Update.table(Note.class).set("title=?", "Testing UPDATE");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"Testing UPDATE"});
 
 		sql = "UPDATE notes SET title='Testing UPDATE' WHERE _id=1";
-		query = new Update(Note.class).set("title='Testing UPDATE'").where(Model._ID + "=1");
+		query = Update.table(Note.class).set("title='Testing UPDATE'").where(Model._ID + "=1");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "UPDATE notes SET title=? WHERE _id=?";
-		query = new Update(Note.class).set("title=?", "Testing UPDATE").where(Model._ID + "=?", "1");
+		query = Update.table(Note.class).set("title=?", "Testing UPDATE").where(Model._ID + "=?", "1");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"Testing UPDATE", "1"});
 	}

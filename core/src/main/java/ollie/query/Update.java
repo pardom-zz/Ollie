@@ -20,38 +20,53 @@ import ollie.Model;
 import ollie.Ollie;
 
 public final class Update extends QueryBase {
-	public Update(Class<? extends Model> table) {
-		super(null, table);
+	private Update() {
+		super(null, null);
 	}
 
-	public Set set(String set) {
-		return set(set, (Object[]) null);
-	}
-
-	public Set set(String set, Object... args) {
-		return new Set(this, mTable, set, args);
+	public static <T extends Model> Table<T> table(Class<T> table) {
+		return new Table<T>(new Update(), table);
 	}
 
 	@Override
 	public String getPartSql() {
-		return "UPDATE " + Ollie.getTableName(mTable);
+		return "UPDATE";
 	}
 
-	public static final class Set extends ExecutableQueryBase {
+	public static final class Table<T extends Model> extends QueryBase<T> {
+		public Table(Query parent, Class<T> table) {
+			super(parent, table);
+		}
+
+		public Set set(String set) {
+			return set(set, (Object[]) null);
+		}
+
+		public Set set(String set, Object... args) {
+			return new Set(this, mTable, set, args);
+		}
+
+		@Override
+		protected String getPartSql() {
+			return Ollie.getTableName(mTable);
+		}
+	}
+
+	public static final class Set<T extends Model> extends ExecutableQueryBase<T> {
 		private String mSet;
 		private Object[] mSetArgs;
 
-		private Set(Query parent, Class<? extends Model> table, String set, Object... args) {
+		private Set(Query parent, Class<T> table, String set, Object... args) {
 			super(parent, table);
 			mSet = set;
 			mSetArgs = args;
 		}
 
-		public Where where(String where) {
+		public Where<T> where(String where) {
 			return where(where, (Object[]) null);
 		}
 
-		public Where where(String where, Object... args) {
+		public Where<T> where(String where, Object... args) {
 			return new Where(this, mTable, where, args);
 		}
 
@@ -66,11 +81,11 @@ public final class Update extends QueryBase {
 		}
 	}
 
-	public static final class Where extends ExecutableQueryBase {
+	public static final class Where<T extends Model> extends ExecutableQueryBase<T> {
 		private String mWhere;
 		private Object[] mWhereArgs;
 
-		private Where(Query parent, Class<? extends Model> table, String where, Object[] args) {
+		private Where(Query parent, Class<T> table, String where, Object[] args) {
 			super(parent, table);
 			mWhere = where;
 			mWhereArgs = args;
