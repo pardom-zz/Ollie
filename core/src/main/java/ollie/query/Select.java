@@ -59,9 +59,8 @@ public final class Select<T extends Model> extends QueryBase<T> {
 			if (mColumns != null && mColumns.length > 0) {
 				builder.append(TextUtils.join(", ", mColumns)).append(" ");
 			} else {
-				builder.append(Ollie.getTableName(mTable) + ".* ");
+				builder.append(Ollie.getTableName(mTable)).append(".* ");
 			}
-
 			return builder.toString();
 		}
 	}
