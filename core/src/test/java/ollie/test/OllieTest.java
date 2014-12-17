@@ -40,7 +40,7 @@ import java.io.File;
 import java.util.*;
 
 import static ollie.Ollie.LogLevel;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, shadows = PersistentShadowSQLiteOpenHelper.class)
@@ -135,33 +135,33 @@ public class OllieTest {
 		Query query;
 
 		sql = "SELECT * FROM notes";
-		query = new Select().from(Note.class);
+		query = Select.from(Note.class);
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "SELECT * FROM notes WHERE _id=?";
-		query = new Select().from(Note.class).where(Model._ID + "=?", "1");
+		query = Select.from(Note.class).where(Model._ID + "=?", "1");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"1"});
 
 		sql = "SELECT * FROM notes ORDER BY title ASC";
-		query = new Select().from(Note.class).orderBy("title ASC");
+		query = Select.from(Note.class).orderBy("title ASC");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "SELECT * FROM notes LIMIT 1";
-		query = new Select().from(Note.class).limit("1");
+		query = Select.from(Note.class).limit("1");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "SELECT * FROM notes LIMIT 1 OFFSET 10";
-		query = new Select().from(Note.class).limit("1").offset("10");
+		query = Select.from(Note.class).limit("1").offset("10");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "SELECT * FROM notes INNER JOIN noteTags ON notes.id=noteTags.note INNER JOIN tags ON tag.id=noteTags" +
 				".tag WHERE tag.name=? ORDER BY notes.title ASC LIMIT 10 OFFSET 10";
-		query = new Select()
+		query = Select
 				.from(Note.class)
 				.innerJoin(NoteTag.class).on("notes.id=noteTags.note")
 				.innerJoin(Tag.class).on("tag.id=noteTags.tag")
@@ -179,29 +179,30 @@ public class OllieTest {
 		Query query;
 
 		sql = "INSERT INTO notes VALUES(?, ?, ?)";
-		query = new Insert().into(Note.class).values("Testing INSERT", "Testing INSERT body.", "0");
+		query = Insert.into(Note.class).values("Testing INSERT", "Testing INSERT body.", "0");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"Testing INSERT", "Testing INSERT body.", "0"});
 
-		sql = "INSERT INTO notes(title) VALUES(?)";
-		query = new Insert().into(Note.class, "title").values("Testing INSERT");
+		sql = "INSERT INTO notes (title) VALUES(?)";
+		query = Insert.into(Note.class).columns("title").values("Testing INSERT");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"Testing INSERT"});
 
-		sql = "INSERT INTO notes(title, body) VALUES(?, ?)";
-		query = new Insert().into(Note.class, "title", "body").values("Testing INSERT", "Testing INSERT body.");
+		sql = "INSERT INTO notes (title, body) VALUES(?, ?)";
+		query = Insert.into(Note.class).columns("title", "body").values("Testing INSERT", "Testing INSERT body.");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"Testing INSERT", "Testing INSERT body."});
 
-		sql = "INSERT INTO notes(title, body, date) VALUES(?, ?, ?)";
-		query = new Insert().into(Note.class, "title", "body", "date").values("Testing INSERT",
+		sql = "INSERT INTO notes (title, body, date) VALUES(?, ?, ?)";
+		query = Insert.into(Note.class).columns("title", "body", "date").values("Testing INSERT",
 				"Testing INSERT body.", "0");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"Testing INSERT", "Testing INSERT body.", "0"});
 
 		try {
-			new Insert().into(Note.class, "title", "body", "date").values("Testing INSERT",
-					"Testing INSERT body.").execute();
+			Insert.into(Note.class).columns("title", "body", "date")
+					.values("Testing INSERT", "Testing INSERT body.")
+					.execute();
 			assert false;
 		} catch (Query.MalformedQueryException e) {
 			// Successfully threw exception
@@ -242,17 +243,17 @@ public class OllieTest {
 		Query query;
 
 		sql = "DELETE FROM notes";
-		query = new Delete().from(Note.class);
+		query = Delete.from(Note.class);
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "DELETE FROM notes WHERE _id=1";
-		query = new Delete().from(Note.class).where(Model._ID + "=1");
+		query = Delete.from(Note.class).where(Model._ID + "=1");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
 		sql = "DELETE FROM notes WHERE _id=?";
-		query = new Delete().from(Note.class).where(Model._ID + "=?", "1");
+		query = Delete.from(Note.class).where(Model._ID + "=?", "1");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"1"});
 	}
@@ -260,16 +261,16 @@ public class OllieTest {
 	@Test
 	public void testSelectEntity() {
 		// Single note
-		Note note = new Select().from(Note.class).fetchSingle();
+		Note note = Select.from(Note.class).fetchSingle();
 		assertThat(note).isNotNull();
 		assertThat(note.id).isNotNull();
 		assertThat(note.id).isGreaterThan(0l);
 
 		// Single note async
-		new Select().from(Note.class).observableSingle()
-				.subscribe(new Action1<Model>() {
+		Select.from(Note.class).observableSingle()
+				.subscribe(new Action1<Note>() {
 					@Override
-					public void call(Model note) {
+					public void call(Note note) {
 						System.out.println("2");
 						assertThat(note).isNotNull();
 						assertThat(note.id).isNotNull();
@@ -279,13 +280,13 @@ public class OllieTest {
 
 
 		// Single note by id
-		note = new Select().from(Note.class).where(Note._ID + "=?", 1).fetchSingle();
+		note = Select.from(Note.class).where(Note._ID + "=?", 1).fetchSingle();
 		assertThat(note).isNotNull();
 		assertThat(note.id).isNotNull();
 		assertThat(note.id).isGreaterThan(0l);
 
 		// Single tag
-		Tag tag = new Select().from(Tag.class).fetchSingle();
+		Tag tag = Select.from(Tag.class).fetchSingle();
 		assertThat(tag).isNotNull();
 		assertThat(tag.id).isNotNull();
 		assertThat(tag.id).isGreaterThan(0l);
@@ -297,12 +298,13 @@ public class OllieTest {
 		noteTag.save();
 
 		// Many
-		List<Note> notes = new Select().from(Note.class).fetch();
+		List<Note> notes = Select.from(Note.class).fetch();
 		assertThat(notes).isNotNull();
 		assertThat(notes.size()).isGreaterThan(0);
 
 		// Join
-		notes = new Select("notes.*")
+		notes = Select
+				.columns("notes.*")
 				.from(Note.class)
 				.innerJoin(NoteTag.class).on("notes._id=noteTags.note")
 				.innerJoin(Tag.class).on("tags._id=noteTags.tag")
@@ -314,10 +316,10 @@ public class OllieTest {
 
 	@Test
 	public void testFetchValue() {
-		long sum = new Select("SUM(date)").from(Note.class).fetchValue(long.class);
+		long sum = Select.columns("SUM(date)").from(Note.class).fetchValue(long.class);
 		assertThat(sum).isGreaterThan(0);
 
-		int count = new Select("COUNT(*)").from(Note.class).fetchValue(int.class);
+		int count = Select.columns("COUNT(*)").from(Note.class).fetchValue(int.class);
 		assertThat(count).isGreaterThan(0);
 	}
 
@@ -333,7 +335,7 @@ public class OllieTest {
 		Note note = new Note();
 		note.body = "this is draft";
 		note.save();
-		new Delete().from(Note.class).where(Note._ID + "=?", note.id.toString()).execute();
+		Delete.from(Note.class).where(Note._ID + "=?", note.id.toString()).execute();
 
 		// TODO: This seems like a bit of work
 		// assertThat(note.id).isNull();

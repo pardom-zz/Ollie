@@ -20,17 +20,13 @@ import android.text.TextUtils;
 import ollie.Model;
 import ollie.Ollie;
 
-public final class Insert extends QueryBase {
-	public Insert() {
+public final class Insert<T extends Model> extends QueryBase<T> {
+	private Insert() {
 		super(null, null);
 	}
 
-	public Into into(Class<? extends Model> table) {
-		return new Into(this, table);
-	}
-
-	public Into into(Class<? extends Model> table, String... columns) {
-		return new Into(this, table, columns);
+	public static <T extends Model> Into<T> into(Class<T> table) {
+		return new Into<T>(new Insert<T>(), table);
 	}
 
 	@Override
@@ -38,16 +34,17 @@ public final class Insert extends QueryBase {
 		return "INSERT";
 	}
 
-	public static final class Into extends QueryBase {
-		private String[] mColumns;
-
-		private Into(Query parent, Class<? extends Model> table, String... columns) {
+	public static final class Into<T extends Model> extends QueryBase<T> {
+		private Into(Query parent, Class<T> table) {
 			super(parent, table);
-			mColumns = columns;
 		}
 
-		public Values values(Object... args) {
-			return new Values(this, mTable, args);
+		public Columns<T> columns(String... columns) {
+			return new Columns<T>(this, mTable, columns);
+		}
+
+		public Values<T> values(Object... args) {
+			return new Values<T>(this, mTable, args);
 		}
 
 		@Override
@@ -55,28 +52,41 @@ public final class Insert extends QueryBase {
 			StringBuilder builder = new StringBuilder();
 			builder.append("INTO ");
 			builder.append(Ollie.getTableName(mTable));
-			if (mColumns != null && mColumns.length > 0) {
-				builder.append("(").append(TextUtils.join(", ", mColumns)).append(")");
-			}
-
 			return builder.toString();
 		}
 	}
 
-	public static final class Values extends ExecutableQueryBase {
-		private Object[] mValuesArgs;
+	public static final class Columns<T extends Model> extends QueryBase<T> {
+		private String[] mColumns;
 
-		private Values(Query parent, Class<? extends Model> table, Object[] args) {
+		public Columns(Query parent, Class<T> table, String[] columns) {
 			super(parent, table);
-			mValuesArgs = args;
+			mColumns = columns;
+		}
+
+		public Values<T> values(Object... args) {
+			if (mColumns.length != args.length) {
+				throw new MalformedQueryException("Number of columns does not match number of values.");
+			}
+			return new Values<T>(this, mTable, args);
 		}
 
 		@Override
-		public void execute() {
-			if (((Into) mParent).mColumns != null && ((Into) mParent).mColumns.length != mValuesArgs.length) {
-				throw new MalformedQueryException("Number of columns does not match number of values.");
+		protected String getPartSql() {
+			StringBuilder builder = new StringBuilder();
+			if (mColumns != null && mColumns.length > 0) {
+				builder.append("(").append(TextUtils.join(", ", mColumns)).append(")");
 			}
-			super.execute();
+			return builder.toString();
+		}
+	}
+
+	public static final class Values<T extends Model> extends ExecutableQueryBase<T> {
+		private Object[] mValuesArgs;
+
+		private Values(Query parent, Class<T> table, Object[] args) {
+			super(parent, table);
+			mValuesArgs = args;
 		}
 
 		@Override

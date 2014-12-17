@@ -47,7 +47,7 @@ public abstract class Model {
 	 * @return The query result.
 	 */
 	public static final <T extends Model> T find(Class<T> cls, Long id) {
-		return new Select().from(cls).where(_ID + "=?", id).fetchSingle();
+		return Select.from(cls).where(_ID + "=?", id).fetchSingle();
 	}
 
 	/**

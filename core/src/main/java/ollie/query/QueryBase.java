@@ -18,11 +18,11 @@ package ollie.query;
 
 import ollie.Model;
 
-public abstract class QueryBase implements Query {
+public abstract class QueryBase<T extends Model> implements Query {
 	protected Query mParent;
-	protected Class<? extends Model> mTable;
+	protected Class<T> mTable;
 
-	public QueryBase(Query parent, Class<? extends Model> table) {
+	public QueryBase(Query parent, Class<T> table) {
 		mParent = parent;
 		mTable = table;
 	}

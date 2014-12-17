@@ -27,19 +27,19 @@ import java.util.List;
 
 import static rx.Observable.OnSubscribe;
 
-public abstract class ResultQueryBase extends ExecutableQueryBase implements ResultQuery {
-	public ResultQueryBase(Query parent, Class<? extends Model> table) {
+public abstract class ResultQueryBase<T extends Model> extends QueryBase<T> implements ResultQuery<T> {
+	public ResultQueryBase(Query parent, Class<T> table) {
 		super(parent, table);
 	}
 
 	@Override
-	public <T extends Model> List<T> fetch() {
-		return (List<T>) QueryUtils.rawQuery(mTable, getSql(), getArgs());
+	public List<T> fetch() {
+		return QueryUtils.rawQuery(mTable, getSql(), getArgs());
 	}
 
 	@Override
-	public <T extends Model> T fetchSingle() {
-		List<T> results = (List<T>) QueryUtils.rawQuery(mTable, getSql(), getArgs());
+	public T fetchSingle() {
+		List<T> results = QueryUtils.rawQuery(mTable, getSql(), getArgs());
 		if (!results.isEmpty()) {
 			return results.get(0);
 		}
@@ -47,33 +47,33 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public <T> T fetchValue(Class<T> type) {
+	public <E> E fetchValue(Class<E> type) {
 		final Cursor cursor = Ollie.getDatabase().rawQuery(getSql(), getArgs());
 		if (!cursor.moveToFirst()) {
 			return null;
 		}
 
 		if (type.equals(Byte[].class) || type.equals(byte[].class)) {
-			return (T) cursor.getBlob(0);
+			return (E) cursor.getBlob(0);
 		} else if (type.equals(double.class) || type.equals(Double.class)) {
-			return (T) Double.valueOf(cursor.getDouble(0));
+			return (E) Double.valueOf(cursor.getDouble(0));
 		} else if (type.equals(float.class) || type.equals(Float.class)) {
-			return (T) Float.valueOf(cursor.getFloat(0));
+			return (E) Float.valueOf(cursor.getFloat(0));
 		} else if (type.equals(int.class) || type.equals(Integer.class)) {
-			return (T) Integer.valueOf(cursor.getInt(0));
+			return (E) Integer.valueOf(cursor.getInt(0));
 		} else if (type.equals(long.class) || type.equals(Long.class)) {
-			return (T) Long.valueOf(cursor.getLong(0));
+			return (E) Long.valueOf(cursor.getLong(0));
 		} else if (type.equals(short.class) || type.equals(Short.class)) {
-			return (T) Short.valueOf(cursor.getShort(0));
+			return (E) Short.valueOf(cursor.getShort(0));
 		} else if (type.equals(String.class)) {
-			return (T) cursor.getString(0);
+			return (E) cursor.getString(0);
 		}
 
 		return null;
 	}
 
 	@Override
-	public <T extends Model> Observable<List<T>> observable() {
+	public Observable<List<T>> observable() {
 		return Observable.create(new OnSubscribe<List<T>>() {
 			@Override
 			public void call(Subscriber<? super List<T>> subscriber) {
@@ -87,7 +87,7 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public <T extends Model> Observable<T> observableSingle() {
+	public Observable<T> observableSingle() {
 		return Observable.create(new OnSubscribe<T>() {
 			@Override
 			public void call(Subscriber<? super T> subscriber) {
@@ -101,11 +101,11 @@ public abstract class ResultQueryBase extends ExecutableQueryBase implements Res
 	}
 
 	@Override
-	public <T> Observable<T> observableValue(final Class<T> type) {
-		return Observable.create(new OnSubscribe<T>() {
+	public <E> Observable<E> observableValue(final Class<E> type) {
+		return Observable.create(new OnSubscribe<E>() {
 			@Override
-			public void call(Subscriber<? super T> subscriber) {
-				final T result = fetchValue(type);
+			public void call(Subscriber<? super E> subscriber) {
+				final E result = fetchValue(type);
 				if (!subscriber.isUnsubscribed()) {
 					subscriber.onNext(result);
 					subscriber.onCompleted();

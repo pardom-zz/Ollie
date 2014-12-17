@@ -23,20 +23,24 @@ import ollie.Ollie;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Select extends QueryBase {
+public final class Select<T extends Model> extends QueryBase<T> {
 	private String[] mColumns;
 
-	public Select() {
+	private Select() {
 		super(null, null);
 	}
 
-	public Select(String... columns) {
+	private Select(String... columns) {
 		super(null, null);
 		mColumns = columns;
 	}
 
-	public From from(Class<? extends Model> table) {
-		return new From(this, table);
+	public static <T extends Model> Columns<T> columns(String... columns) {
+		return new Columns<T>(columns);
+	}
+
+	public static <T extends Model> From<T> from(Class<T> table) {
+		return new From<T>(new Select<T>(), table);
 	}
 
 	@Override
@@ -52,75 +56,88 @@ public final class Select extends QueryBase {
 		return builder.toString();
 	}
 
-	public static final class From extends ResultQueryBase {
+	public static final class Columns<T extends Model> extends QueryBase<T> {
+		private String[] mColumns;
+
+		public Columns(String[] columns) {
+			super(null, null);
+			mColumns = columns;
+		}
+
+		public <T extends Model> From<T> from(Class<T> table) {
+			return new From<T>(new Select<T>(mColumns), table);
+		}
+	}
+
+	public static final class From<T extends Model> extends ResultQueryBase<T> {
 		private List<Join> mJoins = new ArrayList<Join>();
 
-		private From(Query parent, Class<? extends Model> table) {
+		private From(Query parent, Class<T> table) {
 			super(parent, table);
 		}
 
-		public Join join(Class<? extends Model> table) {
+		public <E extends Model> Join<E> join(Class<E> table) {
 			return addJoin(table, Join.Type.JOIN);
 		}
 
-		public Join leftJoin(Class<? extends Model> table) {
+		public <E extends Model> Join<E> leftJoin(Class<E> table) {
 			return addJoin(table, Join.Type.LEFT);
 		}
 
-		public Join leftOuterJoin(Class<? extends Model> table) {
+		public <E extends Model> Join<E> leftOuterJoin(Class<E> table) {
 			return addJoin(table, Join.Type.LEFT_OUTER);
 		}
 
-		public Join innerJoin(Class<? extends Model> table) {
+		public <E extends Model> Join<E> innerJoin(Class<E> table) {
 			return addJoin(table, Join.Type.INNER);
 		}
 
-		public Join crossJoin(Class<? extends Model> table) {
+		public <E extends Model> Join<E> crossJoin(Class<E> table) {
 			return addJoin(table, Join.Type.CROSS);
 		}
 
-		public Join naturalJoin(Class<? extends Model> table) {
+		public <E extends Model> Join<E> naturalJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_JOIN);
 		}
 
-		public Join naturalLeftJoin(Class<? extends Model> table) {
+		public <E extends Model> Join<E> naturalLeftJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_LEFT);
 		}
 
-		public Join naturalLeftOuterJoin(Class<? extends Model> table) {
+		public <E extends Model> Join<E> naturalLeftOuterJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_LEFT_OUTER);
 		}
 
-		public Join naturalInnerJoin(Class<? extends Model> table) {
+		public <E extends Model> Join<E> naturalInnerJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_INNER);
 		}
 
-		public Join naturalCrossJoin(Class<? extends Model> table) {
+		public <E extends Model> Join<E> naturalCrossJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_CROSS);
 		}
 
-		public Where where(String where) {
-			return new Where(this, mTable, where, null);
+		public Where<T> where(String where) {
+			return new Where<T>(this, mTable, where, null);
 		}
 
-		public Where where(String where, Object... args) {
-			return new Where(this, mTable, where, args);
+		public Where<T> where(String where, Object... args) {
+			return new Where<T>(this, mTable, where, args);
 		}
 
-		public GroupBy groupBy(String groupBy) {
-			return new GroupBy(this, mTable, groupBy);
+		public GroupBy<T> groupBy(String groupBy) {
+			return new GroupBy<T>(this, mTable, groupBy);
 		}
 
-		public OrderBy orderBy(String orderBy) {
-			return new OrderBy(this, mTable, orderBy);
+		public OrderBy<T> orderBy(String orderBy) {
+			return new OrderBy<T>(this, mTable, orderBy);
 		}
 
-		public Limit limit(String limit) {
-			return new Limit(this, mTable, limit);
+		public Limit<T> limit(String limit) {
+			return new Limit<T>(this, mTable, limit);
 		}
 
-		private Join addJoin(Class<? extends Model> table, Join.Type type) {
-			final Join join = new Join(this, table, type);
+		private <E extends Model> Join<E> addJoin(Class<E> table, Join.Type type) {
+			final Join<E> join = new Join<E>(this, table, type);
 			mJoins.add(join);
 			return join;
 		}
@@ -139,7 +156,7 @@ public final class Select extends QueryBase {
 		}
 	}
 
-	public static final class Join extends QueryBase {
+	public static final class Join<T extends Model> extends QueryBase<T> {
 		public enum Type {
 			JOIN("JOIN"),
 			LEFT("LEFT JOIN"),
@@ -166,7 +183,7 @@ public final class Select extends QueryBase {
 		private Type mType;
 		private String mConstraint;
 
-		private Join(Query parent, Class<? extends Model> table, Type type) {
+		private Join(Query parent, Class<T> table, Type type) {
 			super(parent, table);
 			mType = type;
 		}
@@ -187,26 +204,26 @@ public final class Select extends QueryBase {
 		}
 	}
 
-	public static final class Where extends ResultQueryBase {
+	public static final class Where<T extends Model> extends ResultQueryBase<T> {
 		private String mWhere;
 		private Object[] mWhereArgs;
 
-		private Where(Query parent, Class<? extends Model> table, String where, Object[] args) {
+		private Where(Query parent, Class<T> table, String where, Object[] args) {
 			super(parent, table);
 			mWhere = where;
 			mWhereArgs = args;
 		}
 
-		public GroupBy groupBy() {
+		public GroupBy<T> groupBy() {
 			return null;
 		}
 
-		public OrderBy orderBy(String orderBy) {
-			return new OrderBy(this, mTable, orderBy);
+		public OrderBy<T> orderBy(String orderBy) {
+			return new OrderBy<T>(this, mTable, orderBy);
 		}
 
-		public Limit limit(String limits) {
-			return new Limit(this, mTable, limits);
+		public Limit<T> limit(String limits) {
+			return new Limit<T>(this, mTable, limits);
 		}
 
 		@Override
@@ -220,24 +237,24 @@ public final class Select extends QueryBase {
 		}
 	}
 
-	public static final class GroupBy extends ResultQueryBase {
+	public static final class GroupBy<T extends Model> extends ResultQueryBase<T> {
 		private String mGroupBy;
 
-		private GroupBy(Query parent, Class<? extends Model> table, String groupBy) {
+		private GroupBy(Query parent, Class<T> table, String groupBy) {
 			super(parent, table);
 			mGroupBy = groupBy;
 		}
 
-		public Having having(String having) {
-			return new Having(this, mTable, having);
+		public Having<T> having(String having) {
+			return new Having<T>(this, mTable, having);
 		}
 
-		public OrderBy orderBy(String orderBy) {
-			return new OrderBy(this, mTable, orderBy);
+		public OrderBy<T> orderBy(String orderBy) {
+			return new OrderBy<T>(this, mTable, orderBy);
 		}
 
-		public Limit limit(String limits) {
-			return new Limit(this, mTable, limits);
+		public Limit<T> limit(String limits) {
+			return new Limit<T>(this, mTable, limits);
 		}
 
 		@Override
@@ -246,20 +263,20 @@ public final class Select extends QueryBase {
 		}
 	}
 
-	public static final class Having extends ResultQueryBase {
+	public static final class Having<T extends Model> extends ResultQueryBase<T> {
 		private String mHaving;
 
-		private Having(Query parent, Class<? extends Model> table, String having) {
+		private Having(Query parent, Class<T> table, String having) {
 			super(parent, table);
 			mHaving = having;
 		}
 
-		public OrderBy orderBy(String orderBy) {
-			return new OrderBy(this, mTable, orderBy);
+		public OrderBy<T> orderBy(String orderBy) {
+			return new OrderBy<T>(this, mTable, orderBy);
 		}
 
-		public Limit limit(String limits) {
-			return new Limit(this, mTable, limits);
+		public Limit<T> limit(String limits) {
+			return new Limit<T>(this, mTable, limits);
 		}
 
 		@Override
@@ -268,16 +285,16 @@ public final class Select extends QueryBase {
 		}
 	}
 
-	public static final class OrderBy extends ResultQueryBase {
+	public static final class OrderBy<T extends Model> extends ResultQueryBase<T> {
 		private String mOrderBy;
 
-		private OrderBy(Query parent, Class<? extends Model> table, String orderBy) {
+		private OrderBy(Query parent, Class<T> table, String orderBy) {
 			super(parent, table);
 			mOrderBy = orderBy;
 		}
 
-		public Limit limit(String limits) {
-			return new Limit(this, mTable, limits);
+		public Limit<T> limit(String limits) {
+			return new Limit<T>(this, mTable, limits);
 		}
 
 		@Override
@@ -287,16 +304,16 @@ public final class Select extends QueryBase {
 
 	}
 
-	public static final class Limit extends ResultQueryBase {
+	public static final class Limit<T extends Model> extends ResultQueryBase<T> {
 		private String mLimit;
 
-		private Limit(Query parent, Class<? extends Model> table, String limit) {
+		private Limit(Query parent, Class<T> table, String limit) {
 			super(parent, table);
 			mLimit = limit;
 		}
 
-		public Offset offset(String offset) {
-			return new Offset(this, mTable, offset);
+		public Offset<T> offset(String offset) {
+			return new Offset<T>(this, mTable, offset);
 		}
 
 		@Override
@@ -305,10 +322,10 @@ public final class Select extends QueryBase {
 		}
 	}
 
-	public static final class Offset extends ResultQueryBase {
+	public static final class Offset<T extends Model> extends ResultQueryBase<T> {
 		private String mOffset;
 
-		private Offset(Query parent, Class<? extends Model> table, String offset) {
+		private Offset(Query parent, Class<T> table, String offset) {
 			super(parent, table);
 			mOffset = offset;
 		}

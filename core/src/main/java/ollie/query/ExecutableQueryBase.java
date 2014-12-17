@@ -19,8 +19,8 @@ package ollie.query;
 import ollie.Model;
 import ollie.util.QueryUtils;
 
-public abstract class ExecutableQueryBase extends QueryBase implements ExecutableQuery {
-	public ExecutableQueryBase(Query parent, Class<? extends Model> table) {
+public abstract class ExecutableQueryBase<T extends Model> extends QueryBase<T> implements ExecutableQuery {
+	public ExecutableQueryBase(Query parent, Class<T> table) {
 		super(parent, table);
 	}
 

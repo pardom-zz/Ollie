@@ -19,13 +19,13 @@ package ollie.query;
 import ollie.Model;
 import ollie.Ollie;
 
-public final class Delete extends QueryBase {
-	public Delete() {
+public final class Delete<T extends Model> extends QueryBase<T> {
+	private Delete() {
 		super(null, null);
 	}
 
-	public From from(Class<? extends Model> table) {
-		return new From(this, table);
+	public static <T extends Model> From from(Class<T> table) {
+		return new From<T>(new Delete<T>(), table);
 	}
 
 	@Override
@@ -33,17 +33,17 @@ public final class Delete extends QueryBase {
 		return "DELETE";
 	}
 
-	public static final class From extends ExecutableQueryBase {
-		private From(Query parent, Class<? extends Model> table) {
+	public static final class From<T extends Model> extends ExecutableQueryBase<T>{
+		private From(Query parent, Class<T> table) {
 			super(parent, table);
 		}
 
-		public Where where(String where) {
+		public Where<T> where(String where) {
 			return where(where, (Object[]) null);
 		}
 
-		public Where where(String where, Object... args) {
-			return new Where(this, mTable, where, args);
+		public Where<T> where(String where, Object... args) {
+			return new Where<T>(this, mTable, where, args);
 		}
 
 		@Override
@@ -52,11 +52,11 @@ public final class Delete extends QueryBase {
 		}
 	}
 
-	public static final class Where extends ExecutableQueryBase {
+	public static final class Where<T extends Model> extends ExecutableQueryBase<T> {
 		private String mWhere;
 		private Object[] mWhereArgs;
 
-		public Where(Query parent, Class<? extends Model> table, String where, Object[] args) {
+		public Where(Query parent, Class<T> table, String where, Object[] args) {
 			super(parent, table);
 			mWhere = where;
 			mWhereArgs = args;

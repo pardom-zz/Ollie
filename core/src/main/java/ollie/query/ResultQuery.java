@@ -21,16 +21,16 @@ import rx.Observable;
 
 import java.util.List;
 
-public interface ResultQuery extends ExecutableQuery {
-	<T extends Model> List<T> fetch();
+public interface ResultQuery<T extends Model> extends Query {
+	List<T> fetch();
 
-	<T extends Model> T fetchSingle();
+	T fetchSingle();
 
-	<T> T fetchValue(Class<T> type);
+	<E> E fetchValue(Class<E> type);
 
-	<T extends Model> Observable<List<T>> observable();
+	Observable<List<T>> observable();
 
-	<T extends Model> Observable<T> observableSingle();
+	Observable<T> observableSingle();
 
-	<T> Observable<T> observableValue(Class<T> type);
+	<E> Observable<E> observableValue(Class<E> type);
 }
