@@ -76,43 +76,43 @@ public final class Select<T extends Model> extends QueryBase<T> {
 			super(parent, table);
 		}
 
-		public <E extends Model> Join<E> join(Class<E> table) {
+		public <E extends Model> Join<T, E> join(Class<E> table) {
 			return addJoin(table, Join.Type.JOIN);
 		}
 
-		public <E extends Model> Join<E> leftJoin(Class<E> table) {
+		public <E extends Model> Join<T, E> leftJoin(Class<E> table) {
 			return addJoin(table, Join.Type.LEFT);
 		}
 
-		public <E extends Model> Join<E> leftOuterJoin(Class<E> table) {
+		public <E extends Model> Join<T, E> leftOuterJoin(Class<E> table) {
 			return addJoin(table, Join.Type.LEFT_OUTER);
 		}
 
-		public <E extends Model> Join<E> innerJoin(Class<E> table) {
+		public <E extends Model> Join<T, E> innerJoin(Class<E> table) {
 			return addJoin(table, Join.Type.INNER);
 		}
 
-		public <E extends Model> Join<E> crossJoin(Class<E> table) {
+		public <E extends Model> Join<T, E> crossJoin(Class<E> table) {
 			return addJoin(table, Join.Type.CROSS);
 		}
 
-		public <E extends Model> Join<E> naturalJoin(Class<E> table) {
+		public <E extends Model> Join<T, E> naturalJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_JOIN);
 		}
 
-		public <E extends Model> Join<E> naturalLeftJoin(Class<E> table) {
+		public <E extends Model> Join<T, E> naturalLeftJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_LEFT);
 		}
 
-		public <E extends Model> Join<E> naturalLeftOuterJoin(Class<E> table) {
+		public <E extends Model> Join<T, E> naturalLeftOuterJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_LEFT_OUTER);
 		}
 
-		public <E extends Model> Join<E> naturalInnerJoin(Class<E> table) {
+		public <E extends Model> Join<T, E> naturalInnerJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_INNER);
 		}
 
-		public <E extends Model> Join<E> naturalCrossJoin(Class<E> table) {
+		public <E extends Model> Join<T, E> naturalCrossJoin(Class<E> table) {
 			return addJoin(table, Join.Type.NATURAL_CROSS);
 		}
 
@@ -136,8 +136,8 @@ public final class Select<T extends Model> extends QueryBase<T> {
 			return new Limit<T>(this, mTable, limit);
 		}
 
-		private <E extends Model> Join<E> addJoin(Class<E> table, Join.Type type) {
-			final Join<E> join = new Join<E>(this, table, type);
+		private <E extends Model> Join<T, E> addJoin(Class<E> table, Join.Type type) {
+			final Join<T, E> join = new Join<T, E>(this, table, type);
 			mJoins.add(join);
 			return join;
 		}
@@ -156,7 +156,7 @@ public final class Select<T extends Model> extends QueryBase<T> {
 		}
 	}
 
-	public static final class Join<T extends Model> extends QueryBase<T> {
+	public static final class Join<P extends Model, T extends Model> extends QueryBase<T> {
 		public enum Type {
 			JOIN("JOIN"),
 			LEFT("LEFT JOIN"),
@@ -183,19 +183,19 @@ public final class Select<T extends Model> extends QueryBase<T> {
 		private Type mType;
 		private String mConstraint;
 
-		private Join(Query parent, Class<T> table, Type type) {
+		private Join(From<P> parent, Class<T> table, Type type) {
 			super(parent, table);
 			mType = type;
 		}
 
-		public From on(String constraint) {
+		public From<P> on(String constraint) {
 			mConstraint = "ON " + constraint;
-			return (From) mParent;
+			return (From<P>) mParent;
 		}
 
-		public From using(String... columns) {
+		public From<P> using(String... columns) {
 			mConstraint = "USING (" + TextUtils.join(", ", columns) + ")";
-			return (From) mParent;
+			return (From<P>) mParent;
 		}
 
 		@Override
