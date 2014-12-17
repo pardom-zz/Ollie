@@ -22,10 +22,10 @@ import android.database.sqlite.*;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.os.Build;
 import android.provider.BaseColumns;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import ollie.internal.AdapterHolder;
 import ollie.internal.ModelAdapter;
-import ollie.util.LruCache;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;

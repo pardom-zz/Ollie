@@ -9,7 +9,8 @@ repositories {
 }
 
 dependencies {
-	provided 'com.google.android:android:4.1.1.4'
+	compile 'com.google.android:android:4.1.1.4'
+	compile 'com.google.android:support-v4:r7'
 	compile 'io.reactivex:rxjava:1.0.2'
 
 	testCompile project(':compiler')
