@@ -40,7 +40,7 @@ public final class Select<T extends Model> extends QueryBase<T> {
 	}
 
 	public static <T extends Model> From<T> from(Class<T> table) {
-		return new From<T>(new Select<T>(), table);
+		return new From<T>(new Select(), table);
 	}
 
 	@Override

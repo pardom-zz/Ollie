@@ -20,13 +20,13 @@ import android.text.TextUtils;
 import ollie.Model;
 import ollie.Ollie;
 
-public final class Insert<T extends Model> extends QueryBase<T> {
+public final class Insert extends QueryBase {
 	private Insert() {
 		super(null, null);
 	}
 
 	public static <T extends Model> Into<T> into(Class<T> table) {
-		return new Into<T>(new Insert<T>(), table);
+		return new Into<T>(new Insert(), table);
 	}
 
 	@Override

@@ -19,13 +19,13 @@ package ollie.query;
 import ollie.Model;
 import ollie.Ollie;
 
-public final class Delete<T extends Model> extends QueryBase<T> {
+public final class Delete extends QueryBase {
 	private Delete() {
 		super(null, null);
 	}
 
 	public static <T extends Model> From from(Class<T> table) {
-		return new From<T>(new Delete<T>(), table);
+		return new From<T>(new Delete(), table);
 	}
 
 	@Override
