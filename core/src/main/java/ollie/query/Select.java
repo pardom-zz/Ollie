@@ -24,48 +24,45 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class Select<T extends Model> extends QueryBase<T> {
-	private String[] mColumns;
-
 	private Select() {
 		super(null, null);
 	}
 
-	private Select(String... columns) {
-		super(null, null);
-		mColumns = columns;
-	}
-
 	public static <T extends Model> Columns<T> columns(String... columns) {
-		return new Columns<T>(columns);
+		return new Columns<T>(new Select(), null, columns);
 	}
 
 	public static <T extends Model> From<T> from(Class<T> table) {
-		return new From<T>(new Select(), table);
+		return new Columns<T>(new Select(), table, null).from(table);
 	}
 
 	@Override
 	public String getPartSql() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("SELECT ");
-		if (mColumns != null && mColumns.length > 0) {
-			builder.append(TextUtils.join(", ", mColumns)).append(" ");
-		} else {
-			builder.append("* ");
-		}
-
-		return builder.toString();
+		return "SELECT";
 	}
 
 	public static final class Columns<T extends Model> extends QueryBase<T> {
 		private String[] mColumns;
 
-		public Columns(String[] columns) {
-			super(null, null);
+		public Columns(Query parent, Class<T> table, String[] columns) {
+			super(parent, table);
 			mColumns = columns;
 		}
 
 		public <T extends Model> From<T> from(Class<T> table) {
-			return new From<T>(new Select<T>(mColumns), table);
+			return new From<T>(this, table);
+		}
+
+		@Override
+		public String getPartSql() {
+			StringBuilder builder = new StringBuilder();
+			if (mColumns != null && mColumns.length > 0) {
+				builder.append(TextUtils.join(", ", mColumns)).append(" ");
+			} else {
+				builder.append(Ollie.getTableName(mTable) + ".* ");
+			}
+
+			return builder.toString();
 		}
 	}
 

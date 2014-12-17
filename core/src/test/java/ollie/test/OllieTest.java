@@ -134,33 +134,39 @@ public class OllieTest {
 		String sql;
 		Query query;
 
-		sql = "SELECT * FROM notes";
+		sql = "SELECT notes.* FROM notes";
 		query = Select.from(Note.class);
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
-		sql = "SELECT * FROM notes WHERE _id=?";
+		sql = "SELECT notes.* FROM notes WHERE _id=?";
 		query = Select.from(Note.class).where(Model._ID + "=?", "1");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(new String[]{"1"});
 
-		sql = "SELECT * FROM notes ORDER BY title ASC";
+		sql = "SELECT notes.* FROM notes ORDER BY title ASC";
 		query = Select.from(Note.class).orderBy("title ASC");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
-		sql = "SELECT * FROM notes LIMIT 1";
+		sql = "SELECT notes.* FROM notes LIMIT 1";
 		query = Select.from(Note.class).limit("1");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
-		sql = "SELECT * FROM notes LIMIT 1 OFFSET 10";
+		sql = "SELECT notes.* FROM notes LIMIT 1 OFFSET 10";
 		query = Select.from(Note.class).limit("1").offset("10");
 		assertThat(query.getSql()).isEqualTo(sql);
 		assertThat(query.getArgs()).isEqualTo(null);
 
-		sql = "SELECT * FROM notes INNER JOIN noteTags ON notes.id=noteTags.note INNER JOIN tags ON tag.id=noteTags" +
-				".tag WHERE tag.name=? ORDER BY notes.title ASC LIMIT 10 OFFSET 10";
+		sql = "SELECT notes.* " +
+				"FROM notes " +
+				"INNER JOIN noteTags ON notes.id=noteTags.note " +
+				"INNER JOIN tags ON tag.id=noteTags.tag " +
+				"WHERE tag.name=? " +
+				"ORDER BY notes.title ASC " +
+				"LIMIT 10 " +
+				"OFFSET 10";
 		query = Select
 				.from(Note.class)
 				.innerJoin(NoteTag.class).on("notes.id=noteTags.note")
