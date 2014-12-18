@@ -9,6 +9,7 @@ Compile-time active record ORM for Android.
 	* SQLiteDatabase-like interface ([`QueryUtils.java`](https://github.com/pardom/Ollie/blob/master/core/src/main/java/ollie/util/QueryUtils.java)).
 	* Lightweight query builder ([`Select.from()`](https://github.com/pardom/Ollie/blob/master/core/src/main/java/ollie/query/Select.java)).
 	* Cursors ([`Ollie.processorCursor()`](https://github.com/pardom/Ollie/blob/master/core/src/main/java/ollie/Ollie.java#L170)).
+* Model inheritence.
 * RxJava support.
 * Generated content providers.
 * Query debug logging.
@@ -101,6 +102,8 @@ or Gradle:
 compile 'com.michaelpardo:ollie:0.3.0'
 provided 'com.michaelpardo:ollie-compiler:0.3.0'
 ```
+
+Latest snapshot: 0.3.1-SNAPSHOT
 
 Build
 -----
