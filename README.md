@@ -6,6 +6,8 @@ Ollie
 
 Compile-time active record ORM for Android, with RxJava support.
 
+Define model
+
 ```java
 @Table("notes")
 class Note extends Model {
@@ -16,6 +18,19 @@ class Note extends Model {
 }
 ```
 
+Initialize
+
+```java
+Ollie.with(Robolectric.application)
+	.setName("OllieSample.db")
+	.setVersion(1)
+	.setLogLevel(LogLevel.FULL)
+	.setCacheSize(512)
+	.init();
+```
+
+Update database
+
 ```java
 Note note = new Note();
 note.title = "My note";
@@ -23,8 +38,39 @@ note.body = "This is my note."
 note.save();
 ```
 
+Query database
+
 ```java
-Select.from(Note.class).fetch();
+List<Note> notes = Select.from(Note.class).fetch();
+```
+
+```java
+Note note = Select.from(Note.class).fetchSingle();
+```
+
+```java
+Integer count = Select.columns("COUNT(*)").from(Note.class).fetchValue(Integer.class);
+```
+
+```java
+Select.from(Note.class).observable()
+	.subscribe(notes -> {
+		// do stuff with notes
+	});
+```
+
+```java
+Select.from(Note.class).observableSingle()
+	.subscribe(note -> {
+		// do stuff with note
+	});
+```
+
+```java
+Select.columns("COUNT(*)").from(Note.class).observableValue(Integer.class)
+	.subscribe(count -> {
+		// do stuff with count
+	});
 ```
 
 Download
