@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package ollie.test.model;
+package ollie.annotation;
 
-import ollie.Model;
-import ollie.annotation.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-import static ollie.annotation.ForeignKey.ReferentialAction.CASCADE;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.CLASS;
 
-@Table("noteTags")
-@Indexes({
-		@Index(name = "note_index", columns = "note"),
-		@Index(name = "tag_index", columns = "tag")
-})
-public class NoteTag extends Model {
-	public static final String Note = "note";
-	public static final String Tag = "tag";
-
-	@Column(Note)
-	@ForeignKey(onDelete = CASCADE)
-	public Note note;
-	@Column(Tag)
-	@ForeignKey(onDelete = CASCADE)
-	public Tag tag;
+/**
+ * <p>
+ * An annotation that indicates a class is indexed. Requires the indexes to be specified.
+ * </p>
+ * <p>
+ * <a href="https://www.sqlite.org/lang_createindex.html">https://www.sqlite.org/lang_createindex.html</a>
+ * </p>
+ */
+@Target(TYPE)
+@Retention(CLASS)
+public @interface Indexes {
+	/**
+	 * Returns the indexes.
+	 *
+	 * @return The indexes.
+	 */
+	public Index[] value();
 }
