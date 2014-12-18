@@ -1,9 +1,28 @@
 Ollie
 =====
 
-Compile-time active record ORM for Android.
+Compile-time active record ORM for Android, with RxJava support.
 
-Ollie is in active development and is changing quite rapidly. Please look at the tests until proper documentation is written.
+```java
+@Table("notes")
+class Note extends Model {
+	@Column("title")
+	public String title;
+	@Column("body")
+	public String body;
+}
+```
+
+```java
+Note note = new Note();
+note.title = "My note";
+note.body = "This is my note."
+note.save();
+```
+
+```java
+Select.from(Note.class).fetch();
+```
 
 [![Build Status](https://travis-ci.org/pardom/ollie.svg?branch=master)](https://travis-ci.org/pardom/ollie)
 [![Stories in Ready](https://badge.waffle.io/pardom/ollie.png)](http://waffle.io/pardom/ollie)  
