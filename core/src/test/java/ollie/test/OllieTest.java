@@ -61,7 +61,12 @@ public class OllieTest {
 		ShadowLog.stream = System.out;
 		ShadowContentResolver.registerProvider("com.example.ollie", contentProvider);
 
-		Ollie.init(Robolectric.application, "OllieSample.db", 1, LogLevel.FULL);
+		Ollie.with(Robolectric.application)
+				.setName("OllieSample.db")
+				.setVersion(1)
+				.setLogLevel(LogLevel.FULL)
+				.setCacheSize(512)
+				.init();
 	}
 
 	@Test

@@ -71,6 +71,10 @@ public final class Ollie {
 
 	// Public methods
 
+	public static Builder with(Context context) {
+		return new Builder(context);
+	}
+
 	/**
 	 * Initialize the database. Must be called before interacting with the database.
 	 *
@@ -251,6 +255,46 @@ public final class Ollie {
 
 	private static String getEntityIdentifier(Class<? extends Model> cls, long id) {
 		return cls.getName() + "@" + id;
+	}
+
+	// Public classes
+
+	public static final class Builder {
+		private Context mContext;
+		private String mName;
+		private int mVersion;
+		private int mCacheSize;
+		private LogLevel mLogLevel;
+
+		public Builder(Context context) {
+			mContext = context;
+			mName = context.getPackageName();
+			mVersion = 1;
+		}
+
+		public Builder setName(String name) {
+			mName = name;
+			return this;
+		}
+
+		public Builder setVersion(int version) {
+			mVersion = version;
+			return this;
+		}
+
+		public Builder setCacheSize(int cacheSize) {
+			mCacheSize = cacheSize;
+			return this;
+		}
+
+		public Builder setLogLevel(LogLevel logLevel) {
+			mLogLevel = logLevel;
+			return this;
+		}
+
+		public void init() {
+			Ollie.init(mContext, mName, mVersion, mCacheSize, mLogLevel);
+		}
 	}
 
 	// Private classes
