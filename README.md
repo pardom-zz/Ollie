@@ -11,6 +11,7 @@ Compile-time active record ORM for Android.
 	* Cursors ([`Ollie.processorCursor()`](https://github.com/pardom/Ollie/blob/master/core/src/main/java/ollie/Ollie.java#L170)).
 * RxJava support.
 * Generated content providers.
+* Query debug logging.
 
 Usage
 -----
@@ -30,11 +31,11 @@ class Note extends Model {
 Initialize
 
 ```java
-Ollie.with(Robolectric.application)
-	.setName("OllieSample.db")
-	.setVersion(1)
+Ollie.with(context)
+	.setName(DB_NAME)
+	.setVersion(DB_VERSION)
 	.setLogLevel(LogLevel.FULL)
-	.setCacheSize(512)
+	.setCacheSize(CACHE_SIZE)
 	.init();
 ```
 
