@@ -63,9 +63,7 @@ public class OllieTest {
 
 		Ollie.with(Robolectric.application)
 				.setName("OllieSample.db")
-				.setVersion(1)
 				.setLogLevel(LogLevel.FULL)
-				.setCacheSize(512)
 				.init();
 	}
 
