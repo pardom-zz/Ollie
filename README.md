@@ -4,7 +4,16 @@ Ollie
 [![Build Status](https://travis-ci.org/pardom/ollie.svg?branch=master)](https://travis-ci.org/pardom/ollie)
 [![Stories in Ready](https://badge.waffle.io/pardom/ollie.png)](http://waffle.io/pardom/ollie)  
 
-Compile-time active record ORM for Android, with RxJava support.
+Compile-time active record ORM for Android.
+* Multiple mapping methods.
+	* SQLiteDatabase-like interface ([`QueryUtils.java`](https://github.com/pardom/Ollie/blob/master/core/src/main/java/ollie/util/QueryUtils.java)).
+	* Lightweight query builder ([`Select.from()`](https://github.com/pardom/Ollie/blob/master/core/src/main/java/ollie/query/Select.java)).
+	* Cursors ([`Ollie.processorCursor()`](https://github.com/pardom/Ollie/blob/master/core/src/main/java/ollie/Ollie.java#L170)).
+* RxJava support.
+* Generated content providers.
+
+Usage
+-----
 
 Define model
 
@@ -41,32 +50,28 @@ note.save();
 Query database
 
 ```java
+// Get all notes
 List<Note> notes = Select.from(Note.class).fetch();
-```
 
-```java
+// Get a single note
 Note note = Select.from(Note.class).fetchSingle();
-```
 
-```java
+// Get notes table count
 Integer count = Select.columns("COUNT(*)").from(Note.class).fetchValue(Integer.class);
-```
 
-```java
+// Get observable of all notes
 Select.from(Note.class).observable()
 	.subscribe(notes -> {
 		// do stuff with notes
 	});
-```
 
-```java
+// Get observable of a single note
 Select.from(Note.class).observableSingle()
 	.subscribe(note -> {
 		// do stuff with note
 	});
-```
-
-```java
+	
+// Get observable of notes table count
 Select.columns("COUNT(*)").from(Note.class).observableValue(Integer.class)
 	.subscribe(count -> {
 		// do stuff with count
