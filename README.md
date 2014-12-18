@@ -88,19 +88,19 @@ Grab via Maven:
 <dependency>
   <groupId>com.michaelpardo</groupId>
   <artifactId>ollie</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
 </dependency>
 <dependency>
   <groupId>com.michaelpardo</groupId>
   <artifactId>ollie-compiler</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <optional>true</optional>
 </dependency>
 ```
 or Gradle:
 ```groovy
-compile 'com.michaelpardo:ollie:0.3.0'
-provided 'com.michaelpardo:ollie-compiler:0.3.0'
+compile 'com.michaelpardo:ollie:0.3.1'
+provided 'com.michaelpardo:ollie-compiler:0.3.1'
 ```
 
 Latest snapshot: 0.3.1-SNAPSHOT
