@@ -55,8 +55,6 @@ public class ModelAdapterTest {
 						"import android.content.ContentValues;",
 						"import android.database.Cursor;",
 						"import android.database.sqlite.SQLiteDatabase;",
-						"import java.lang.Long;",
-						"import java.util.Date;",
 						"import ollie.internal.ModelAdapter;",
 						"import ollie.test.Note;",
 						"public final class Note$$ModelAdapter extends ModelAdapter<Note> {",
@@ -77,7 +75,7 @@ public class ModelAdapterTest {
 						"		entity.id = cursor.getLong(cursor.getColumnIndex(\"_id\"));",
 						"		entity.title = cursor.getString(cursor.getColumnIndex(\"title\"));",
 						"		entity.body = cursor.getString(cursor.getColumnIndex(\"body\"));",
-						"		entity.date = Ollie.getTypeAdapter(Date.class)",
+						"		entity.date = Ollie.getTypeAdapter(java.util.Date.class)",
 						"				.deserialize(cursor.getLong(cursor.getColumnIndex(\"date\")));",
 						"	}",
 						"	public final Long save(Note entity, SQLiteDatabase db) {",
@@ -85,7 +83,7 @@ public class ModelAdapterTest {
 						"		values.put(\"_id\", entity.id);",
 						"		values.put(\"title\", entity.title);",
 						"		values.put(\"body\", entity.body);",
-						"		values.put(\"date\", (Long) Ollie.getTypeAdapter(Date.class)",
+						"		values.put(\"date\", (java.lang.Long) Ollie.getTypeAdapter(java.util.Date.class)",
 						"				.serialize(entity.date));",
 						"		return insertOrUpdate(entity, db, values);",
 						"	}",
@@ -101,7 +99,6 @@ public class ModelAdapterTest {
 				.and()
 				.generatesSources(expectedSource);
 	}
-
 
 	@Test
 	public void tablesAreClasses() {

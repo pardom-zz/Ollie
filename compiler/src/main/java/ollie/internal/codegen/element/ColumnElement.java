@@ -122,16 +122,8 @@ public class ColumnElement {
 		return deserializedType.getQualifiedName().toString();
 	}
 
-	public String getDeserializedSimpleName() {
-		return deserializedType.getSimpleName().toString();
-	}
-
 	public String getSerializedQualifiedName() {
 		return serializedType.getQualifiedName().toString();
-	}
-
-	public String getSerializedSimpleName() {
-		return serializedType.getSimpleName().toString();
 	}
 
 	public boolean requiresTypeAdapter() {

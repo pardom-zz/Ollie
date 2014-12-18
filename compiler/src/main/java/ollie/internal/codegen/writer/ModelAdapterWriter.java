@@ -107,16 +107,6 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 				ModelAdapter.class.getName()
 		);
 
-		for (ColumnElement column : columns) {
-			if (column.isModel()) {
-				imports.add(Long.class.getName());
-			}
-			if (column.requiresTypeAdapter()) {
-				imports.add(column.getDeserializedQualifiedName());
-				imports.add(column.getSerializedQualifiedName());
-			}
-		}
-
 		writer.emitImports(imports);
 	}
 
@@ -170,13 +160,13 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 			int closeParens = 1;
 			if (column.isModel()) {
 				closeParens++;
-				value.append("Ollie.getOrFindEntity(entity.")
-						.append(column.getFieldName())
-						.append(".getClass(), ");
+				value.append("Ollie.getOrFindEntity(")
+						.append(column.getDeserializedQualifiedName())
+						.append(".class, ");
 			} else if (column.requiresTypeAdapter()) {
 				closeParens++;
 				value.append("Ollie.getTypeAdapter(")
-						.append(column.getDeserializedSimpleName())
+						.append(column.getDeserializedQualifiedName())
 						.append(".class).deserialize(");
 			}
 
@@ -206,9 +196,9 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 
 			if (!column.isModel() && column.requiresTypeAdapter()) {
 				closeParens++;
-				value.append("(").append(column.getSerializedSimpleName())
+				value.append("(").append(column.getSerializedQualifiedName())
 						.append(") Ollie.getTypeAdapter(")
-						.append(column.getDeserializedSimpleName())
+						.append(column.getDeserializedQualifiedName())
 						.append(".class).serialize(");
 			}
 
