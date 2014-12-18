@@ -270,6 +270,8 @@ public final class Ollie {
 			mContext = context;
 			mName = context.getPackageName();
 			mVersion = 1;
+			mCacheSize = DEFAULT_CACHE_SIZE;
+			mLogLevel = LogLevel.NONE;
 		}
 
 		public Builder setName(String name) {
