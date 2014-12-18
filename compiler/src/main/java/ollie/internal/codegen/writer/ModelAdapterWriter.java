@@ -16,9 +16,6 @@
 
 package ollie.internal.codegen.writer;
 
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
@@ -104,9 +101,9 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 
 		Set<String> imports = Sets.newHashSet(
 				modelQualifiedName,
-				ContentValues.class.getName(),
-				Cursor.class.getName(),
-				SQLiteDatabase.class.getName(),
+				"android.content.ContentValues",
+				"android.database.Cursor",
+				"android.database.sqlite.SQLiteDatabase",
 				ModelAdapter.class.getName()
 		);
 

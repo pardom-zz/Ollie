@@ -4,13 +4,21 @@ apply from: '../gradle-mvn-push.gradle'
 targetCompatibility = '1.6'
 sourceCompatibility = '1.6'
 
+def Properties props = new Properties()
+props.load(new FileInputStream(file('../local.properties')))
+
+ext.android = [
+		sdk   : props["sdk.dir"],
+		target: 'android-21'
+]
+
 repositories {
 	mavenCentral()
 }
 
 dependencies {
-	compile 'com.google.android:android:4.1.1.4'
-	compile 'com.google.android:support-v4:r7'
+	compile files("${android.sdk}/platforms/${android.target}/android.jar")
+	compile files("${android.sdk}/extras/android/support/v4/android-support-v4.jar")
 	compile 'io.reactivex:rxjava:1.0.2'
 
 	testCompile project(':compiler')

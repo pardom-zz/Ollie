@@ -5,6 +5,6 @@ buildscript {
 }
 
 subprojects {
-	project.group = GROUP
-	project.version = VERSION_NAME
+	group = GROUP
+	version = VERSION_NAME
 }
