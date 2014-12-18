@@ -17,15 +17,19 @@
 package ollie.internal.codegen.element;
 
 import android.text.TextUtils;
+import android.util.Log;
 import com.google.common.collect.Maps;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.NodeType;
 import ollie.annotation.*;
 import ollie.internal.codegen.Registry;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.NoType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +57,8 @@ public class ColumnElement {
 	};
 
 	private Column column;
+	private ExecutableElement accessorMethod;
+	private ExecutableElement mutatorMethod;
 	private VariableElement element;
 	private TypeElement enclosingType;
 	private TypeElement deserializedType;
@@ -96,6 +102,18 @@ public class ColumnElement {
 				e.printStackTrace();
 			}
 		}
+
+		List<ExecutableElement> enclosedElements = ElementFilter.methodsIn(enclosingType.getEnclosedElements());
+		for ( ExecutableElement enclosedElement : enclosedElements ) {
+			Accessor accessor = enclosedElement.getAnnotation(Accessor.class);
+			if ( accessor != null && accessor.value().equals(column.value()) ) {
+				if ( enclosedElement.getReturnType().getKind() == TypeKind.VOID ) {
+					mutatorMethod = enclosedElement;
+				} else {
+					accessorMethod = enclosedElement;
+				}
+			}
+		}
 	}
 
 	public boolean isModel() {
@@ -112,6 +130,14 @@ public class ColumnElement {
 
 	public TypeElement getEnclosingElement() {
 		return enclosingType;
+	}
+
+	public ExecutableElement getMutatorMethod () {
+		return mutatorMethod;
+	}
+
+	public ExecutableElement getAccessorMethod () {
+		return accessorMethod;
 	}
 
 	public String getEnclosingQualifiedName() {

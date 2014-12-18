@@ -170,9 +170,13 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 			int closeParens = 1;
 			if (column.isModel()) {
 				closeParens++;
-				value.append("Ollie.getOrFindEntity(entity.")
-						.append(column.getFieldName())
-						.append(".getClass(), ");
+				value.append("Ollie.getOrFindEntity(entity.");
+				if ( column.getAccessorMethod() != null ) {
+					value.append(column.getAccessorMethod().getSimpleName().toString()).append("()");
+				} else {
+					value.append(column.getFieldName());
+				}
+				value.append(".getClass(), ");
 			} else if (column.requiresTypeAdapter()) {
 				closeParens++;
 				value.append("Ollie.getTypeAdapter(")
@@ -187,7 +191,11 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 				value.append(")");
 			}
 
-			writer.emitStatement("entity." + column.getFieldName() + " = " + value.toString());
+			if ( column.getMutatorMethod() != null ) {
+				writer.emitStatement("entity." + column.getMutatorMethod().getSimpleName().toString() + "(" + value.toString() + ")");
+			} else {
+				writer.emitStatement("entity." + column.getFieldName() + " = " + value.toString());
+			}
 		}
 
 		writer.endMethod();
@@ -212,11 +220,24 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 						.append(".class).serialize(");
 			}
 
-			value.append("entity.").append(column.getFieldName());
+			value.append("entity.");
+
+			if ( column.getAccessorMethod() != null ) {
+				value.append(column.getAccessorMethod().getSimpleName().toString()).append("()");
+			} else {
+				value.append(column.getFieldName());
+			}
 
 			if (column.isModel()) {
 				value.append(" != null ? ");
-				value.append("entity.").append(column.getFieldName()).append(".id");
+				value.append("entity.");
+
+				if ( column.getAccessorMethod() != null ) {
+					value.append(column.getAccessorMethod().getSimpleName().toString()).append("()");
+				} else {
+					value.append(column.getFieldName());
+				}
+				value.append(".id");
 				value.append(" : null");
 			}
 
