@@ -155,7 +155,20 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		writer.beginMethod("void", "load", MODIFIERS, modelQualifiedName, "entity", "Cursor", "cursor");
 
 		for (ColumnElement column : columns) {
+			StringBuilder value = new StringBuilder();
+			value.append("cursor.getColumnIndex(\"").append(column.getColumnName()).append("\")");
+			writer.emitStatement("final int " + column.getColumnName() + "Index = " + value.toString());
+		}
+
+		writer.emitEmptyLine();
+
+		for (ColumnElement column : columns) {
 			final StringBuilder value = new StringBuilder();
+			value.append("entity.")
+					.append(column.getFieldName())
+					.append(" = ")
+					.append(column.getColumnName())
+					.append("Index >= 0 ? ");
 
 			int closeParens = 1;
 			if (column.isModel()) {
@@ -171,13 +184,15 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 			}
 
 			value.append("cursor.").append(CURSOR_METHOD_MAP.get(column.getSerializedQualifiedName())).append("(");
-			value.append("cursor.getColumnIndex(\"").append(column.getColumnName()).append("\")");
+			value.append(column.getColumnName()).append("Index");
 
 			for (int i = 0; i < closeParens; i++) {
 				value.append(")");
 			}
 
-			writer.emitStatement("entity." + column.getFieldName() + " = " + value.toString());
+			value.append(" : null");
+
+			writer.emitStatement(value.toString());
 		}
 
 		writer.endMethod();

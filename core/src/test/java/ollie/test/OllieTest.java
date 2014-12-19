@@ -309,7 +309,7 @@ public class OllieTest {
 		// Many
 		List<Note> notes = Select.from(Note.class).fetch();
 		assertThat(notes).isNotNull();
-		assertThat(notes.size()).isGreaterThan(0);
+		assertThat(notes).isNotEmpty();
 
 		// Join
 		notes = Select
@@ -320,7 +320,19 @@ public class OllieTest {
 				.where("tags._id=?", tag.id.toString())
 				.fetch();
 		assertThat(notes).isNotNull();
-		assertThat(notes.size()).isGreaterThan(0);
+		assertThat(notes).isNotEmpty();
+
+		// Column subset
+		notes = Select.columns("_id, title").from(Note.class).fetch();
+		assertThat(notes).isNotNull();
+		assertThat(notes).isNotEmpty();
+
+		for (Note n : notes) {
+			assertThat(n.id).isNotNull();
+			assertThat(n.title).isNotNull();
+			assertThat(n.body).isNull();
+			assertThat(n.date).isNull();
+		}
 	}
 
 	@Test
@@ -346,15 +358,13 @@ public class OllieTest {
 		note.save();
 		Delete.from(Note.class).execute();
 
-		// TODO: This seems like a bit of work
-		// assertThat(note.id).isNull();
+		assertThat(note.id).isNull();
 
 		note = new Note();
 		note.body = "this is draft";
 		note.save();
-		Delete.from(Note.class).where(Note._ID + "=?", note.id.toString()).execute();
+		Delete.from(Note.class).execute(false);
 
-		// TODO: This seems like a bit of work
-		// assertThat(note.id).isNull();
+		assertThat(note.id).isNotNull();
 	}
 }
