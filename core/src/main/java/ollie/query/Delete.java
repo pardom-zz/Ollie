@@ -20,6 +20,10 @@ import ollie.Model;
 import ollie.Ollie;
 
 public final class Delete extends QueryBase {
+	public static final int FLAG_NONE = 0;
+	public static final int FLAG_NULLIFY = 1;
+	public static final int FLAG_NULLIFY_ID = 2;
+
 	private Delete() {
 		super(null, null);
 	}
@@ -33,7 +37,7 @@ public final class Delete extends QueryBase {
 		return "DELETE";
 	}
 
-	public static final class From<T extends Model> extends ExecutableQueryBase<T> {
+	public static final class From<T extends Model> extends DeleteQueryBase<T> {
 		private From(Query parent, Class<T> table) {
 			super(parent, table);
 		}
@@ -52,7 +56,7 @@ public final class Delete extends QueryBase {
 		}
 	}
 
-	public static final class Where<T extends Model> extends ExecutableQueryBase<T> {
+	public static final class Where<T extends Model> extends DeleteQueryBase<T> {
 		private String mWhere;
 		private Object[] mWhereArgs;
 
