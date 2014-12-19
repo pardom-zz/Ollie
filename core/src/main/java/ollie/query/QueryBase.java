@@ -48,7 +48,7 @@ public abstract class QueryBase<T extends Model> implements Query {
 	}
 
 	protected String[] getPartArgs() {
-		return null;
+		return new String[]{};
 	}
 
 	protected final String[] toStringArray(final Object[] array) {

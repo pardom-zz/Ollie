@@ -140,7 +140,7 @@ public class OllieTest {
 		sql = "SELECT notes.* FROM notes";
 		query = Select.from(Note.class);
 		assertThat(query.getSql()).isEqualTo(sql);
-		assertThat(query.getArgs()).isEqualTo(null);
+		assertThat(query.getArgs()).isEmpty();
 
 		sql = "SELECT notes.* FROM notes WHERE _id=?";
 		query = Select.from(Note.class).where(Model._ID + "=?", "1");
@@ -150,17 +150,17 @@ public class OllieTest {
 		sql = "SELECT notes.* FROM notes ORDER BY title ASC";
 		query = Select.from(Note.class).orderBy("title ASC");
 		assertThat(query.getSql()).isEqualTo(sql);
-		assertThat(query.getArgs()).isEqualTo(null);
+		assertThat(query.getArgs()).isEmpty();
 
 		sql = "SELECT notes.* FROM notes LIMIT 1";
 		query = Select.from(Note.class).limit("1");
 		assertThat(query.getSql()).isEqualTo(sql);
-		assertThat(query.getArgs()).isEqualTo(null);
+		assertThat(query.getArgs()).isEmpty();
 
 		sql = "SELECT notes.* FROM notes LIMIT 1 OFFSET 10";
 		query = Select.from(Note.class).limit("1").offset("10");
 		assertThat(query.getSql()).isEqualTo(sql);
-		assertThat(query.getArgs()).isEqualTo(null);
+		assertThat(query.getArgs()).isEmpty();
 
 		sql = "SELECT notes.* " +
 				"FROM notes " +
@@ -228,7 +228,7 @@ public class OllieTest {
 		sql = "UPDATE notes SET title='Testing UPDATE'";
 		query = Update.table(Note.class).set("title='Testing UPDATE'");
 		assertThat(query.getSql()).isEqualTo(sql);
-		assertThat(query.getArgs()).isEqualTo(null);
+		assertThat(query.getArgs()).isEmpty();
 
 		sql = "UPDATE notes SET title=?";
 		query = Update.table(Note.class).set("title=?", "Testing UPDATE");
@@ -238,7 +238,7 @@ public class OllieTest {
 		sql = "UPDATE notes SET title='Testing UPDATE' WHERE _id=1";
 		query = Update.table(Note.class).set("title='Testing UPDATE'").where(Model._ID + "=1");
 		assertThat(query.getSql()).isEqualTo(sql);
-		assertThat(query.getArgs()).isEqualTo(null);
+		assertThat(query.getArgs()).isEmpty();
 
 		sql = "UPDATE notes SET title=? WHERE _id=?";
 		query = Update.table(Note.class).set("title=?", "Testing UPDATE").where(Model._ID + "=?", "1");
@@ -254,12 +254,12 @@ public class OllieTest {
 		sql = "DELETE FROM notes";
 		query = Delete.from(Note.class);
 		assertThat(query.getSql()).isEqualTo(sql);
-		assertThat(query.getArgs()).isEqualTo(null);
+		assertThat(query.getArgs()).isEmpty();
 
 		sql = "DELETE FROM notes WHERE _id=1";
 		query = Delete.from(Note.class).where(Model._ID + "=1");
 		assertThat(query.getSql()).isEqualTo(sql);
-		assertThat(query.getArgs()).isEqualTo(null);
+		assertThat(query.getArgs()).isEmpty();
 
 		sql = "DELETE FROM notes WHERE _id=?";
 		query = Delete.from(Note.class).where(Model._ID + "=?", "1");
@@ -342,6 +342,14 @@ public class OllieTest {
 	@Test
 	public void testDeleteByQuery() {
 		Note note = new Note();
+		note.body = "this is draft";
+		note.save();
+		Delete.from(Note.class).execute();
+
+		// TODO: This seems like a bit of work
+		// assertThat(note.id).isNull();
+
+		note = new Note();
 		note.body = "this is draft";
 		note.save();
 		Delete.from(Note.class).where(Note._ID + "=?", note.id.toString()).execute();
