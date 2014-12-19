@@ -103,7 +103,7 @@ compile 'com.michaelpardo:ollie:0.3.1'
 provided 'com.michaelpardo:ollie-compiler:0.3.1'
 ```
 
-Latest snapshot: 0.3.1-SNAPSHOT
+Latest snapshot: 0.3.2-SNAPSHOT
 
 Build
 -----
