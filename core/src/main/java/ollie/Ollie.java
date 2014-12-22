@@ -375,7 +375,11 @@ public final class Ollie {
 		@Override
 		public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver driver, String editTable, SQLiteQuery query) {
 			Log.v(TAG, query.toString());
-			return new SQLiteCursor(db, driver, editTable, query);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				return new SQLiteCursor(db, driver, editTable, query);
+			} else {
+				return new SQLiteCursor(driver, editTable, query);
+			}
 		}
 	}
 }
