@@ -39,11 +39,7 @@ public abstract class ModelAdapter<T extends Model> {
 	public abstract void delete(T entity, SQLiteDatabase db);
 
 	protected final Long insertOrUpdate(T entity, SQLiteDatabase db, ContentValues values) {
-		if (entity.id == null) {
-			entity.id = db.insert(getTableName(), null, values);
-		} else {
-			db.update(getTableName(), values, BaseColumns._ID + "=?", new String[]{entity.id.toString()});
-		}
+        entity.id = db.replace(getTableName(), null, values);
 
 		return entity.id;
 	}
