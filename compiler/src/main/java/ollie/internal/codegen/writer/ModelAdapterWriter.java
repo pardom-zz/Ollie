@@ -20,24 +20,17 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.squareup.javawriter.JavaWriter;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-
 import ollie.Model;
 import ollie.annotation.Table;
 import ollie.internal.ModelAdapter;
 import ollie.internal.codegen.Registry;
 import ollie.internal.codegen.element.ColumnElement;
+
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -97,9 +90,7 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		writeGetTableName(javaWriter, tableName);
 		writeGetSchema(javaWriter, tableName, columns);
 		writeLoad(javaWriter, modelQualifiedName, columns);
-        writeConvertToContentValues(javaWriter, modelQualifiedName, columns);
 		writeSave(javaWriter, modelQualifiedName, columns);
-        writeSaveList(javaWriter, modelQualifiedName, columns);
 		writeDelete(javaWriter, modelQualifiedName, tableName);
 
 		javaWriter.endType();
@@ -110,8 +101,6 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 
 		Set<String> imports = Sets.newHashSet(
 				modelQualifiedName,
-                "java.util.ArrayList",
-                "java.util.List",
 				"android.content.ContentValues",
 				"android.database.Cursor",
 				"android.database.sqlite.SQLiteDatabase",
@@ -210,76 +199,43 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		writer.emitEmptyLine();
 	}
 
-    private void writeConvertToContentValues(JavaWriter writer, String modelQualifiedName, Set<ColumnElement> columns) throws
-            IOException {
-
-        writer.beginMethod("ContentValues", "convertToContentValues", MODIFIERS, modelQualifiedName, "entity");
-        writer.emitStatement("ContentValues values = new ContentValues()");
-
-        for (ColumnElement column : columns) {
-            final StringBuilder value = new StringBuilder();
-            int closeParens = 0;
-
-            if (!column.isModel() && column.requiresTypeAdapter()) {
-                closeParens++;
-                value.append("(").append(column.getSerializedQualifiedName())
-                        .append(") Ollie.getTypeAdapter(")
-                        .append(column.getDeserializedQualifiedName())
-                        .append(".class).serialize(");
-            }
-
-            value.append("entity.").append(column.getFieldName());
-
-            if (column.isModel()) {
-                value.append(" != null ? ");
-                value.append("entity.").append(column.getFieldName()).append(".id");
-                value.append(" : null");
-            }
-
-            for (int i = 0; i < closeParens; i++) {
-                value.append(")");
-            }
-
-            writer.emitStatement("values.put(\"" + column.getColumnName() + "\", " + value.toString() + ")");
-        }
-
-        writer.emitStatement("return values");
-        writer.endMethod();
-        writer.emitEmptyLine();
-    }
-
 	private void writeSave(JavaWriter writer, String modelQualifiedName, Set<ColumnElement> columns) throws
 			IOException {
 
 		writer.beginMethod("Long", "save", MODIFIERS, modelQualifiedName, "entity", "SQLiteDatabase", "db");
-		writer.emitStatement("ContentValues values = convertToContentValues(entity)");
+		writer.emitStatement("ContentValues values = new ContentValues()");
+
+		for (ColumnElement column : columns) {
+			final StringBuilder value = new StringBuilder();
+			int closeParens = 0;
+
+			if (!column.isModel() && column.requiresTypeAdapter()) {
+				closeParens++;
+				value.append("(").append(column.getSerializedQualifiedName())
+						.append(") Ollie.getTypeAdapter(")
+						.append(column.getDeserializedQualifiedName())
+						.append(".class).serialize(");
+			}
+
+			value.append("entity.").append(column.getFieldName());
+
+			if (column.isModel()) {
+				value.append(" != null ? ");
+				value.append("entity.").append(column.getFieldName()).append(".id");
+				value.append(" : null");
+			}
+
+			for (int i = 0; i < closeParens; i++) {
+				value.append(")");
+			}
+
+			writer.emitStatement("values.put(\"" + column.getColumnName() + "\", " + value.toString() + ")");
+		}
+
 		writer.emitStatement("return insertOrUpdate(entity, db, values)");
 		writer.endMethod();
 		writer.emitEmptyLine();
 	}
-
-    private void writeSaveList(JavaWriter writer, String modelQualifiedName, Set<ColumnElement> columns) throws
-            IOException {
-
-        writer.beginMethod("List<Long>", "save", MODIFIERS, "List<" + modelQualifiedName + ">", "entities", "SQLiteDatabase", "db");
-        writer.emitStatement("List<Long> ids = new ArrayList<Long>()");
-        writer.emitEmptyLine();
-        writer.emitStatement("db.beginTransaction()");
-        writer.beginControlFlow("try");
-        writer.beginControlFlow("for (" + modelQualifiedName + " entity : entities)");
-        writer.emitStatement("ids.add(save(entity, db))");
-        writer.endControlFlow();
-        writer.emitStatement("db.setTransactionSuccessful()");
-        writer.nextControlFlow("catch (Exception e)");
-        writer.emitStatement("e.printStackTrace()");
-        writer.nextControlFlow("finally");
-        writer.emitStatement("db.endTransaction()");
-        writer.endControlFlow();
-        writer.emitEmptyLine();
-        writer.emitStatement("return ids");
-        writer.endMethod();
-        writer.emitEmptyLine();
-    }
 
 	private void writeDelete(JavaWriter writer, String modelQualifiedName, String tableName) throws IOException {
 		writer.beginMethod("void", "delete", MODIFIERS, modelQualifiedName, "entity", "SQLiteDatabase", "db");

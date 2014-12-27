@@ -19,9 +19,7 @@ package ollie.internal;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
-import java.util.List;
-
+import android.provider.BaseColumns;
 import ollie.Model;
 
 /**
@@ -36,11 +34,7 @@ public abstract class ModelAdapter<T extends Model> {
 
 	public abstract void load(T entity, Cursor cursor);
 
-    public abstract ContentValues convertToContentValues(T entity);
-
 	public abstract Long save(T entity, SQLiteDatabase db);
-
-    public abstract List<Long> save(List<T> entities, SQLiteDatabase db);
 
 	public abstract void delete(T entity, SQLiteDatabase db);
 
