@@ -18,18 +18,23 @@ package ollie;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.*;
+import android.database.sqlite.SQLiteCursor;
+import android.database.sqlite.SQLiteCursorDriver;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQuery;
 import android.os.Build;
 import android.provider.BaseColumns;
 import android.support.v4.util.LruCache;
 import android.util.Log;
-import ollie.internal.AdapterHolder;
-import ollie.internal.ModelAdapter;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+
+import ollie.internal.AdapterHolder;
+import ollie.internal.ModelAdapter;
 
 public final class Ollie {
 	public static final int DEFAULT_CACHE_SIZE = 1024;
@@ -44,7 +49,7 @@ public final class Ollie {
 	private static LogLevel sLogLevel = LogLevel.NONE;
 	private static boolean sInitialized = false;
 
-	/**
+    /**
 	 * Controls the level of logging.
 	 */
 	public enum LogLevel {
@@ -243,9 +248,46 @@ public final class Ollie {
 		sAdapterHolder.getModelAdapter(entity.getClass()).load(entity, cursor);
 	}
 
-	static synchronized <T extends Model> Long save(T entity) {
-		return sAdapterHolder.getModelAdapter(entity.getClass()).save(entity, sSQLiteDatabase);
-	}
+    static synchronized <T extends Model> Long save(T entity) {
+        return sAdapterHolder.getModelAdapter(entity.getClass()).save(entity, sSQLiteDatabase);
+    }
+
+    public static synchronized <T extends Model> List<Long> save(List<T> entities) {
+        List<Long> ids = new ArrayList<Long>();
+
+        if (!entities.isEmpty()) {
+
+            Class<? extends Model> cls = entities.get(0).getClass();
+            ModelAdapter<Model> modelAdapter = sAdapterHolder.getModelAdapter(cls);
+            sSQLiteDatabase.beginTransaction();
+            try {
+                for (T entity : entities) {
+                    ids.add(modelAdapter.save(entity, sSQLiteDatabase));
+                }
+
+                sSQLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sSQLiteDatabase.endTransaction();
+            }
+
+            Ollie.notifyChange(cls, null);
+        }
+
+        return ids;
+    }
+
+    /**
+     * <p>
+     * Notify observers that this record has changed.
+     * </p>
+     * @param type
+     * @param id
+     */
+    public static void notifyChange(Class<? extends Model> type, Long id) {
+        if (OllieProvider.isImplemented()) {
+            getContext().getContentResolver().notifyChange(OllieProvider.createUri(type, id), null);
+        }
+    }
 
 	static synchronized <T extends Model> void delete(T entity) {
 		sAdapterHolder.getModelAdapter(entity.getClass()).delete(entity, sSQLiteDatabase);

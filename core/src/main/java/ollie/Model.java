@@ -73,7 +73,7 @@ public abstract class Model {
 	public final Long save() {
 		id = Ollie.save(this);
 		Ollie.putEntity(this);
-		notifyChange();
+		Ollie.notifyChange(getClass(), id);
 		return id;
 	}
 
@@ -85,22 +85,11 @@ public abstract class Model {
 	public final void delete() {
 		Ollie.delete(this);
 		Ollie.removeEntity(this);
-		notifyChange();
+		Ollie.notifyChange(getClass(), id);
 		id = null;
 	}
 
-	/**
-	 * <p>
-	 * Notify observers that this record has changed.
-	 * </p>
-	 */
-	private void notifyChange() {
-		if (OllieProvider.isImplemented()) {
-			Ollie.getContext().getContentResolver().notifyChange(OllieProvider.createUri(getClass(), id), null);
-		}
-	}
-
-	@Override
+    @Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Model && id != null) {
 			final Model other = (Model) obj;
