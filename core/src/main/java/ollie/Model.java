@@ -18,6 +18,9 @@ package ollie;
 
 import android.database.Cursor;
 import android.provider.BaseColumns;
+
+import java.util.List;
+
 import ollie.annotation.AutoIncrement;
 import ollie.annotation.Column;
 import ollie.annotation.PrimaryKey;
@@ -73,9 +76,18 @@ public abstract class Model {
 	public final Long save() {
 		id = Ollie.save(this);
 		Ollie.putEntity(this);
-		notifyChange();
+		notifyChange(getClass(), id);
 		return id;
 	}
+
+    public static List<Long> save(List<Model> entities, Class<? extends Model> aClass) {
+        List<Long> ids =  Ollie.save(entities);
+        for(Model entity: entities){
+            Ollie.putEntity(entity);
+        }
+        notifyChange(aClass, null);
+        return ids;
+    }
 
 	/**
 	 * <p>
@@ -85,7 +97,7 @@ public abstract class Model {
 	public final void delete() {
 		Ollie.delete(this);
 		Ollie.removeEntity(this);
-		notifyChange();
+		notifyChange(getClass(), id);
 		id = null;
 	}
 
@@ -93,10 +105,11 @@ public abstract class Model {
 	 * <p>
 	 * Notify observers that this record has changed.
 	 * </p>
-	 */
-	private void notifyChange() {
+     * @param aClass
+     */
+	private static void notifyChange(Class<? extends Model> aClass, Long id) {
 		if (OllieProvider.isImplemented()) {
-			Ollie.getContext().getContentResolver().notifyChange(OllieProvider.createUri(getClass(), id), null);
+			Ollie.getContext().getContentResolver().notifyChange(OllieProvider.createUri(aClass, id), null);
 		}
 	}
 

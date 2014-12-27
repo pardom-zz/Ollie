@@ -18,18 +18,23 @@ package ollie;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.*;
+import android.database.sqlite.SQLiteCursor;
+import android.database.sqlite.SQLiteCursorDriver;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQuery;
 import android.os.Build;
 import android.provider.BaseColumns;
 import android.support.v4.util.LruCache;
 import android.util.Log;
-import ollie.internal.AdapterHolder;
-import ollie.internal.ModelAdapter;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+
+import ollie.internal.AdapterHolder;
+import ollie.internal.ModelAdapter;
 
 public final class Ollie {
 	public static final int DEFAULT_CACHE_SIZE = 1024;
@@ -246,6 +251,10 @@ public final class Ollie {
 	static synchronized <T extends Model> Long save(T entity) {
 		return sAdapterHolder.getModelAdapter(entity.getClass()).save(entity, sSQLiteDatabase);
 	}
+
+    static synchronized <T extends Model> List<Long> save(List<Model> entities) {
+        return sAdapterHolder.getModelAdapter(entities.get(0).getClass()).save(entities, sSQLiteDatabase);
+    }
 
 	static synchronized <T extends Model> void delete(T entity) {
 		sAdapterHolder.getModelAdapter(entity.getClass()).delete(entity, sSQLiteDatabase);
