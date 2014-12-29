@@ -45,7 +45,7 @@ Update database
 ```java
 Note note = new Note();
 note.title = "My note";
-note.body = "This is my note."
+note.body = "This is my note.";
 note.save();
 ```
 
