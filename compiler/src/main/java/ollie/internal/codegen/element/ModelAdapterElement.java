@@ -18,7 +18,7 @@ package ollie.internal.codegen.element;
 
 import javax.lang.model.element.TypeElement;
 
-public class ModelAdapterElement {
+public class ModelAdapterElement implements Comparable<ModelAdapterElement> {
 	private TypeElement element;
 
 	public ModelAdapterElement(TypeElement element) {
@@ -31,5 +31,10 @@ public class ModelAdapterElement {
 
 	public String getModelQualifiedName() {
 		return element.getQualifiedName().toString();
+	}
+
+	@Override
+	public int compareTo(ModelAdapterElement other) {
+		return getQualifiedName().compareTo(other.getQualifiedName());
 	}
 }

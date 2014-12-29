@@ -23,7 +23,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.List;
 
-public class TypeAdapterElement {
+public class TypeAdapterElement implements Comparable<TypeAdapterElement> {
 	private TypeElement element;
 	private TypeElement deserializedTypeElement;
 	private TypeElement serializedTypeElement;
@@ -37,7 +37,6 @@ public class TypeAdapterElement {
 				types.getWildcardType(null, null),
 				types.getWildcardType(null, null)
 		);
-
 
 		for (TypeMirror superType : types.directSupertypes(element.asType())) {
 			if (types.isAssignable(superType, typeAdapterType)) {
@@ -61,27 +60,16 @@ public class TypeAdapterElement {
 		return element.getSimpleName().toString();
 	}
 
-	public TypeElement getDeserializedType() {
-		return deserializedTypeElement;
-	}
-
 	public String getDeserializedQualifiedName() {
 		return deserializedTypeElement.getQualifiedName().toString();
-	}
-
-	public String getDeserializedSimpleName() {
-		return deserializedTypeElement.getSimpleName().toString();
 	}
 
 	public TypeElement getSerializedType() {
 		return serializedTypeElement;
 	}
 
-	public String getSerializedQualifiedName() {
-		return serializedTypeElement.getQualifiedName().toString();
-	}
-
-	public String getSerializedSimpleName() {
-		return serializedTypeElement.getSimpleName().toString();
+	@Override
+	public int compareTo(TypeAdapterElement other) {
+		return getQualifiedName().compareTo(other.getQualifiedName());
 	}
 }

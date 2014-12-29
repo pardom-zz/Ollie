@@ -18,7 +18,7 @@ package ollie.internal.codegen.element;
 
 import javax.lang.model.element.TypeElement;
 
-public class MigrationElement {
+public class MigrationElement implements Comparable<MigrationElement> {
 	private TypeElement element;
 
 	public MigrationElement(TypeElement element) {
@@ -31,5 +31,10 @@ public class MigrationElement {
 
 	public String getSimpleName() {
 		return element.getSimpleName().toString();
+	}
+
+	@Override
+	public int compareTo(MigrationElement other) {
+		return getQualifiedName().compareTo(other.getQualifiedName());
 	}
 }

@@ -16,6 +16,7 @@
 
 package ollie.internal.codegen.writer;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.squareup.javawriter.JavaWriter;
 import ollie.internal.AdapterHolder;
@@ -81,16 +82,6 @@ public class AdapterHolderWriter implements SourceWriter<TypeElement> {
 				ModelAdapter.class.getName()
 		);
 
-		Set<TypeAdapterElement> typeAdapters = registry.getTypeAdapterElements();
-		for (TypeAdapterElement typeAdapter : typeAdapters) {
-			imports.add(typeAdapter.getQualifiedName());
-		}
-
-		Set<MigrationElement> migrationElements = registry.getMigrationElements();
-		for (MigrationElement migrationElement : migrationElements) {
-			imports.add(migrationElement.getQualifiedName());
-		}
-
 		writer.emitImports(imports);
 		writer.emitEmptyLine();
 	}
@@ -120,23 +111,35 @@ public class AdapterHolderWriter implements SourceWriter<TypeElement> {
 	private void writeStaticInitializations(JavaWriter writer) throws IOException {
 		writer.beginInitializer(true);
 
-		for (MigrationElement migration : registry.getMigrationElements()) {
-			writer.emitStatement("MIGRATIONS.add(new %s())",
-					migration.getSimpleName());
+		List<MigrationElement> migrations = Lists.newArrayList(registry.getMigrationElements());
+		if (!migrations.isEmpty()) {
+			Collections.sort(migrations);
+			for (MigrationElement migration : migrations) {
+				writer.emitStatement("MIGRATIONS.add(new %s())",
+						migration.getQualifiedName());
+			}
+			writer.emitEmptyLine();
 		}
-		writer.emitEmptyLine();
 
-		for (ModelAdapterElement modelAdapter : registry.getModelAdapterElements()) {
-			writer.emitStatement("MODEL_ADAPTERS.put(%s.class, new %s())",
-					modelAdapter.getModelQualifiedName(),
-					modelAdapter.getQualifiedName());
+		List<ModelAdapterElement> modelAdapters = Lists.newArrayList(registry.getModelAdapterElements());
+		if (!modelAdapters.isEmpty()) {
+			Collections.sort(modelAdapters);
+			for (ModelAdapterElement modelAdapter : modelAdapters) {
+				writer.emitStatement("MODEL_ADAPTERS.put(%s.class, new %s())",
+						modelAdapter.getModelQualifiedName(),
+						modelAdapter.getQualifiedName());
+			}
+			writer.emitEmptyLine();
 		}
-		writer.emitEmptyLine();
 
-		for (TypeAdapterElement typeAdapter : registry.getTypeAdapterElements()) {
-			writer.emitStatement("TYPE_ADAPTERS.put(%s.class, new %s())",
-					typeAdapter.getDeserializedQualifiedName(),
-					typeAdapter.getSimpleName());
+		List<TypeAdapterElement> typeAdapters = Lists.newArrayList(registry.getTypeAdapterElements());
+		if (!typeAdapters.isEmpty()) {
+			Collections.sort(typeAdapters);
+			for (TypeAdapterElement typeAdapter : typeAdapters) {
+				writer.emitStatement("TYPE_ADAPTERS.put(%s.class, new %s())",
+						typeAdapter.getDeserializedQualifiedName(),
+						typeAdapter.getQualifiedName());
+			}
 		}
 
 		writer.endInitializer();

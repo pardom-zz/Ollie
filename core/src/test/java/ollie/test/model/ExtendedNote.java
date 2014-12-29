@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ollie.test.model.migration;
+package ollie.test.model;
 
 import ollie.annotation.Column;
 import ollie.annotation.Table;
