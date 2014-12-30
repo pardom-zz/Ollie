@@ -1,7 +1,7 @@
 Ollie
 =====
 
-[![Build Status](https://travis-ci.org/pardom/ollie.svg?branch=master)](https://travis-ci.org/pardom/ollie)
+[![Build Status](https://travis-ci.org/pardom/Ollie.svg?branch=master)](https://travis-ci.org/pardom/Ollie)
 [![Stories in Ready](https://badge.waffle.io/pardom/ollie.png)](http://waffle.io/pardom/ollie)  
 
 Compile-time active record ORM for Android.
