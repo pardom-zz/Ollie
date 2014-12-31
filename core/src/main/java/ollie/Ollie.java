@@ -18,18 +18,28 @@ package ollie;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.*;
+import android.database.sqlite.SQLiteCursor;
+import android.database.sqlite.SQLiteCursorDriver;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQuery;
 import android.os.Build;
 import android.provider.BaseColumns;
 import android.support.v4.util.LruCache;
 import android.util.Log;
-import ollie.internal.AdapterHolder;
-import ollie.internal.ModelAdapter;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+
+import ollie.internal.AdapterHolder;
+import ollie.internal.ModelAdapter;
 
 public final class Ollie {
 	public static final int DEFAULT_CACHE_SIZE = 1024;
@@ -43,6 +53,7 @@ public final class Ollie {
 	private static LruCache<String, Model> sCache;
 	private static LogLevel sLogLevel = LogLevel.NONE;
 	private static boolean sInitialized = false;
+    private static boolean sHasAttachedDatabase = false;
 
 	/**
 	 * Controls the level of logging.
@@ -83,7 +94,7 @@ public final class Ollie {
 	 * @param version The database version.
 	 */
 	public static void init(Context context, String name, int version) {
-		init(context, name, version, DEFAULT_CACHE_SIZE, LogLevel.NONE);
+		init(context, name, version, DEFAULT_CACHE_SIZE, LogLevel.NONE, false);
 	}
 
 	/**
@@ -95,7 +106,7 @@ public final class Ollie {
 	 * @param cacheSize The cache size.
 	 */
 	public static void init(Context context, String name, int version, int cacheSize) {
-		init(context, name, version, cacheSize, LogLevel.NONE);
+		init(context, name, version, cacheSize, LogLevel.NONE, false);
 	}
 
 	/**
@@ -107,7 +118,7 @@ public final class Ollie {
 	 * @param logLevel The logging level.
 	 */
 	public static void init(Context context, String name, int version, LogLevel logLevel) {
-		init(context, name, version, DEFAULT_CACHE_SIZE, logLevel);
+		init(context, name, version, DEFAULT_CACHE_SIZE, logLevel, false);
 	}
 
 	/**
@@ -119,8 +130,9 @@ public final class Ollie {
 	 * @param cacheSize The cache size.
 	 * @param logLevel  The logging level.
 	 */
-	public static void init(Context context, String name, int version, int cacheSize, LogLevel logLevel) {
+	public static void init(Context context, String name, int version, int cacheSize, LogLevel logLevel, boolean hasAttachedDatabase) {
 		sLogLevel = logLevel;
+        sHasAttachedDatabase = hasAttachedDatabase;
 
 		if (sInitialized) {
 			if (sLogLevel.log(LogLevel.BASIC)) {
@@ -265,6 +277,7 @@ public final class Ollie {
 		private int mVersion;
 		private int mCacheSize;
 		private LogLevel mLogLevel;
+        private boolean mHasAttachedDatabase;
 
 		public Builder(Context context) {
 			mContext = context;
@@ -272,6 +285,7 @@ public final class Ollie {
 			mVersion = 1;
 			mCacheSize = DEFAULT_CACHE_SIZE;
 			mLogLevel = LogLevel.NONE;
+            mHasAttachedDatabase = false;
 		}
 
 		public Builder setName(String name) {
@@ -294,8 +308,13 @@ public final class Ollie {
 			return this;
 		}
 
+        public Builder setHasAttachedDatabase(boolean hasAttachedDatabase) {
+            mHasAttachedDatabase = hasAttachedDatabase;
+            return this;
+        }
+
 		public void init() {
-			Ollie.init(mContext, mName, mVersion, mCacheSize, mLogLevel);
+			Ollie.init(mContext, mName, mVersion, mCacheSize, mLogLevel, mHasAttachedDatabase);
 		}
 	}
 
@@ -304,6 +323,11 @@ public final class Ollie {
 	private static final class DatabaseHelper extends SQLiteOpenHelper {
 		public DatabaseHelper(Context context, String name, int version) {
 			super(context, name, sLogLevel.log(LogLevel.FULL) ? new LoggingCursorAdapter() : null, version);
+
+            if (sHasAttachedDatabase) {
+                copyAttachedDatabase(context, name);
+            }
+
 		}
 
 		@Override
@@ -369,6 +393,38 @@ public final class Ollie {
 
 			return migrationExecuted;
 		}
+
+        private static void copyAttachedDatabase(Context context, String databaseName) {
+            final File dbPath = context.getDatabasePath(databaseName);
+
+            // If the database already exists, return
+            if (dbPath.exists()) {
+                return;
+            }
+
+            // Make sure we have a path to the file
+            dbPath.getParentFile().mkdirs();
+
+            // Try to copy database file
+            try {
+                final InputStream inputStream = context.getAssets().open(databaseName);
+                final OutputStream output = new FileOutputStream(dbPath);
+
+                byte[] buffer = new byte[8192];
+                int length;
+
+                while ((length = inputStream.read(buffer, 0, 8192)) > 0) {
+                    output.write(buffer, 0, length);
+                }
+
+                output.flush();
+                output.close();
+                inputStream.close();
+            }
+            catch (IOException e) {
+                Log.e(TAG, "Failed to open file", e);
+            }
+        }
 	}
 
 	private static final class LoggingCursorAdapter implements CursorFactory {
