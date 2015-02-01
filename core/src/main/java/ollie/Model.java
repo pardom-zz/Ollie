@@ -16,6 +16,7 @@
 
 package ollie;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.provider.BaseColumns;
 import ollie.annotation.AutoIncrement;
@@ -75,6 +76,33 @@ public abstract class Model {
 		Ollie.putEntity(this);
 		notifyChange();
 		return id;
+	}
+
+	/**
+	 * <p>
+	 * Persist the record to the database. Inserts the record if it does not exists and replace the record if it
+	 * does exists.
+	 * </p>
+	 *
+	 * @return The record id.
+	 */
+	public final Long replace() {
+		id = Ollie.replace(this);
+		Ollie.putEntity(this);
+		notifyChange();
+		return id;
+	}
+
+	/**
+	 * <p>
+	 * Persist the record to the database. Inserts the record if it does not exists and replace the record if it
+	 * does exists.
+	 * </p>
+	 *
+	 * @return The record id.
+	 */
+	public final ContentValues toContentValues() {
+		return Ollie.toContentValues(this);
 	}
 
 	/**

@@ -16,6 +16,7 @@
 
 package ollie;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.*;
@@ -245,6 +246,14 @@ public final class Ollie {
 
 	static synchronized <T extends Model> Long save(T entity) {
 		return sAdapterHolder.getModelAdapter(entity.getClass()).save(entity, sSQLiteDatabase);
+	}
+
+	static synchronized <T extends Model> ContentValues toContentValues(T entity) {
+		return sAdapterHolder.getModelAdapter(entity.getClass()).toContentValues(entity);
+	}
+
+	static synchronized <T extends Model> Long replace(T entity) {
+		return sAdapterHolder.getModelAdapter(entity.getClass()).replace(entity, sSQLiteDatabase);
 	}
 
 	static synchronized <T extends Model> void delete(T entity) {

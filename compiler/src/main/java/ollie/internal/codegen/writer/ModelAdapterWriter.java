@@ -91,6 +91,8 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 		writeGetSchema(javaWriter, tableName, columns);
 		writeLoad(javaWriter, modelQualifiedName, columns);
 		writeSave(javaWriter, modelQualifiedName, columns);
+		writeReplace(javaWriter, modelQualifiedName, columns);
+		writeToContentValues(javaWriter, modelQualifiedName, columns);
 		writeDelete(javaWriter, modelQualifiedName, tableName);
 
 		javaWriter.endType();
@@ -203,6 +205,28 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 			IOException {
 
 		writer.beginMethod("Long", "save", MODIFIERS, modelQualifiedName, "entity", "SQLiteDatabase", "db");
+		writer.emitStatement("ContentValues values = toContentValues(entity)");
+
+		writer.emitStatement("return insertOrUpdate(entity, db, values)");
+		writer.endMethod();
+		writer.emitEmptyLine();
+	}
+
+	private void writeReplace(JavaWriter writer, String modelQualifiedName, Set<ColumnElement> columns) throws
+			IOException {
+
+		writer.beginMethod("Long", "replace", MODIFIERS, modelQualifiedName, "entity", "SQLiteDatabase", "db");
+		writer.emitStatement("ContentValues values = toContentValues(entity)");
+
+		writer.emitStatement("return db.replace(getTableName(), null, values)");
+		writer.endMethod();
+		writer.emitEmptyLine();
+	}
+
+	private void writeToContentValues(JavaWriter writer, String modelQualifiedName, Set<ColumnElement> columns) throws
+			IOException {
+
+		writer.beginMethod("ContentValues", "toContentValues", MODIFIERS, modelQualifiedName, "entity");
 		writer.emitStatement("ContentValues values = new ContentValues()");
 
 		for (ColumnElement column : columns) {
@@ -232,7 +256,7 @@ public class ModelAdapterWriter implements SourceWriter<TypeElement> {
 			writer.emitStatement("values.put(\"" + column.getColumnName() + "\", " + value.toString() + ")");
 		}
 
-		writer.emitStatement("return insertOrUpdate(entity, db, values)");
+		writer.emitStatement("return values");
 		writer.endMethod();
 		writer.emitEmptyLine();
 	}
