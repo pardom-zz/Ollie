@@ -32,7 +32,10 @@ public class BooleanAdapter extends TypeAdapter<Boolean, Integer> {
 	 */
 	@Override
 	public Integer serialize(Boolean value) {
-		return value ? 1 : 0;
+		if (value != null) {
+			return value ? 1 : 0;
+		}
+		return null;
 	}
 
 	/**
@@ -43,6 +46,9 @@ public class BooleanAdapter extends TypeAdapter<Boolean, Integer> {
 	 */
 	@Override
 	public Boolean deserialize(Integer value) {
-		return value != 0;
+		if (value != null) {
+			return value != 0;
+		}
+		return null;
 	}
 }
