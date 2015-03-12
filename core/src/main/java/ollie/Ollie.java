@@ -16,6 +16,7 @@
 
 package ollie;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.*;
@@ -29,7 +30,12 @@ import ollie.internal.ModelAdapter;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public final class Ollie {
 	public static final int DEFAULT_CACHE_SIZE = 1024;
@@ -43,6 +49,20 @@ public final class Ollie {
 	private static LruCache<String, Model> sCache;
 	private static LogLevel sLogLevel = LogLevel.NONE;
 	private static boolean sInitialized = false;
+
+    private static ThreadLocal<Set<Class<? extends Model>>> sInTransactionClasses = new ThreadLocal<Set<Class<? extends Model>>>() {
+        @Override
+        protected Set<Class<? extends Model>> initialValue() {
+            return new HashSet<Class<? extends Model>>();
+        }
+    };
+
+    private static ThreadLocal<Set<Class<? extends Model>>> sTransactionSuccessfulClasses = new ThreadLocal<Set<Class<? extends Model>>>() {
+        @Override
+        protected Set<Class<? extends Model>> initialValue() {
+            return new HashSet<Class<? extends Model>>();
+        }
+    };
 
 	/**
 	 * Controls the level of logging.
@@ -244,14 +264,74 @@ public final class Ollie {
 	}
 
 	static synchronized <T extends Model> Long save(T entity) {
-		return sAdapterHolder.getModelAdapter(entity.getClass()).save(entity, sSQLiteDatabase);
+        Long id = sAdapterHolder.getModelAdapter(entity.getClass()).save(entity, sSQLiteDatabase);
+
+        addToInTransactionClasses(entity);
+
+        return id;
+    }
+
+	static synchronized <T extends Model> Long replace(T entity) {
+        Long id = sAdapterHolder.getModelAdapter(entity.getClass()).replace(entity, sSQLiteDatabase);
+
+        addToInTransactionClasses(entity);
+
+        return id;
 	}
+
+    static synchronized <T extends Model> ContentValues toContentValues(T entity) {
+        return sAdapterHolder.getModelAdapter(entity.getClass()).toContentValues(entity);
+    }
 
 	static synchronized <T extends Model> void delete(T entity) {
-		sAdapterHolder.getModelAdapter(entity.getClass()).delete(entity, sSQLiteDatabase);
+        sAdapterHolder.getModelAdapter(entity.getClass()).delete(entity, sSQLiteDatabase);
+
+        addToInTransactionClasses(entity);
 	}
 
-	// Private methods
+    private static <T extends Model> void addToInTransactionClasses(T entity) {
+        if (getDatabase().inTransaction()) {
+            sInTransactionClasses.get().add(entity.getClass());
+        }
+    }
+
+    public static void beginTransaction() {
+        getDatabase().beginTransaction();
+    }
+
+    public static void endTransaction() {
+        getDatabase().endTransaction();
+
+        // nested transaction
+        if (!getDatabase().inTransaction()) {
+            Set<Class<? extends Model>> classes = sTransactionSuccessfulClasses.get();
+            for (Class<? extends Model> cls : classes) {
+                notifyChange(cls, null);
+            }
+            sInTransactionClasses.get().clear();
+            sTransactionSuccessfulClasses.get().clear();
+        }
+
+    }
+
+    public static void setTransactionSuccessful() {
+        getDatabase().setTransactionSuccessful();
+
+        sTransactionSuccessfulClasses.get().addAll(sInTransactionClasses.get());
+    }
+
+    /**
+     * <p>
+     * Notify observers that this record has changed.
+     * </p>
+     */
+    static void notifyChange(Class<? extends Model> cls, Long id) {
+        if (OllieProvider.isImplemented() && !getDatabase().inTransaction()) {
+            getContext().getContentResolver().notifyChange(OllieProvider.createUri(cls, id), null);
+        }
+    }
+
+    // Private methods
 
 	private static String getEntityIdentifier(Class<? extends Model> cls, long id) {
 		return cls.getName() + "@" + id;

@@ -88,13 +88,24 @@ public class ModelAdapterTest {
 				"	}",
 
 				"	public final Long save(Note entity, SQLiteDatabase db) {",
+				"		ContentValues values = toContentValues(entity);",
+				"		return insertOrUpdate(entity, db, values);",
+				"	}",
+
+
+				"	public final Long replace(Note entity, SQLiteDatabase db) {",
+				"		ContentValues values = toContentValues(entity);",
+				"		return db.replace(getTableName(), null, values);",
+				"	}",
+
+				"	public final ContentValues toContentValues(Note entity) {",
 				"		ContentValues values = new ContentValues();",
 				"		values.put(\"_id\", entity.id);",
 				"		values.put(\"title\", entity.title);",
 				"		values.put(\"body\", entity.body);",
 				"		values.put(\"date\", (java.lang.Long) Ollie.getTypeAdapter(java.util.Date.class)",
 				"				.serialize(entity.date));",
-				"		return insertOrUpdate(entity, db, values);",
+				"		return values;",
 				"	}",
 
 				"	public final void delete(Note entity, SQLiteDatabase db) {",

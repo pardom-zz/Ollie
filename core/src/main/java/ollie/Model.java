@@ -16,6 +16,7 @@
 
 package ollie;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.provider.BaseColumns;
 import ollie.annotation.AutoIncrement;
@@ -73,8 +74,35 @@ public abstract class Model {
 	public final Long save() {
 		id = Ollie.save(this);
 		Ollie.putEntity(this);
-		notifyChange();
+		Ollie.notifyChange(getClass(), id);
 		return id;
+	}
+
+	/**
+	 * <p>
+	 * Persist the record to the database. Inserts the record if it does not exists and replace the record if it
+	 * does exists.
+	 * </p>
+	 *
+	 * @return The record id.
+	 */
+	public final Long replace() {
+		id = Ollie.replace(this);
+		Ollie.putEntity(this);
+		Ollie.notifyChange(getClass(), id);
+		return id;
+	}
+
+	/**
+	 * <p>
+	 * Persist the record to the database. Inserts the record if it does not exists and replace the record if it
+	 * does exists.
+	 * </p>
+	 *
+	 * @return The record id.
+	 */
+	public final ContentValues toContentValues() {
+		return Ollie.toContentValues(this);
 	}
 
 	/**
@@ -85,22 +113,11 @@ public abstract class Model {
 	public final void delete() {
 		Ollie.delete(this);
 		Ollie.removeEntity(this);
-		notifyChange();
+		Ollie.notifyChange(getClass(), id);
 		id = null;
 	}
 
-	/**
-	 * <p>
-	 * Notify observers that this record has changed.
-	 * </p>
-	 */
-	private void notifyChange() {
-		if (OllieProvider.isImplemented()) {
-			Ollie.getContext().getContentResolver().notifyChange(OllieProvider.createUri(getClass(), id), null);
-		}
-	}
-
-	@Override
+    @Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Model && id != null) {
 			final Model other = (Model) obj;

@@ -36,6 +36,10 @@ public abstract class ModelAdapter<T extends Model> {
 
 	public abstract Long save(T entity, SQLiteDatabase db);
 
+	public abstract Long replace(T entity, SQLiteDatabase db);
+
+	public abstract ContentValues toContentValues(T entity);
+
 	public abstract void delete(T entity, SQLiteDatabase db);
 
 	protected final Long insertOrUpdate(T entity, SQLiteDatabase db, ContentValues values) {
