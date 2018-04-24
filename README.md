@@ -99,7 +99,7 @@ Grab via Maven:
 ```
 or Gradle:
 ```groovy
-compile 'com.michaelpardo:ollie:0.3.1'
+implementation 'com.michaelpardo:ollie:0.3.1'
 provided 'com.michaelpardo:ollie-compiler:0.3.1'
 ```
 
